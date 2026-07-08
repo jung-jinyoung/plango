@@ -30,14 +30,10 @@ class TodoCreate(BaseModel):
         description="고정 시간(자정 기준 분). 있으면 그 시간대에 반드시 배치되어야 하고, "
         "priority를 별도로 안 주면 자동으로 high가 된다",
     )
-    scheduled_time: int | None = Field(
-        default=None, ge=0, le=1439, description="실제 배치된 시각(자정 기준 분). 더미 상태면 null"
-    )
     priority: PriorityLevel | None = Field(
         default=None, description="상/중/하. 생략하면 기본 low(0), fixed_time이 있으면 high(1)"
     )
     weekly_goal_id: uuid.UUID | None = Field(default=None, description="연결할 주간 목표 ID")
-    is_scheduled: bool = Field(default=False, description="할 일 더미(False)/일정에 배치됨(True)")
 
 
 class TodoUpdate(BaseModel):
@@ -45,12 +41,9 @@ class TodoUpdate(BaseModel):
     date: date_ | None = Field(default=None, description="날짜만 바꾸면 이월(carry-over)이 된다")
     estimated_minutes: int | None = Field(default=None, ge=0)
     fixed_time: int | None = Field(default=None, ge=0, le=1439)
-    scheduled_time: int | None = Field(default=None, ge=0, le=1439)
     priority: PriorityLevel | None = None
     weekly_goal_id: uuid.UUID | None = None
     is_done: bool | None = None
-    is_scheduled: bool | None = None
-    note: str | None = Field(default=None, description="메모")
 
 
 class TodoRead(BaseModel):
@@ -61,17 +54,11 @@ class TodoRead(BaseModel):
     date: date_
     estimated_minutes: int
     fixed_time: int | None
-    scheduled_time: int | None
     priority: float = Field(description="0~1 사이 float. 상/중/하는 1.0/0.5/0.0으로 저장된다")
     weekly_goal_id: uuid.UUID | None
     is_done: bool
-    is_scheduled: bool
-    note: str | None = Field(description="메모")
-    reason: str | None = Field(
-        description="AI가 이 시간대를 추천한 근거 (source=ai일 때만 의미 있음)"
-    )
-    source: str | None = Field(
-        description="'manual' 또는 'ai' — 어떻게 배치됐는지. 배치 전이면 null"
+    is_scheduled: bool = Field(
+        description="타임라인에 배치됐는지 (Schedule row 존재 여부로 계산됨, 저장 컬럼 아님)"
     )
     created_at: datetime
     updated_at: datetime

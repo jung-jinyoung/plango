@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.db import get_db
 from app.models.todo import Todo
@@ -20,10 +21,21 @@ def _resolve_create_priority(payload: TodoCreate) -> float:
     return 0.0
 
 
+async def _get_with_schedule(db: AsyncSession, todo_id: uuid.UUID) -> Todo | None:
+    result = await db.execute(
+        select(Todo).options(selectinload(Todo.schedule)).where(Todo.id == todo_id)
+    )
+    return result.scalar_one_or_none()
+
+
 @router.get("", summary="할 일 목록 조회")
 async def list_todos(db: AsyncSession = Depends(get_db)) -> list[TodoRead]:
-    """모든 할 일을 날짜순으로 반환한다."""
-    result = await db.execute(select(Todo).order_by(Todo.date, Todo.created_at))
+    """모든 할 일을 날짜순으로 반환한다. `is_scheduled`는 배치 여부를 계산한 값이다."""
+    result = await db.execute(
+        select(Todo)
+        .options(selectinload(Todo.schedule))
+        .order_by(Todo.date, Todo.created_at)
+    )
     return list(result.scalars().all())
 
 
@@ -42,14 +54,13 @@ async def create_todo(payload: TodoCreate, db: AsyncSession = Depends(get_db)) -
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(status_code=400, detail="weekly goal not found") from exc
-    await db.refresh(todo)
-    return todo
+    return await _get_with_schedule(db, todo.id)
 
 
 @router.get("/{todo_id}", summary="할 일 단건 조회")
 async def get_todo(todo_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> TodoRead:
     """id로 할 일 하나를 조회한다. 없으면 404."""
-    todo = await db.get(Todo, todo_id)
+    todo = await _get_with_schedule(db, todo_id)
     if todo is None:
         raise HTTPException(status_code=404, detail="todo not found")
     return todo
@@ -93,13 +104,12 @@ async def update_todo(
     except IntegrityError as exc:
         await db.rollback()
         raise HTTPException(status_code=400, detail="weekly goal not found") from exc
-    await db.refresh(todo)
-    return todo
+    return await _get_with_schedule(db, todo_id)
 
 
 @router.delete("/{todo_id}", status_code=204, summary="할 일 삭제")
 async def delete_todo(todo_id: uuid.UUID, db: AsyncSession = Depends(get_db)) -> None:
-    """할 일을 삭제한다. 없으면 404."""
+    """할 일을 삭제한다 (연결된 schedule이 있으면 함께 삭제된다). 없으면 404."""
     todo = await db.get(Todo, todo_id)
     if todo is None:
         raise HTTPException(status_code=404, detail="todo not found")
