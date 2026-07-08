@@ -22,4 +22,16 @@ yarn-error.log
 # 로컬 캐시
 .cache/
 tmp/
-EOF
+
+# Quasar
+.quasar/
+/quasar.config.*.temporary.compiled*
+.thumbs.db
+
+# Cordova / Capacitor
+/src-cordova/node_modules
+/src-cordova/platforms
+/src-cordova/plugins
+/src-cordova/www
+/src-capacitor/www
+/src-capacitor/node_modules
