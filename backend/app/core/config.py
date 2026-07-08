@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     environment: str = "development"
     # Quasar dev server 기본 포트. 배포 환경에서는 .env로 덮어쓴다.
     cors_origins: list[str] = ["http://localhost:9000", "http://localhost:8080"]
+    # Supabase Postgres 접속 정보. postgresql+asyncpg:// 스킴을 사용한다.
+    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
 
 
 settings = Settings()
