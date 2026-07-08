@@ -30,6 +30,11 @@ tags_metadata = [
         "주간 목표는 카테고리를 직접 갖지 않고 "
         "부모 월간 목표의 카테고리를 상속한다.",
     },
+    {
+        "name": "todos",
+        "description": "할 일. `fixed_time`이 있으면 그 시간대에 고정 배치되어야 하고 "
+        "priority가 자동으로 high가 된다. 이월은 `date` 필드만 바꾸면 된다.",
+    },
 ]
 
 app = FastAPI(

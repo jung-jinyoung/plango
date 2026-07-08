@@ -60,13 +60,13 @@ uv run alembic upgrade head                          # 마이그레이션 적용
 - 헬스체크 (`app/api/health.py`, `tags=["infra"]`) — 배포 플랫폼의 liveness/readiness probe 용도이며 제품 도메인 API와는 태그로 구분되어 있습니다.
 - `categories` — 실제 모델(`app/models/category.py`)과 DB 연동 CRUD로 전환됨 (id/name/color/timestamps). 개수 제약 최소 1개·최대 8개 (태그처럼 쓰이는 리소스라 자유 CRUD지만 개수는 제한). 사용자 소유권(`user_id`)은 아직 없음 — Supabase JWT 검증이 붙으면 추가할 예정.
 - `monthly-goals`/`weekly-goals` — `goals`를 프론트 실제 구조(월간/주간 완전 분리)에 맞춰 두 리소스로 재구성. `monthly_goals.category_id`는 필수(FK, 삭제 시 RESTRICT), `weekly_goals`는 자체 카테고리 컬럼 없이 `monthly_goal_id`(nullable, 부모 삭제 시 SET NULL)로 부모의 카테고리를 상속. 부모 없는 weekly goal은 `category_id`가 `null`.
-- 나머지 도메인 라우터(todos/schedules/retrospectives)는 여전히 stub — categories/goals와 동일한 패턴(모델 + Pydantic 스키마 + 실제 CRUD)으로 순차 전환 예정.
+- `todos` — 실제 모델(`app/models/todo.py`)과 DB 연동 CRUD로 전환됨. `date`(필수), `estimated_minutes`(기본 30분), `fixed_time`(고정 배치 시간, 있으면 `priority`가 자동으로 high(1.0)), `scheduled_time`(실제 배치 시각, nullable), `priority`(상/중/하 입력 → 1.0/0.5/0.0, DB엔 제약 없는 float), `weekly_goal_id`(FK, `ON DELETE SET NULL`), `is_done`, `is_scheduled`. 이월(carry-over)은 전용 엔드포인트 없이 `PATCH`로 `date`만 바꾸면 나머지 필드가 그대로 유지되는 방식으로 처리.
+- 나머지 도메인 라우터(schedules/retrospectives)는 여전히 stub — categories/goals/todos와 동일한 패턴(모델 + Pydantic 스키마 + 실제 CRUD)으로 순차 전환 예정.
 - 사용자 프로필 (`app/api/users.py`) — 회원가입/로그인은 Supabase Auth에 위임하고(프론트엔드가 supabase-js로 직접 처리), 백엔드는 `/users/me` 프로필/설정 조회·수정만 담당합니다. Supabase JWT 검증 의존성은 후속 브랜치에서 추가합니다.
 
 AI 연동(우선순위 추천, 회고 자동 생성)은 후속 브랜치에서 진행합니다.
 
 ## 알려진 갭 (기획안 대비)
 
-- 할 일/일정의 "다음 날 또는 주간 목표로 이월" 액션은 아직 전용 엔드포인트 없이 범용 PATCH로만 대체 가능합니다 — 실제 필요 여부는 `todos`/`schedules` 모델 설계 시 결정합니다.
+- 일정(schedule)의 "다음 날로 이월" 액션은 아직 정리 전입니다 — `schedules` 모델 설계 시 결정합니다 (`todos`는 `PATCH`로 `date`만 바꾸는 방식으로 이미 해결됨).
 - 리소스 소유권(`user_id`)이 아직 어떤 도메인에도 없습니다 — Supabase JWT 검증 의존성이 붙을 때 `categories`부터 함께 추가합니다.
-- `todos`의 `goal_id`가 `weekly_goals`만 가리킬 수 있는지(월간 목표에는 직접 태그 불가) 아직 강제되지 않습니다 — `todos` 도메인 정리 시 결정합니다.
