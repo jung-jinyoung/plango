@@ -1,0 +1,39 @@
+/*
+  Plango Design Tokens — Variant C (쿨그레이 뉴모픽), 확정본
+  quasar.variables.scss 는 Quasar 컴포넌트 시맨틱 컬러(QBtn, QBanner 등)에 매핑된 값이고,
+  이 파일은 뉴모픽 표현(그림자, 반경, surface)에 필요한 raw 토큰을 CSS 변수로 노출합니다.
+  두 값은 동일한 팔레트에서 파생되어야 하며, 색상을 바꿀 때는 항상 두 파일을 함께 수정합니다.
+*/
+
+:root {
+  /* Neutrals */
+  --p-bg: #f2f3f5;
+  --p-surface: #f8f9fa;
+  --p-ink: #20232a;
+  --p-ink-muted: #5b6270;
+  --p-ink-faint: #8c919c;
+
+  /* Brand */
+  --p-rose: #d9738c;
+  --p-rose-ink: #a34a63;
+  --p-lavender: #7a6bc9;
+  --p-green: #10b981;
+  --p-green-ink: #0b7a57;
+  --p-blue: #3b82f6;
+  --p-amber: #e8a23d;
+
+  --p-focus-ring: #3b82f6;
+
+  /* Radius */
+  --p-radius-lg: 26px;
+  --p-radius-md: 18px;
+  --p-radius-sm: 11px;
+  --p-radius-xs: 8px;
+
+  /* Neumorphic elevation recipes */
+  --p-shadow-raised: 8px 8px 18px rgba(148, 157, 178, 0.35), -8px -8px 18px rgba(255, 255, 255, 0.9);
+  --p-shadow-raised-hover: 5px 5px 12px rgba(148, 157, 178, 0.35), -5px -5px 12px rgba(255, 255, 255, 0.9);
+  --p-shadow-raised-sm: 4px 4px 9px rgba(148, 157, 178, 0.32), -4px -4px 9px rgba(255, 255, 255, 0.85);
+  --p-shadow-sunken: inset 3px 3px 7px rgba(148, 157, 178, 0.3), inset -3px -3px 7px rgba(255, 255, 255, 0.85);
+  --p-shadow-pressed: inset 5px 5px 11px rgba(148, 157, 178, 0.42), inset -5px -5px 11px rgba(255, 255, 255, 0.75);
+}

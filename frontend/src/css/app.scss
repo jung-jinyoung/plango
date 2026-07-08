@@ -1,0 +1,85 @@
+// app global css
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+@import './tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html body {
+  background: var(--p-bg);
+  color: var(--p-ink);
+  font-family:
+    'Pretendard Variable',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Apple SD Gothic Neo',
+    sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid var(--p-focus-ring);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/*
+  뉴모픽 표면 유틸리티 — Variant C 인터랙션 테스트에서 확정된 상태값.
+  resting(raised) → hover(shadow 축소) → active(sunken/pressed 반전) 3단 전이를 기본으로 한다.
+*/
+.neu-raised {
+  background: var(--p-surface);
+  border-radius: var(--p-radius-md);
+  box-shadow: var(--p-shadow-raised);
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.neu-sunken {
+  background: var(--p-surface);
+  border-radius: var(--p-radius-sm);
+  box-shadow: var(--p-shadow-sunken);
+}
+
+.neu-interactive {
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--p-shadow-raised-hover);
+    transform: translateY(-1px);
+  }
+
+  &:active,
+  &.is-pressed {
+    box-shadow: var(--p-shadow-pressed);
+    transform: translateY(0) scale(0.97);
+    transition-duration: 80ms;
+  }
+
+  &:disabled,
+  &.is-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: var(--p-shadow-sunken);
+    transform: none;
+  }
+}
+
+.q-notification {
+  border-radius: var(--p-radius-sm);
+  box-shadow: var(--p-shadow-raised);
+  font-family: inherit;
+}
+
