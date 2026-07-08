@@ -36,6 +36,12 @@ class Todo(Base):
     # 할 일 더미(False)인지 일정에 배치됨(True)인지.
     is_scheduled: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
+    # 아래 세 필드는 "일정(schedule)" 관점의 정보 — 배치 안 된 todo는 전부 null.
+    note: Mapped[str | None] = mapped_column(nullable=True)
+    reason: Mapped[str | None] = mapped_column(nullable=True)
+    # 'manual' | 'ai' — 어떻게 배치됐는지 (AI 추천 배지 표시용).
+    source: Mapped[str | None] = mapped_column(nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

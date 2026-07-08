@@ -50,6 +50,7 @@ class TodoUpdate(BaseModel):
     weekly_goal_id: uuid.UUID | None = None
     is_done: bool | None = None
     is_scheduled: bool | None = None
+    note: str | None = Field(default=None, description="메모")
 
 
 class TodoRead(BaseModel):
@@ -65,5 +66,12 @@ class TodoRead(BaseModel):
     weekly_goal_id: uuid.UUID | None
     is_done: bool
     is_scheduled: bool
+    note: str | None = Field(description="메모")
+    reason: str | None = Field(
+        description="AI가 이 시간대를 추천한 근거 (source=ai일 때만 의미 있음)"
+    )
+    source: str | None = Field(
+        description="'manual' 또는 'ai' — 어떻게 배치됐는지. 배치 전이면 null"
+    )
     created_at: datetime
     updated_at: datetime

@@ -35,6 +35,12 @@ tags_metadata = [
         "description": "할 일. `fixed_time`이 있으면 그 시간대에 고정 배치되어야 하고 "
         "priority가 자동으로 high가 된다. 이월은 `date` 필드만 바꾸면 된다.",
     },
+    {
+        "name": "schedules",
+        "description": "타임라인에 배치된 할 일을 다루는 API. 별도 테이블이 아니라 "
+        "`todos`를 그대로 조회·수정하는 관점의 레이어이다. "
+        "시간이 겹치면 409 또는 `auto_resolve`로 자동 재배치된다.",
+    },
 ]
 
 app = FastAPI(
