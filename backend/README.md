@@ -58,14 +58,15 @@ uv run alembic upgrade head                          # 마이그레이션 적용
 - 앱 스캐폴드 (설정, 도구 체인)
 - Supabase Postgres 연동 (SQLAlchemy async + asyncpg, `app/core/db.py`) + Alembic 마이그레이션
 - 헬스체크 (`app/api/health.py`, `tags=["infra"]`) — 배포 플랫폼의 liveness/readiness probe 용도이며 제품 도메인 API와는 태그로 구분되어 있습니다.
-- `categories` — 실제 모델(`app/models/category.py`)과 DB 연동 CRUD로 전환됨 (id/name/color/timestamps). 사용자 소유권(`user_id`)은 아직 없음 — Supabase JWT 검증이 붙으면 추가할 예정.
-- 나머지 도메인 라우터(goals/todos/schedules/retrospectives)는 여전히 stub — categories와 동일한 패턴(모델 + Pydantic 스키마 + 실제 CRUD)으로 순차 전환 예정.
+- `categories` — 실제 모델(`app/models/category.py`)과 DB 연동 CRUD로 전환됨 (id/name/color/timestamps). 개수 제약 최소 1개·최대 8개 (태그처럼 쓰이는 리소스라 자유 CRUD지만 개수는 제한). 사용자 소유권(`user_id`)은 아직 없음 — Supabase JWT 검증이 붙으면 추가할 예정.
+- `monthly-goals`/`weekly-goals` — `goals`를 프론트 실제 구조(월간/주간 완전 분리)에 맞춰 두 리소스로 재구성. `monthly_goals.category_id`는 필수(FK, 삭제 시 RESTRICT), `weekly_goals`는 자체 카테고리 컬럼 없이 `monthly_goal_id`(nullable, 부모 삭제 시 SET NULL)로 부모의 카테고리를 상속. 부모 없는 weekly goal은 `category_id`가 `null`.
+- `todos` — 실제 모델(`app/models/todo.py`)과 DB 연동 CRUD로 전환됨. `date`(필수), `estimated_minutes`(기본 30분), `fixed_time`(고정 배치 시간, 있으면 `priority`가 자동으로 high(1.0)), `priority`(상/중/하 입력 → 1.0/0.5/0.0, DB엔 제약 없는 float), `weekly_goal_id`(FK, `ON DELETE SET NULL`), `is_done`. `is_scheduled`는 저장 컬럼이 아니라 `schedules`에 연결된 row가 있는지로 계산되는 값입니다. 이월(carry-over)은 전용 엔드포인트 없이 `PATCH`로 `date`만 바꾸면 나머지 필드가 그대로 유지되는 방식으로 처리하며, 완료된(`is_done`) 할 일은 이월이 차단됩니다.
+- `schedules` — `todo_id`(FK, unique, `ON DELETE CASCADE`)로 `todos`와 1:1 연결되는 별도 테이블(`app/models/schedule.py`). `scheduled_time`/`note`/`reason`/`source`는 배치됐을 때만 의미가 있는 값이라 todos에서 분리했습니다 (처음엔 todos에 nullable 컬럼으로 얹었다가, "배치 안 됐을 땐 전부 null인 컬럼 묶음"이라는 정규화 문제로 재구조화). `POST /schedules`로 배치(1토도당 1배치만, 이미 배치돼 있으면 409), `PATCH /schedules/{todo_id}`로 이동·메모 수정(완료 체크는 `PATCH /todos/{id}`가 담당), `DELETE /schedules/{todo_id}`로 배치 해제(todo 자체는 유지, todo를 지우면 schedule도 CASCADE로 같이 삭제됨). 같은 날짜에 시간이 겹치면 기본은 `409`, `auto_resolve=true`면 겹치는 항목 뒤 10분 간격으로 자동 재배치.
+- `retrospectives` — 일일/주간/월간 회고(`app/models/retrospective.py`, `period_type`+`period_start`+`content`, 기간당 하나로 unique 제약). 흐름은 (1) `GET /retrospectives/direction`으로 AI가 방향성 제안 → (2) 사용자가 직접 작성 → (3) `POST /retrospectives/transform`으로 AI가 문체 변형, 반복 → (4) 완료되면 `POST /retrospectives`로 그때 처음 저장. **`direction`/`transform`은 지금 스텁이고 아무것도 저장하지 않습니다** — 실제 AI 분석/변형 로직은 후속 브랜치. 저장된 회고는 수정/삭제 가능.
 - 사용자 프로필 (`app/api/users.py`) — 회원가입/로그인은 Supabase Auth에 위임하고(프론트엔드가 supabase-js로 직접 처리), 백엔드는 `/users/me` 프로필/설정 조회·수정만 담당합니다. Supabase JWT 검증 의존성은 후속 브랜치에서 추가합니다.
 
-AI 연동(우선순위 추천, 회고 자동 생성)은 후속 브랜치에서 진행합니다.
+AI 연동(우선순위 추천, 회고 방향성 분석·문체 변형)은 후속 브랜치에서 진행합니다.
 
 ## 알려진 갭 (기획안 대비)
 
-- 목표 계층 구조(월간/주간 구분, 상위 목표 연결, 역방향 조회용 라우트)는 아직 반영되지 않았습니다 — `goals` 도메인 모델 설계 시 함께 결정합니다.
-- 할 일/일정의 "다음 날 또는 주간 목표로 이월" 액션은 아직 전용 엔드포인트 없이 범용 PATCH로만 대체 가능합니다 — 실제 필요 여부는 `todos`/`schedules` 모델 설계 시 결정합니다.
 - 리소스 소유권(`user_id`)이 아직 어떤 도메인에도 없습니다 — Supabase JWT 검증 의존성이 붙을 때 `categories`부터 함께 추가합니다.
