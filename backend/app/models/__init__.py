@@ -1,3 +1,5 @@
 from app.models.category import Category
+from app.models.monthly_goal import MonthlyGoal
+from app.models.weekly_goal import WeeklyGoal
 
-__all__ = ["Category"]
+__all__ = ["Category", "MonthlyGoal", "WeeklyGoal"]
