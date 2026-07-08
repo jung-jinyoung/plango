@@ -41,6 +41,12 @@ tags_metadata = [
         "`todos`를 그대로 조회·수정하는 관점의 레이어이다. "
         "시간이 겹치면 409 또는 `auto_resolve`로 자동 재배치된다.",
     },
+    {
+        "name": "retrospectives",
+        "description": "일일/주간/월간 회고. AI 방향성 제안·문체 변형"
+        "(`/direction`, `/transform`)은 스텁이며 아무것도 저장하지 않는다 — "
+        "사용자가 완료를 눌러야 그때 저장된다.",
+    },
 ]
 
 app = FastAPI(
