@@ -19,8 +19,9 @@ yarn-error.log
 !.vscode/extensions.json
 .idea/
 
-# Claude Code (개인 로컬 권한/설정은 제외, settings.json 등 공통 설정만 커밋)
+# Claude Code (개인 로컬 권한/설정, 설치형 플러그인 스킬 번들은 제외 — settings.json 등 공통 설정만 커밋)
 .claude/settings.local.json
+.claude/skills/
 
 # 개인 기획 문서 (git에 올리지 않음)
 docs/
