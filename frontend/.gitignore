@@ -19,6 +19,12 @@ yarn-error.log
 !.vscode/extensions.json
 .idea/
 
+# Claude Code (개인 로컬 권한/설정은 제외, settings.json 등 공통 설정만 커밋)
+.claude/settings.local.json
+
+# 개인 기획 문서 (git에 올리지 않음)
+docs/
+
 # 로컬 캐시
 .cache/
 tmp/
