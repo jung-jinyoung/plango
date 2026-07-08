@@ -4,7 +4,19 @@ __pycache__/
 .venv/
 .ruff_cache/
 .pytest_cache/
+.mypy_cache/
 *.egg-info/
+
+# 테스트 산출물
+.coverage
+htmlcov/
+
+# 로컬 DB 파일
+*.db
+*.sqlite3
+
+# macOS
+.DS_Store
 
 # 환경 변수
 .env
