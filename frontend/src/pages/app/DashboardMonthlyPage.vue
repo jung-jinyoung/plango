@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="monthly-page">
     <div class="monthly-layout">
       <GoalPanel
         title="이번 달 목표"
@@ -7,7 +7,11 @@
         @select="goToGoal"
         @add="showGoalForm = true"
       />
-      <MonthCalendarGrid :current-date="calendarNav.currentDate" @select-day="goToDay" />
+      <MonthCalendarGrid
+        :current-date="calendarNav.currentDate"
+        @select-day="goToDay"
+        @select-week="goToWeek"
+      />
     </div>
 
     <GoalFormModal
@@ -38,17 +42,28 @@ function goToDay(dateISO) {
   router.push('/app/dashboard/daily')
 }
 
+function goToWeek(dateISO) {
+  calendarNav.currentDate = dayjs(dateISO)
+  router.push('/app/dashboard/weekly')
+}
+
 function goToGoal(goalId) {
   router.push({ path: '/app/goals', query: { monthly: goalId } })
 }
 </script>
 
 <style scoped>
+.monthly-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
 .monthly-layout {
+  flex: 1;
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 24px;
   margin-top: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 </style>
