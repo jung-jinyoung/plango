@@ -8,7 +8,11 @@
         @select="goToGoal"
         @add="showGoalForm = true"
       />
-      <MonthCalendarGrid :current-date="calendarNav.currentDate" @select-day="goToDay" />
+      <MonthCalendarGrid
+        :current-date="calendarNav.currentDate"
+        @select-day="goToDay"
+        @select-week="goToWeek"
+      />
     </div>
 
     <GoalFormModal
@@ -39,6 +43,11 @@ const showGoalForm = ref(false)
 function goToDay(dateISO) {
   calendarNav.currentDate = dayjs(dateISO)
   router.push('/app/dashboard/daily')
+}
+
+function goToWeek(dateISO) {
+  calendarNav.currentDate = dayjs(dateISO)
+  router.push('/app/dashboard/weekly')
 }
 
 function goToGoal(goalId) {
