@@ -16,7 +16,6 @@
       <BaseButton variant="secondary" icon aria-label="알림">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       </BaseButton>
-      <span class="avatar">P</span>
     </div>
   </header>
 </template>
@@ -49,9 +48,10 @@ function step(delta) {
 .app-header {
   height: 64px;
   flex-shrink: 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 24px;
+  column-gap: 24px;
   padding: 0 28px;
   border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 8%, transparent);
   background: var(--p-bg);
@@ -60,17 +60,21 @@ function step(delta) {
   z-index: 20;
 }
 .title {
+  grid-column: 1;
   font-size: 1.15rem;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
+  justify-self: start;
 }
 .date-nav {
+  grid-column: 2;
   display: inline-flex;
   align-items: center;
   gap: 2px;
   padding: 4px;
   border-radius: 999px;
+  justify-self: center;
 }
 .date-btn {
   appearance: none;
@@ -95,21 +99,10 @@ function step(delta) {
   color: var(--p-ink);
 }
 .header-actions {
-  margin-left: auto;
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 14px;
-}
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, var(--p-lavender), #4b3b8c);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 </style>
