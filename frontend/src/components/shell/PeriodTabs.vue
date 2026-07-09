@@ -29,6 +29,7 @@ function isActive(to) {
 <style scoped>
 .tabs {
   display: inline-flex;
+  align-self: flex-start;
   gap: 4px;
   padding: 5px;
   border-radius: 999px;

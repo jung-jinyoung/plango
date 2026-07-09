@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="monthly-page">
     <PeriodTabs :tabs="dashboardTabs" aria-label="월/주/일 전환" />
     <div class="monthly-layout">
       <GoalPanel
@@ -56,11 +56,17 @@ function goToGoal(goalId) {
 </script>
 
 <style scoped>
+.monthly-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
 .monthly-layout {
+  flex: 1;
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 24px;
   margin-top: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 </style>
