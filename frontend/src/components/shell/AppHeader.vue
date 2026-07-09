@@ -62,6 +62,7 @@ function step(delta) {
 .title {
   grid-column: 1;
   font-size: 1.15rem;
+  line-height: 1.3;
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
