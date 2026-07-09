@@ -1,6 +1,5 @@
 <template>
   <div>
-    <PeriodTabs :tabs="dashboardTabs" aria-label="월/주/일 전환" />
     <div class="monthly-layout">
       <GoalPanel
         title="이번 달 목표"
@@ -23,11 +22,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
-import PeriodTabs from '@/components/shell/PeriodTabs.vue'
 import GoalPanel from '@/components/goals/GoalPanel.vue'
 import GoalFormModal from '@/components/goals/GoalFormModal.vue'
 import MonthCalendarGrid from '@/components/calendar/MonthCalendarGrid.vue'
-import { dashboardTabs } from '@/constants/period-tabs'
 import { useGoalStore } from '@/stores/goals'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 

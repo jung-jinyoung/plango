@@ -1,7 +1,7 @@
 export const dashboardTabs = [
-  { label: '월간', to: '/app/dashboard/monthly' },
-  { label: '주간', to: '/app/dashboard/weekly' },
-  { label: '일간', to: '/app/dashboard/daily' },
+  { label: 'monthly', to: '/app/dashboard/monthly' },
+  { label: 'weekly', to: '/app/dashboard/weekly' },
+  { label: 'daily', to: '/app/dashboard/daily' },
 ]
 
 export const retrospectiveTabs = [
