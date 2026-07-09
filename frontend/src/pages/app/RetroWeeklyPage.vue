@@ -1,7 +1,6 @@
 <template>
   <div>
-    <div class="tabs-row">
-      <PeriodTabs :tabs="retrospectiveTabs" aria-label="주간/월간 회고 전환" />
+    <div class="archive-row">
       <router-link to="/app/retrospective/archive" class="archive-link">지난 회고 보기 →</router-link>
     </div>
 
@@ -29,12 +28,10 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import PeriodTabs from '@/components/shell/PeriodTabs.vue'
 import RetroSummaryCard from '@/components/retrospective/RetroSummaryCard.vue'
 import BarChart from '@/components/retrospective/BarChart.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import GoalFormModal from '@/components/goals/GoalFormModal.vue'
-import { retrospectiveTabs } from '@/constants/period-tabs'
 import { useRetrospectiveStore } from '@/stores/retrospective'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { useGoalStore } from '@/stores/goals'
@@ -77,12 +74,9 @@ function handleSaveGoal(payload) {
 </script>
 
 <style scoped>
-.tabs-row {
+.archive-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .archive-link {
   font-size: 0.85rem;

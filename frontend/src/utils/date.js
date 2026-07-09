@@ -16,12 +16,14 @@ export function addDaysISO(dateISO, days) {
   return toISODate(date)
 }
 
-const WEEKDAY = ['일', '월', '화', '수', '목', '금', '토']
+const WEEKDAY_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export function formatDateTitle(dateISO) {
   const [y, m, d] = dateISO.split('-').map(Number)
   const date = new Date(y, m - 1, d)
-  return `${m}월 ${d}일 (${WEEKDAY[date.getDay()]})`
+  const mm = String(m).padStart(2, '0')
+  const dd = String(d).padStart(2, '0')
+  return `${y}, ${mm}/${dd} (${WEEKDAY_EN[date.getDay()]})`
 }
 
 export function minutesToLabel(minutes) {

@@ -16,17 +16,17 @@ const routes = [
       {
         path: 'dashboard/monthly',
         component: () => import('@/pages/app/DashboardMonthlyPage.vue'),
-        meta: { showDateNav: true, dateUnit: 'month' },
+        meta: { showDateNav: true, dateUnit: 'month', periodTabs: 'dashboard' },
       },
       {
         path: 'dashboard/weekly',
         component: () => import('@/pages/app/DashboardWeeklyPage.vue'),
-        meta: { showDateNav: true, dateUnit: 'week' },
+        meta: { showDateNav: true, dateUnit: 'week', periodTabs: 'dashboard' },
       },
       {
         path: 'dashboard/daily',
         component: () => import('@/pages/app/DashboardDailyPage.vue'),
-        meta: { showDateNav: true, dateUnit: 'day' },
+        meta: { showDateNav: true, dateUnit: 'day', periodTabs: 'dashboard' },
       },
 
       // C. 목표 관리 (C3 트리 뷰만 라우트, C1/C2는 모달)
@@ -41,12 +41,12 @@ const routes = [
       {
         path: 'retrospective/weekly',
         component: () => import('@/pages/app/RetroWeeklyPage.vue'),
-        meta: { showDateNav: true, dateUnit: 'week' },
+        meta: { showDateNav: true, dateUnit: 'week', periodTabs: 'retrospective' },
       },
       {
         path: 'retrospective/monthly',
         component: () => import('@/pages/app/RetroMonthlyPage.vue'),
-        meta: { showDateNav: true, dateUnit: 'month' },
+        meta: { showDateNav: true, dateUnit: 'month', periodTabs: 'retrospective' },
       },
       {
         path: 'retrospective/archive',

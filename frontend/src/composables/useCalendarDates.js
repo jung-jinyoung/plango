@@ -42,14 +42,11 @@ function toCell(date, monthReference) {
 }
 
 export function formatMonthTitle(current) {
-  return `${current.year()}년 ${current.month() + 1}월`
+  return `${current.year()}, ${current.format('MMMM')}`
 }
 
 export function formatWeekTitle(current) {
   const start = current.startOf('week')
   const end = current.endOf('week')
-  if (start.month() === end.month()) {
-    return `${start.month() + 1}월 ${start.date()}일~${end.date()}일`
-  }
-  return `${start.month() + 1}월 ${start.date()}일~${end.month() + 1}월 ${end.date()}일`
+  return `${start.year()}, ${start.format('MM/DD')}-${end.format('MM/DD')}`
 }
