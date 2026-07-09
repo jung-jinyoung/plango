@@ -1,7 +1,5 @@
 <template>
   <div>
-    <PeriodTabs :tabs="dashboardTabs" aria-label="월/주/일 전환" />
-
     <div class="daily-layout">
       <BaseCard class="todo-panel">
         <div class="panel-head">
@@ -66,7 +64,6 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import PeriodTabs from '@/components/shell/PeriodTabs.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import TodoList from '@/components/daily-plan/TodoList.vue'
@@ -75,7 +72,6 @@ import TodoInputModal from '@/components/daily-plan/TodoInputModal.vue'
 import AiRecommendationPanel from '@/components/daily-plan/AiRecommendationPanel.vue'
 import ScheduleConflictModal from '@/components/daily-plan/ScheduleConflictModal.vue'
 import CarryOverDialog from '@/components/daily-plan/CarryOverDialog.vue'
-import { dashboardTabs } from '@/constants/period-tabs'
 import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
 import { useAiPlanningStore } from '@/stores/ai-planning'
