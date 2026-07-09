@@ -100,13 +100,13 @@ function step(delta) {
 
 <style scoped>
 .app-header {
-  height: 64px;
+  height: 72px;
   flex-shrink: 0;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   column-gap: 24px;
-  padding: 0 28px;
+  padding: 0 32px;
   border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 8%, transparent);
   background: var(--p-bg);
   position: sticky;
@@ -149,7 +149,7 @@ function step(delta) {
 }
 .date-label {
   padding: 0 4px;
-  font-size: 1.25rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
