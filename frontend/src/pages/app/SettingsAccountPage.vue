@@ -1,6 +1,5 @@
 <template>
   <BaseCard class="account-card">
-    <span class="ia-code">G1</span>
     <h1>계정</h1>
     <p class="desc">계정 정보를 수정합니다.</p>
 
@@ -33,17 +32,7 @@ const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.valu
 
 <style scoped>
 .account-card {
-  max-width: 480px;
-}
-.ia-code {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--p-rose-ink);
-  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-surface));
-  padding: 4px 10px;
-  border-radius: 999px;
-  margin-bottom: 12px;
+  width: 100%;
 }
 h1 {
   font-size: 1.3rem;

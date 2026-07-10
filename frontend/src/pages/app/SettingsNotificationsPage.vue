@@ -1,6 +1,5 @@
 <template>
   <BaseCard class="notif-card">
-    <span class="ia-code">G1</span>
     <h1>알림</h1>
     <p class="desc">알림 유형별로 수신 여부를 설정합니다.</p>
 
@@ -30,17 +29,7 @@ const items = reactive([
 
 <style scoped>
 .notif-card {
-  max-width: 480px;
-}
-.ia-code {
-  display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--p-rose-ink);
-  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-surface));
-  padding: 4px 10px;
-  border-radius: 999px;
-  margin-bottom: 12px;
+  width: 100%;
 }
 h1 {
   font-size: 1.3rem;

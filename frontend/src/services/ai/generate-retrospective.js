@@ -21,7 +21,7 @@ export function generateRetrospective(input) {
 }
 
 const COLORS = ['rose', 'blue', 'green', 'lavender']
-const COLOR_LABELS = { rose: '로즈', blue: '블루', green: '그린', lavender: '라벤더' }
+const COLOR_LABELS = { rose: '운동', blue: '자기계발', green: '독서', lavender: '취미' }
 
 function buildReport({ periodType, periodLabel, dates, todosByDate, schedulesByDate }) {
   const allTodos = dates.flatMap((d) => todosByDate[d] || [])

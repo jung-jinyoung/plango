@@ -10,9 +10,8 @@
       >
         {{ item.label }}
       </router-link>
-      <button type="button" class="local-nav-item is-modal-trigger" @click="showCategoryModal = true">
+      <button type="button" class="local-nav-item" @click="showCategoryModal = true">
         카테고리 관리
-        <span class="modal-badge">G2 · Modal</span>
       </button>
     </nav>
     <div class="local-body">
@@ -71,16 +70,6 @@ const showCategoryModal = ref(false)
 .local-nav-item.is-active {
   background: color-mix(in srgb, var(--p-rose) 14%, var(--p-surface));
   color: var(--p-rose-ink);
-}
-.local-nav-item.is-modal-trigger {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-.modal-badge {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--p-ink-faint);
 }
 .local-body {
   flex: 1;
