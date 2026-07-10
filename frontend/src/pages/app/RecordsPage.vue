@@ -11,7 +11,7 @@
     </BaseCard>
 
     <div class="top-row">
-      <BaseCard class="column column-plan">
+      <BaseCard class="column">
         <div class="column-head">
           <h2>계획</h2>
         </div>
@@ -145,9 +145,9 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 }
 .top-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
 }
 @media (max-width: 640px) {
   .top-row {
@@ -161,8 +161,6 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 .column {
   padding: 20px;
   min-width: 0;
-}
-.column-plan {
   display: flex;
   flex-direction: column;
 }
@@ -197,6 +195,7 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 }
 .intent-input {
   width: 100%;
+  flex: 1;
   border: none;
   padding: 14px 16px;
   font-size: 0.9rem;
