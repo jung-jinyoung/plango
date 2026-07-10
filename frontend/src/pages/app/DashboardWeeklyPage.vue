@@ -4,6 +4,8 @@
       <GoalPanel
         title="이번 주 목표"
         :goals="goalStore.weeklyGoals"
+        :loading="goalStore.loading"
+        :error="goalStore.error"
         @select="goToGoal"
         @add="showGoalForm = true"
       />
@@ -13,13 +15,15 @@
     <GoalFormModal
       v-model="showGoalForm"
       variant="weekly"
-      @save="goalStore.addWeeklyGoal($event)"
+      :submitting="saving"
+      :submit-error="formError"
+      @save="handleSaveWeeklyGoal"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import GoalPanel from '@/components/goals/GoalPanel.vue'
@@ -32,6 +36,23 @@ const router = useRouter()
 const goalStore = useGoalStore()
 const calendarNav = useCalendarNavStore()
 const showGoalForm = ref(false)
+const formError = ref(null)
+const saving = ref(false)
+
+onMounted(() => goalStore.load())
+
+async function handleSaveWeeklyGoal(payload) {
+  formError.value = null
+  saving.value = true
+  try {
+    await goalStore.addWeeklyGoal(payload)
+    showGoalForm.value = false
+  } catch (e) {
+    formError.value = e
+  } finally {
+    saving.value = false
+  }
+}
 
 function goToDay(dateISO) {
   calendarNav.currentDate = dayjs(dateISO)

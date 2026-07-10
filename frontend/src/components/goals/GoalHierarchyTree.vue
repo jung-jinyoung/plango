@@ -12,7 +12,9 @@
       </template>
     </nav>
 
-    <div class="accordion-list">
+    <p v-if="goalStore.loading && goalStore.monthlyGoals.length === 0" class="empty">불러오는 중…</p>
+    <p v-else-if="goalStore.error" class="empty">목표를 불러오지 못했어요.</p>
+    <div v-else class="accordion-list">
       <BaseAccordion
         v-for="monthly in goalStore.monthlyGoals"
         :key="monthly.id"
@@ -56,7 +58,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, watchEffect } from 'vue'
+import { reactive, computed, onMounted, watchEffect } from 'vue'
 import BaseAccordion from '@/components/ui/BaseAccordion.vue'
 import TodoItem from '@/components/daily-plan/TodoItem.vue'
 import GoalHeaderRow from './GoalHeaderRow.vue'
@@ -70,6 +72,8 @@ const props = defineProps({
 
 const goalStore = useGoalStore()
 const todoStore = useTodoStore()
+
+onMounted(() => goalStore.load())
 
 const expandedMonthly = reactive({})
 const expandedWeekly = reactive({})

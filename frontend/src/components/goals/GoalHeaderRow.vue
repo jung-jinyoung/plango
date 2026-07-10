@@ -38,6 +38,18 @@ defineProps({
 .dot.is-lavender {
   background: var(--p-lavender);
 }
+.dot.is-amber {
+  background: var(--p-amber);
+}
+.dot.is-teal {
+  background: var(--p-teal);
+}
+.dot.is-plum {
+  background: var(--p-plum);
+}
+.dot.is-slate {
+  background: var(--p-slate);
+}
 .title {
   font-weight: 700;
   font-size: 0.94rem;

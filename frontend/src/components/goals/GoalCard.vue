@@ -55,7 +55,23 @@ defineEmits(['select'])
 }
 .goal-card.is-lavender {
   --tag-color: var(--p-lavender);
-  --tag-ink: #4b3b8c;
+  --tag-ink: var(--p-lavender-ink);
+}
+.goal-card.is-amber {
+  --tag-color: var(--p-amber);
+  --tag-ink: var(--p-amber-ink);
+}
+.goal-card.is-teal {
+  --tag-color: var(--p-teal);
+  --tag-ink: var(--p-teal-ink);
+}
+.goal-card.is-plum {
+  --tag-color: var(--p-plum);
+  --tag-ink: var(--p-plum-ink);
+}
+.goal-card.is-slate {
+  --tag-color: var(--p-slate);
+  --tag-ink: var(--p-slate-ink);
 }
 h3 {
   font-size: 0.94rem;

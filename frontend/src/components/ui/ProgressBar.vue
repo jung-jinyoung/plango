@@ -12,7 +12,7 @@ import { computed } from 'vue'
 
 const props = defineProps({
   value: { type: Number, required: true },
-  color: { type: String, default: 'rose' }, // rose | green | blue | lavender
+  color: { type: String, default: 'rose' }, // rose | amber | green | teal | blue | lavender | plum | slate
   showLabel: { type: Boolean, default: false },
 })
 
@@ -45,10 +45,22 @@ const clamped = computed(() => Math.min(100, Math.max(0, Math.round(props.value)
   background: linear-gradient(90deg, var(--p-green), var(--p-green-ink));
 }
 .is-blue {
-  background: linear-gradient(90deg, var(--p-blue), #1d4ed8);
+  background: linear-gradient(90deg, var(--p-blue), var(--p-blue-ink));
 }
 .is-lavender {
-  background: linear-gradient(90deg, var(--p-lavender), #4b3b8c);
+  background: linear-gradient(90deg, var(--p-lavender), var(--p-lavender-ink));
+}
+.is-amber {
+  background: linear-gradient(90deg, var(--p-amber), var(--p-amber-ink));
+}
+.is-teal {
+  background: linear-gradient(90deg, var(--p-teal), var(--p-teal-ink));
+}
+.is-plum {
+  background: linear-gradient(90deg, var(--p-plum), var(--p-plum-ink));
+}
+.is-slate {
+  background: linear-gradient(90deg, var(--p-slate), var(--p-slate-ink));
 }
 .label {
   font-size: 0.78rem;

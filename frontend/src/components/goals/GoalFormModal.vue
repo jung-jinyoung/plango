@@ -7,18 +7,24 @@
   >
     <div class="form">
       <BaseInput v-model="form.title" label="목표명" placeholder="목표를 입력하세요" />
-      <BaseSelect v-model="form.color" label="카테고리 색상" :options="colorOptions" />
+      <BaseSelect v-if="variant === 'monthly'" v-model="form.color" label="카테고리 색상" :options="colorOptions" />
       <BaseSelect
         v-if="variant === 'weekly'"
         v-model="form.monthlyGoalId"
         label="연결할 월간 목표"
         :options="monthlyOptions"
       />
+      <p v-if="variant === 'weekly'" class="inherit-hint">
+        카테고리: {{ inheritedCategoryLabel }} — 주간 목표는 연결된 월간 목표의 카테고리를 그대로 따라가요.
+      </p>
+      <p v-if="submitError" class="submit-error">{{ submitErrorMessage }}</p>
     </div>
 
     <template #actions>
       <BaseButton variant="secondary" @click="$emit('update:modelValue', false)">취소</BaseButton>
-      <BaseButton variant="primary" :disabled="!form.title.trim()" @click="submit">저장</BaseButton>
+      <BaseButton variant="primary" :disabled="!form.title.trim() || submitting" @click="submit">
+        {{ submitting ? '저장 중…' : '저장' }}
+      </BaseButton>
     </template>
   </BaseModal>
 </template>
@@ -36,6 +42,8 @@ const props = defineProps({
   modelValue: { type: Boolean, default: false },
   variant: { type: String, required: true }, // 'monthly' | 'weekly'
   editingGoal: { type: Object, default: null },
+  submitting: { type: Boolean, default: false },
+  submitError: { type: [Object, Error], default: null },
 })
 const emit = defineEmits(['update:modelValue', 'save'])
 
@@ -56,6 +64,17 @@ const monthlyOptions = computed(() => [
   ...goalStore.monthlyGoals.map((g) => ({ label: g.title, value: g.id })),
 ])
 
+const inheritedCategoryLabel = computed(() => {
+  if (!form.monthlyGoalId) return '없음 (미분류)'
+  const parent = goalStore.monthlyGoals.find((g) => g.id === form.monthlyGoalId)
+  const category = categoryStore.categories.find((c) => c.color === parent?.color)
+  return category?.name ?? parent?.color ?? '없음'
+})
+
+const submitErrorMessage = computed(
+  () => props.submitError?.message || '저장에 실패했어요. 잠시 후 다시 시도해주세요.',
+)
+
 const form = reactive({ title: '', color: 'rose', monthlyGoalId: '' })
 
 watch(
@@ -75,13 +94,12 @@ watch(
 )
 
 function submit() {
-  if (!form.title.trim()) return
+  if (!form.title.trim() || props.submitting) return
   emit('save', {
     title: form.title.trim(),
     color: form.color,
     ...(props.variant === 'weekly' ? { monthlyGoalId: form.monthlyGoalId || null } : {}),
   })
-  emit('update:modelValue', false)
 }
 </script>
 
@@ -90,5 +108,16 @@ function submit() {
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+.inherit-hint {
+  margin: -8px 0 0;
+  font-size: 0.78rem;
+  color: var(--p-ink-faint);
+  line-height: 1.5;
+}
+.submit-error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--p-rose-ink);
 }
 </style>

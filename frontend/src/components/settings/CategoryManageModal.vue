@@ -32,7 +32,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
       카테고리 추가
     </button>
-    <p v-if="!hasInactive" class="hint">Plango는 4가지 고정 색상만 지원해요. 더 추가하려면 먼저 하나를 삭제하세요.</p>
+    <p v-if="!hasInactive" class="hint">Plango는 8가지 고정 색상만 지원해요. 더 추가하려면 먼저 하나를 삭제하세요.</p>
 
     <template #actions>
       <BaseButton variant="primary" @click="$emit('update:modelValue', false)">완료</BaseButton>
@@ -91,6 +91,18 @@ function addBack() {
 }
 .dot.is-lavender {
   --dot-color: var(--p-lavender);
+}
+.dot.is-amber {
+  --dot-color: var(--p-amber);
+}
+.dot.is-teal {
+  --dot-color: var(--p-teal);
+}
+.dot.is-plum {
+  --dot-color: var(--p-plum);
+}
+.dot.is-slate {
+  --dot-color: var(--p-slate);
 }
 .name-input {
   flex: 1;

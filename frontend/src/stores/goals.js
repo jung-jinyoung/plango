@@ -1,21 +1,77 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useTodoStore } from './todos'
+import { useCategoryStore } from './categories'
 import { getTodayISO } from '@/utils/date'
+import * as categoriesApi from '@/services/api/categories'
+import * as monthlyGoalsApi from '@/services/api/monthly-goals'
+import * as weeklyGoalsApi from '@/services/api/weekly-goals'
 
-// 월간-주간 목표는 이제 실제로 만들고 수정·삭제할 수 있다.
-// 진행률(progress/taskCount/doneCount)은 저장하지 않고, 태그된 할 일로부터 매번 계산한다 —
-// 그래야 할 일을 체크하거나 목표에 태그할 때마다 카드가 실시간으로 반영된다.
+// 월간/주간 목표는 실제 백엔드(FastAPI)와 통신한다. 진행률(progress/taskCount/doneCount)은
+// 서버에 저장하지 않고, 태그된 할 일로부터 매번 계산한다 — 그래야 할 일을 체크하거나
+// 목표에 태그할 때마다 카드가 실시간으로 반영된다.
+//
+// 백엔드의 월간 목표는 category_id(FK, 필수)를 갖고, 주간 목표는 카테고리를 직접 갖지
+// 않고 부모 월간 목표에서 상속한다. 프론트는 색상을 slot 이름("rose" 등)으로 다루므로,
+// 이 스토어가 슬롯 색상 ↔ 백엔드 category id를 서로 변환하는 다리 역할을 한다
+// (카테고리 이름은 categories 스토어의 8개 고정 슬롯 이름을 그대로 시드한다).
 export const useGoalStore = defineStore('goals', () => {
-  const rawMonthlyGoals = ref([
-    { id: 'g-month-1', title: '브랜드 캠페인 런칭', color: 'rose' },
-    { id: 'g-month-2', title: '사이드 프로젝트 MVP 완성', color: 'blue' },
-  ])
+  const rawMonthlyGoals = ref([]) // { id, title, categoryId }
+  const rawWeeklyGoals = ref([]) // { id, title, monthlyGoalId, categoryId }
+  const categoryIdByColor = ref({})
+  const colorByCategoryId = ref({})
 
-  const rawWeeklyGoals = ref([
-    { id: 'g-week-1', title: '캠페인 콘텐츠 3종 제작', color: 'rose', monthlyGoalId: 'g-month-1' },
-    { id: 'g-week-2', title: 'MVP 로그인 플로우 구현', color: 'blue', monthlyGoalId: 'g-month-2' },
-  ])
+  const loading = ref(false)
+  const error = ref(null)
+  let loaded = false
+  let loadPromise = null
+
+  function colorOf(categoryId) {
+    return colorByCategoryId.value[categoryId] ?? 'slate'
+  }
+
+  async function ensureCategoryId(color) {
+    if (categoryIdByColor.value[color]) return categoryIdByColor.value[color]
+    const categoryStore = useCategoryStore()
+    const local = categoryStore.categories.find((c) => c.color === color)
+    const created = await categoriesApi.createCategory({ name: local?.name ?? color, color })
+    categoryIdByColor.value = { ...categoryIdByColor.value, [color]: created.id }
+    colorByCategoryId.value = { ...colorByCategoryId.value, [created.id]: color }
+    return created.id
+  }
+
+  async function load() {
+    if (loaded) return
+    if (loadPromise) return loadPromise
+    loading.value = true
+    error.value = null
+    loadPromise = (async () => {
+      try {
+        const [categories, monthly, weekly] = await Promise.all([
+          categoriesApi.listCategories(),
+          monthlyGoalsApi.listMonthlyGoals(),
+          weeklyGoalsApi.listWeeklyGoals(),
+        ])
+        const byColor = {}
+        const byId = {}
+        for (const c of categories) {
+          byColor[c.color] = c.id
+          byId[c.id] = c.color
+        }
+        categoryIdByColor.value = byColor
+        colorByCategoryId.value = byId
+        rawMonthlyGoals.value = monthly
+        rawWeeklyGoals.value = weekly
+        loaded = true
+      } catch (e) {
+        error.value = e
+      } finally {
+        loading.value = false
+        loadPromise = null
+      }
+    })()
+    return loadPromise
+  }
 
   function allTodos() {
     const todoStore = useTodoStore()
@@ -33,7 +89,13 @@ export const useGoalStore = defineStore('goals', () => {
       const tagged = allTodos().filter((t) => t.goalId === goal.id)
       const taskCount = tagged.length
       const doneCount = tagged.filter((t) => t.done).length
-      return { ...goal, taskCount, doneCount, progress: progressOf(taskCount, doneCount) }
+      return {
+        ...goal,
+        color: colorOf(goal.categoryId),
+        taskCount,
+        doneCount,
+        progress: progressOf(taskCount, doneCount),
+      }
     }),
   )
 
@@ -42,36 +104,56 @@ export const useGoalStore = defineStore('goals', () => {
       const children = weeklyGoals.value.filter((w) => w.monthlyGoalId === goal.id)
       const taskCount = children.reduce((sum, w) => sum + w.taskCount, 0)
       const doneCount = children.reduce((sum, w) => sum + w.doneCount, 0)
-      return { ...goal, taskCount, doneCount, progress: progressOf(taskCount, doneCount) }
+      return {
+        ...goal,
+        color: colorOf(goal.categoryId),
+        taskCount,
+        doneCount,
+        progress: progressOf(taskCount, doneCount),
+      }
     }),
   )
 
-  function addMonthlyGoal({ title, color = 'rose' }) {
-    const goal = { id: crypto.randomUUID(), title, color }
+  async function addMonthlyGoal({ title, color = 'rose' }) {
+    const categoryId = await ensureCategoryId(color)
+    const goal = await monthlyGoalsApi.createMonthlyGoal({ title, categoryId })
     rawMonthlyGoals.value.push(goal)
     return goal
   }
-  function updateMonthlyGoal(id, { title, color }) {
-    const goal = rawMonthlyGoals.value.find((g) => g.id === id)
-    if (goal) Object.assign(goal, { title, color })
+
+  async function updateMonthlyGoal(id, { title, color }) {
+    const categoryId = color ? await ensureCategoryId(color) : undefined
+    const updated = await monthlyGoalsApi.updateMonthlyGoal(id, { title, categoryId })
+    const idx = rawMonthlyGoals.value.findIndex((g) => g.id === id)
+    if (idx !== -1) rawMonthlyGoals.value[idx] = updated
   }
-  function removeMonthlyGoal(id) {
+
+  async function removeMonthlyGoal(id) {
+    await monthlyGoalsApi.deleteMonthlyGoal(id)
     rawMonthlyGoals.value = rawMonthlyGoals.value.filter((g) => g.id !== id)
+    // 백엔드가 ON DELETE SET NULL로 자식 주간 목표의 monthly_goal_id/category_id를 null 처리한다
     rawWeeklyGoals.value.forEach((w) => {
-      if (w.monthlyGoalId === id) w.monthlyGoalId = null
+      if (w.monthlyGoalId === id) {
+        w.monthlyGoalId = null
+        w.categoryId = null
+      }
     })
   }
 
-  function addWeeklyGoal({ title, color = 'rose', monthlyGoalId = null }) {
-    const goal = { id: crypto.randomUUID(), title, color, monthlyGoalId }
+  async function addWeeklyGoal({ title, monthlyGoalId = null }) {
+    const goal = await weeklyGoalsApi.createWeeklyGoal({ title, monthlyGoalId })
     rawWeeklyGoals.value.push(goal)
     return goal
   }
-  function updateWeeklyGoal(id, { title, color, monthlyGoalId }) {
-    const goal = rawWeeklyGoals.value.find((g) => g.id === id)
-    if (goal) Object.assign(goal, { title, color, monthlyGoalId })
+
+  async function updateWeeklyGoal(id, { title, monthlyGoalId }) {
+    const updated = await weeklyGoalsApi.updateWeeklyGoal(id, { title, monthlyGoalId })
+    const idx = rawWeeklyGoals.value.findIndex((g) => g.id === id)
+    if (idx !== -1) rawWeeklyGoals.value[idx] = updated
   }
-  function removeWeeklyGoal(id) {
+
+  async function removeWeeklyGoal(id) {
+    await weeklyGoalsApi.deleteWeeklyGoal(id)
     rawWeeklyGoals.value = rawWeeklyGoals.value.filter((g) => g.id !== id)
     const todoStore = useTodoStore()
     Object.values(todoStore.todosByDate).forEach((list) => {
@@ -82,6 +164,9 @@ export const useGoalStore = defineStore('goals', () => {
   }
 
   return {
+    loading,
+    error,
+    load,
     monthlyGoals,
     weeklyGoals,
     addMonthlyGoal,

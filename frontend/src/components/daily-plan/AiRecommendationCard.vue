@@ -50,6 +50,18 @@ const timeLabel = computed(
 .rec-card.is-lavender {
   --card-accent: var(--p-lavender);
 }
+.rec-card.is-amber {
+  --card-accent: var(--p-amber);
+}
+.rec-card.is-teal {
+  --card-accent: var(--p-teal);
+}
+.rec-card.is-plum {
+  --card-accent: var(--p-plum);
+}
+.rec-card.is-slate {
+  --card-accent: var(--p-slate);
+}
 .top {
   display: flex;
   align-items: center;

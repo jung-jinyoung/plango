@@ -11,15 +11,26 @@
 | ink | `#20232a` | `--p-ink` | 본문 텍스트 |
 | ink-muted | `#5b6270` | `--p-ink-muted` | 보조 텍스트 |
 | ink-faint | `#8c919c` | `--p-ink-faint` | 희미한 텍스트(placeholder 등) |
-| rose | `#d9738c` | `--p-rose` | 브랜드 — 배경/텍스트/테두리 |
-| rose-ink | `#a34a63` | `--p-rose-ink` | 브랜드 — 배경/텍스트/테두리 |
-| lavender | `#7a6bc9` | `--p-lavender` | 브랜드 — 배경/텍스트/테두리 |
-| green | `#10b981` | `--p-green` | 브랜드 — 배경/텍스트/테두리 |
-| green-ink | `#0b7a57` | `--p-green-ink` | 브랜드 — 배경/텍스트/테두리 |
-| blue | `#3b82f6` | `--p-blue` | 브랜드 — 배경/텍스트/테두리 |
-| amber | `#e8a23d` | `--p-amber` | **선언만 됨, 커스텀 컴포넌트 미사용** (Quasar `$warning` 시맨틱 슬롯 전용) |
+| rose | `#d9738c` | `--p-rose` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| rose-ink | `#a34a63` | `--p-rose-ink` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| lavender | `#7a6bc9` | `--p-lavender` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| lavender-ink | `#4b3b8c` | `--p-lavender-ink` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| green | `#10b981` | `--p-green` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| green-ink | `#0b7a57` | `--p-green-ink` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| blue | `#3b82f6` | `--p-blue` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| blue-ink | `#1d4ed8` | `--p-blue-ink` | 브랜드/카테고리 — 배경/텍스트/테두리 |
+| amber | `#e8a23d` | `--p-amber` | 카테고리 색상(8번째 슬롯) + Quasar `$warning` 시맨틱 슬롯 겸용 |
+| amber-ink | `#a66d1f` | `--p-amber-ink` | 카테고리 색상 |
+| teal | `#1ca9b0` | `--p-teal` | 카테고리 색상(2026-07 추가) |
+| teal-ink | `#0f7a80` | `--p-teal-ink` | 카테고리 색상 |
+| plum | `#a855c9` | `--p-plum` | 카테고리 색상(2026-07 추가) |
+| plum-ink | `#7a3a94` | `--p-plum-ink` | 카테고리 색상 |
+| slate | `#64748b` | `--p-slate` | 카테고리 색상(2026-07 추가, 중성/저채도 슬롯) |
+| slate-ink | `#3f4a5a` | `--p-slate-ink` | 카테고리 색상 |
 | negative | `#dc2626` | 없음(`$negative`, Quasar SCSS 전용) | **선언만 됨, 커스텀 컴포넌트 미사용** |
 | focus-ring | = blue | `--p-focus-ring` | 포커스 아웃라인 전용 (blue와 동일 값) |
+
+> 카테고리 색상 슬롯은 2026-07-10부로 4개(rose/blue/green/lavender)에서 8개(+amber/teal/plum/slate)로 확장됐다 — 백엔드 `categories` 리소스가 최대 8개까지 지원하는 데 맞춰 1:1 매핑. 아래 Figma 반영 상태는 4색 시점 스냅샷이라 재동기화가 필요하다.
 
 ## Radius
 
