@@ -12,7 +12,10 @@
       </div>
       <p class="time">{{ dateLabel }} · {{ timeLabel }}</p>
       <span v-if="schedule.completed" class="done-badge">완료됨</span>
-      <p v-if="schedule.reason" class="reason">{{ schedule.reason }}</p>
+      <div v-if="schedule.reason" class="reason-block">
+        <span v-if="schedule.source === 'ai'" class="ai-badge">AI</span>
+        <p class="reason">{{ schedule.reason }}</p>
+      </div>
       <p v-if="schedule.note" class="note">{{ schedule.note }}</p>
     </div>
   </BaseModal>
@@ -87,6 +90,20 @@ h3.is-done {
   color: var(--p-green-ink);
   background: color-mix(in srgb, var(--p-green) 18%, transparent);
   padding: 3px 10px;
+  border-radius: 999px;
+}
+.reason-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.ai-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(145deg, var(--p-lavender), #4b3b8c);
+  padding: 2px 8px;
   border-radius: 999px;
 }
 .reason,
