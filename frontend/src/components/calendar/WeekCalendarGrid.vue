@@ -32,9 +32,9 @@
               :key="s.id"
               type="button"
               class="slot"
-              :class="[`is-${s.categoryColor}`, { 'is-completed': s.completed }]"
+              :class="`is-${s.categoryColor}`"
               :style="slotStyle(s)"
-              @click="$emit('select-day', day.dateISO)"
+              @click="openInfo(day.dateISO, s)"
             >
               <span class="slot-title">{{ s.title }}</span>
             </button>
@@ -44,11 +44,14 @@
         <div v-if="isCurrentWeek && nowLineTop !== null" class="now-line-full" :style="{ top: `${nowLineTop}px` }" />
       </div>
     </div>
+
+    <ScheduleInfoModal v-model="showInfoModal" :schedule="selectedSchedule" />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import ScheduleInfoModal from './ScheduleInfoModal.vue'
 import { getWeekDays } from '@/composables/useCalendarDates'
 import { useScheduleStore } from '@/stores/schedule'
 
@@ -87,6 +90,13 @@ function slotStyle(schedule) {
   const top = (schedule.startMinutes - props.startHour * 60) * pxPerMinute
   const height = Math.max(schedule.durationMinutes * pxPerMinute, MIN_HEIGHT)
   return { top: `${top}px`, height: `${height}px` }
+}
+
+const showInfoModal = ref(false)
+const selectedSchedule = ref(null)
+function openInfo(dateISO, schedule) {
+  selectedSchedule.value = { ...schedule, dateISO }
+  showInfoModal.value = true
 }
 
 // "현재 시각" 표시선 — 1분 단위로 갱신하기엔 과하니 1분 간격이면 충분
@@ -231,34 +241,29 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   left: 3px;
   right: 3px;
   appearance: none;
-  border: none;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
   padding: 5px 8px;
   border-radius: var(--p-radius-sm);
-  border-left: 3px solid var(--card-accent, var(--p-rose));
-  box-shadow: var(--p-shadow-raised-sm);
+  border: 1.5px solid var(--card-accent, var(--p-rose));
   overflow: hidden;
 }
 .slot.is-rose {
   --card-accent: var(--p-rose);
-  background: color-mix(in srgb, var(--p-rose) 18%, var(--p-surface));
+  background: color-mix(in srgb, var(--p-rose) 18%, transparent);
 }
 .slot.is-blue {
   --card-accent: var(--p-blue);
-  background: color-mix(in srgb, var(--p-blue) 18%, var(--p-surface));
+  background: color-mix(in srgb, var(--p-blue) 18%, transparent);
 }
 .slot.is-green {
   --card-accent: var(--p-green);
-  background: color-mix(in srgb, var(--p-green) 18%, var(--p-surface));
+  background: color-mix(in srgb, var(--p-green) 18%, transparent);
 }
 .slot.is-lavender {
   --card-accent: var(--p-lavender);
-  background: color-mix(in srgb, var(--p-lavender) 18%, var(--p-surface));
-}
-.slot.is-completed {
-  opacity: 0.55;
+  background: color-mix(in srgb, var(--p-lavender) 18%, transparent);
 }
 .slot-title {
   display: -webkit-box;
@@ -269,8 +274,5 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   font-weight: 600;
   line-height: 1.3;
   color: var(--p-ink);
-}
-.slot.is-completed .slot-title {
-  text-decoration: line-through;
 }
 </style>
