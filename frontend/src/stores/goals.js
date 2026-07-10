@@ -100,18 +100,21 @@ export const useGoalStore = defineStore('goals', () => {
   )
 
   const monthlyGoals = computed(() =>
-    rawMonthlyGoals.value.map((goal) => {
-      const children = weeklyGoals.value.filter((w) => w.monthlyGoalId === goal.id)
-      const taskCount = children.reduce((sum, w) => sum + w.taskCount, 0)
-      const doneCount = children.reduce((sum, w) => sum + w.doneCount, 0)
-      return {
-        ...goal,
-        color: colorOf(goal.categoryId),
-        taskCount,
-        doneCount,
-        progress: progressOf(taskCount, doneCount),
-      }
-    }),
+    rawMonthlyGoals.value
+      .map((goal) => {
+        const children = weeklyGoals.value.filter((w) => w.monthlyGoalId === goal.id)
+        const taskCount = children.reduce((sum, w) => sum + w.taskCount, 0)
+        const doneCount = children.reduce((sum, w) => sum + w.doneCount, 0)
+        return {
+          ...goal,
+          color: colorOf(goal.categoryId),
+          taskCount,
+          doneCount,
+          progress: progressOf(taskCount, doneCount),
+        }
+      })
+      // 달성률(progress) 내림차순 — 가장 진척된 목표가 먼저 보이도록
+      .sort((a, b) => b.progress - a.progress),
   )
 
   async function addMonthlyGoal({ title, color = 'rose' }) {
