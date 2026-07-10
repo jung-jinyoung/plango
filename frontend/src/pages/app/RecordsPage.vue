@@ -40,7 +40,7 @@
           >
             <ScheduleCard :schedule="schedule" :draggable="false" compact @toggle-complete="handleToggleComplete" />
             <select
-              v-if="schedule.todoId"
+              v-if="schedule.todoId && goalStore.weeklyGoals.length > 0"
               class="goal-select neu-sunken"
               :value="todoGoalId(schedule.todoId) || ''"
               @change="handleAssignGoal({ todoId: schedule.todoId, goalId: $event.target.value || null })"
@@ -48,6 +48,14 @@
               <option value="">목표 미태그</option>
               <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">{{ goal.title }}</option>
             </select>
+            <button
+              v-else-if="schedule.todoId"
+              type="button"
+              class="goal-add-link"
+              @click="showGoalModal = true"
+            >
+              주간 목표 추가
+            </button>
           </div>
           <p v-if="schedules.length === 0" class="empty empty-link" @click="goToDaily">
             오늘 기록된 일정이 없어요. 대시보드에서 계획을 세워보세요 →
@@ -57,6 +65,7 @@
     </div>
 
     <ReflectionModal v-model="showReflectionModal" :dateISO="dateISO" />
+    <GoalFormModal v-model="showGoalModal" variant="weekly" @save="goalStore.addWeeklyGoal($event)" />
   </div>
 </template>
 
@@ -67,6 +76,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import ScheduleCard from '@/components/daily-plan/ScheduleCard.vue'
 import ReflectionModal from '@/components/retrospective/ReflectionModal.vue'
+import GoalFormModal from '@/components/goals/GoalFormModal.vue'
 import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
 import { useGoalStore } from '@/stores/goals'
@@ -134,6 +144,8 @@ watch(dateISO, loadSuggestion, { immediate: true })
 
 const showReflectionModal = ref(false)
 const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[dateISO.value])
+
+const showGoalModal = ref(false)
 </script>
 
 <style scoped>
@@ -238,8 +250,23 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
   color: var(--p-ink-muted);
   padding: 6px 10px;
   border-radius: var(--p-radius-xs);
-  max-width: 130px;
+  max-width: 220px;
   flex-shrink: 0;
+}
+.goal-add-link {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-lavender);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.goal-add-link:hover {
+  text-decoration: underline;
 }
 .retro-suggest {
   display: flex;
