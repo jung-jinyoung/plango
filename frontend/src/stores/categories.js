@@ -6,14 +6,14 @@ import { ref, computed } from 'vue'
 // 이름을 바꾸고 활성/비활성(사용 여부)을 토글하는 것으로 구현한다.
 export const useCategoryStore = defineStore('categories', () => {
   const categories = ref([
-    { color: 'rose', name: '로즈', active: true },
-    { color: 'amber', name: '앰버', active: true },
-    { color: 'green', name: '그린', active: true },
-    { color: 'teal', name: '틸', active: true },
-    { color: 'blue', name: '블루', active: true },
-    { color: 'lavender', name: '라벤더', active: true },
-    { color: 'plum', name: '플럼', active: true },
-    { color: 'slate', name: '슬레이트', active: true },
+    { color: 'rose', name: '운동', active: true },
+    { color: 'amber', name: '업무', active: true },
+    { color: 'green', name: '독서', active: true },
+    { color: 'teal', name: '공부', active: true },
+    { color: 'blue', name: '자기계발', active: true },
+    { color: 'lavender', name: '취미', active: true },
+    { color: 'plum', name: '건강', active: true },
+    { color: 'slate', name: '기타', active: true },
   ])
 
   const activeCategories = computed(() => categories.value.filter((c) => c.active))
