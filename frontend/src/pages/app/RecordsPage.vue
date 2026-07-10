@@ -251,7 +251,7 @@ const showGoalModal = ref(false)
   color: var(--p-ink-muted);
   padding: 6px 10px;
   border-radius: var(--p-radius-xs);
-  max-width: 220px;
+  max-width: 320px;
   flex-shrink: 0;
 }
 .goal-add-link {
