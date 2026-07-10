@@ -54,7 +54,7 @@ const routes = [
         meta: { title: '회고 히스토리' },
       },
 
-      // F. 통합 기록
+      // F. 데일리 저널
       {
         path: 'records',
         component: () => import('@/pages/app/RecordsPage.vue'),

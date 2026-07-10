@@ -9,7 +9,7 @@ import { getWeekDays, formatWeekTitle, formatMonthTitle } from '@/composables/us
 export const useRetrospectiveStore = defineStore('retrospective', () => {
   const status = ref('idle') // idle | loading | ready | error
   const reportsByKey = ref({}) // { 'week:2026-06-29': Report, 'month:2026-07': Report }
-  const reflectionsByDate = ref({}) // { [dateISO]: string } — F 통합 기록의 한 줄 회고
+  const reflectionsByDate = ref({}) // { [dateISO]: string } — F 데일리 저널의 한 줄 회고
 
   function keyFor(periodType, currentDate) {
     if (periodType === 'week') return `week:${toISODate(currentDate.startOf('week').toDate())}`

@@ -79,7 +79,7 @@ const navItems = [
   { label: '대시보드', to: '/app/dashboard', icon: ICONS.dashboard },
   { label: '목표 관리', to: '/app/goals', icon: ICONS.goals },
   { label: '회고', to: '/app/retrospective', icon: ICONS.retro },
-  { label: '통합 기록', to: '/app/records', icon: ICONS.records },
+  { label: '데일리 저널', to: '/app/records', icon: ICONS.records },
 ]
 </script>
 
