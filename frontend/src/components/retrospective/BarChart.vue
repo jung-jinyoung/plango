@@ -62,13 +62,25 @@ defineProps({
   background: linear-gradient(180deg, var(--p-rose), var(--p-rose-ink));
 }
 .fill.is-blue {
-  background: linear-gradient(180deg, var(--p-blue), #1d4ed8);
+  background: linear-gradient(180deg, var(--p-blue), var(--p-blue-ink));
 }
 .fill.is-green {
   background: linear-gradient(180deg, var(--p-green), var(--p-green-ink));
 }
 .fill.is-lavender {
-  background: linear-gradient(180deg, var(--p-lavender), #4b3b8c);
+  background: linear-gradient(180deg, var(--p-lavender), var(--p-lavender-ink));
+}
+.fill.is-amber {
+  background: linear-gradient(180deg, var(--p-amber), var(--p-amber-ink));
+}
+.fill.is-teal {
+  background: linear-gradient(180deg, var(--p-teal), var(--p-teal-ink));
+}
+.fill.is-plum {
+  background: linear-gradient(180deg, var(--p-plum), var(--p-plum-ink));
+}
+.fill.is-slate {
+  background: linear-gradient(180deg, var(--p-slate), var(--p-slate-ink));
 }
 .label {
   font-size: 0.78rem;

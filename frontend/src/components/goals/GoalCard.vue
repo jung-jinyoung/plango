@@ -7,18 +7,30 @@
   >
     <span class="tag">{{ goal.taskCount }}개 태스크</span>
     <h3>{{ goal.title }}</h3>
+    <p v-if="parentLabel" class="parent">{{ parentLabel }}</p>
     <ProgressBar :value="goal.progress" :color="goal.color" show-label />
     <p class="meta">{{ goal.doneCount }}/{{ goal.taskCount }} 완료</p>
   </button>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import ProgressBar from '@/components/ui/ProgressBar.vue'
+import { useGoalStore } from '@/stores/goals'
 
-defineProps({
-  goal: { type: Object, required: true }, // { id, title, progress, color, taskCount, doneCount }
+const props = defineProps({
+  // { id, title, progress, color, taskCount, doneCount, monthlyGoalId? } — monthlyGoalId만 있으면 주간 목표
+  goal: { type: Object, required: true },
 })
 defineEmits(['select'])
+
+const goalStore = useGoalStore()
+const parentLabel = computed(() => {
+  if (!('monthlyGoalId' in props.goal)) return null
+  if (!props.goal.monthlyGoalId) return '미분류'
+  const parent = goalStore.monthlyGoals.find((g) => g.id === props.goal.monthlyGoalId)
+  return parent ? `상위: ${parent.title}` : '미분류'
+})
 </script>
 
 <style scoped>
@@ -47,7 +59,7 @@ defineEmits(['select'])
 }
 .goal-card.is-blue {
   --tag-color: var(--p-blue);
-  --tag-ink: #1d4ed8;
+  --tag-ink: var(--p-blue-ink);
 }
 .goal-card.is-green {
   --tag-color: var(--p-green);
@@ -55,13 +67,34 @@ defineEmits(['select'])
 }
 .goal-card.is-lavender {
   --tag-color: var(--p-lavender);
-  --tag-ink: #4b3b8c;
+  --tag-ink: var(--p-lavender-ink);
+}
+.goal-card.is-amber {
+  --tag-color: var(--p-amber);
+  --tag-ink: var(--p-amber-ink);
+}
+.goal-card.is-teal {
+  --tag-color: var(--p-teal);
+  --tag-ink: var(--p-teal-ink);
+}
+.goal-card.is-plum {
+  --tag-color: var(--p-plum);
+  --tag-ink: var(--p-plum-ink);
+}
+.goal-card.is-slate {
+  --tag-color: var(--p-slate);
+  --tag-ink: var(--p-slate-ink);
 }
 h3 {
   font-size: 0.94rem;
   font-weight: 700;
   color: var(--p-ink);
   margin: 0 0 12px;
+}
+.parent {
+  font-size: 0.72rem;
+  color: var(--p-ink-faint);
+  margin: -8px 0 12px;
 }
 .meta {
   font-size: 0.76rem;

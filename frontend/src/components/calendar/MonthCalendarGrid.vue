@@ -235,6 +235,18 @@ function monthLabelFor(cell) {
 .dot.is-lavender {
   background: var(--p-lavender);
 }
+.dot.is-amber {
+  background: var(--p-amber);
+}
+.dot.is-teal {
+  background: var(--p-teal);
+}
+.dot.is-plum {
+  background: var(--p-plum);
+}
+.dot.is-slate {
+  background: var(--p-slate);
+}
 .more {
   font-size: 0.66rem;
   color: var(--p-ink-faint);

@@ -107,6 +107,18 @@ const { onPointerDown } = usePointerDrag({
 .schedule-card.is-lavender {
   --card-accent: var(--p-lavender);
 }
+.schedule-card.is-amber {
+  --card-accent: var(--p-amber);
+}
+.schedule-card.is-teal {
+  --card-accent: var(--p-teal);
+}
+.schedule-card.is-plum {
+  --card-accent: var(--p-plum);
+}
+.schedule-card.is-slate {
+  --card-accent: var(--p-slate);
+}
 .schedule-card.is-completed {
   opacity: 0.7;
 }

@@ -1,10 +1,12 @@
 # 컴포넌트 × 컬러 매핑
 
-`grep -rl "is-rose\|is-blue\|is-green\|is-lavender" src/components`로 확인한 실제 사용 현황이다 (추측 아님).
+`grep -rl "is-rose\|is-blue\|is-green\|is-lavender\|is-amber\|is-teal\|is-plum\|is-slate" src/components`로 확인한 실제 사용 현황이다 (추측 아님).
 
-## 4색(rose/blue/green/lavender) 전체 지원 컴포넌트
+> 2026-07-10: 카테고리 슬롯이 4개→8개로 확장되면서 아래 9개 컴포넌트 전부 `is-amber`/`is-teal`/`is-plum`/`is-slate` variant도 함께 지원하도록 갱신했다.
 
-아래 9개는 `is-rose` / `is-blue` / `is-green` / `is-lavender` variant 클래스를 전부 지원하고, 실제로 어떤 색이 쓰일지는 데이터(목표/일정/카테고리의 `color` 필드)에 따라 동적으로 결정된다 — 즉 이 컴포넌트들 자체에 고정된 색은 없다.
+## 8색(rose/amber/green/teal/blue/lavender/plum/slate) 전체 지원 컴포넌트
+
+아래 9개는 8가지 색상 variant 클래스를 전부 지원하고, 실제로 어떤 색이 쓰일지는 데이터(목표/일정/카테고리의 `color` 필드)에 따라 동적으로 결정된다 — 즉 이 컴포넌트들 자체에 고정된 색은 없다.
 
 | 컴포넌트 | 경로 | 색이 어디서 오는가 |
 |---|---|---|
@@ -16,7 +18,7 @@
 | MonthCalendarGrid | `src/components/calendar/MonthCalendarGrid.vue` | 날짜별 일정의 categoryColor |
 | BarChart | `src/components/retrospective/BarChart.vue` | 카테고리별 완료 데이터의 color |
 | AiRecommendationCard | `src/components/daily-plan/AiRecommendationCard.vue` | AI 추천 항목의 categoryColor |
-| CategoryManageModal | `src/components/settings/CategoryManageModal.vue` | `categories` 스토어의 4개 고정 슬롯(로즈/블루/그린/라벤더) 자체를 나열 |
+| CategoryManageModal | `src/components/settings/CategoryManageModal.vue` | `categories` 스토어의 8개 고정 슬롯(로즈/앰버/그린/틸/블루/라벤더/플럼/슬레이트) 자체를 나열 |
 
 ## 고정 색상 컴포넌트
 
@@ -26,11 +28,12 @@
 
 ## 선언됐지만 미사용
 
-- **amber**(`#e8a23d`), **negative**(`#dc2626`) — `tokens.css`/`quasar.variables.scss`에 토큰은 있지만 위 컴포넌트 어디에서도 `var(--p-amber)`/negative를 직접 참조하지 않는다. Quasar 프레임워크의 `$warning`/`$negative` 시맨틱 슬롯(예: `QBtn color="negative"`, `notify()`)에만 연결돼 있고, 우리가 만든 커스텀 컴포넌트는 아직 이 슬롯을 쓰지 않는다.
+- **negative**(`#dc2626`) — `quasar.variables.scss`에 토큰은 있지만 커스텀 컴포넌트 어디서도 참조하지 않는다. Quasar 프레임워크의 `$negative` 시맨틱 슬롯(예: `QBtn color="negative"`, `notify()`)에만 연결돼 있다.
+- amber는 2026-07-10부터 카테고리 8번째 슬롯으로도 쓰이기 시작했다 — Quasar `$warning` 시맨틱 슬롯과 겸용(각각 다른 UI 맥락이라 혼동 위험은 낮다고 판단했다).
 
-## 4색의 실제 의미
+## 8색의 실제 의미
 
-카테고리(로즈/블루/그린/라벤더)는 **고정된 의미가 없다** — `src/stores/categories.js`에서 이름을 자유롭게 바꿀 수 있는 4개 색상 슬롯일 뿐이다(기본값: 로즈/블루/그린/라벤더). 즉 "로즈 = 업무" 같은 의미는 사용자가 카테고리 관리 화면(G2)에서 직접 부여한다.
+카테고리(로즈/앰버/그린/틸/블루/라벤더/플럼/슬레이트)는 **고정된 의미가 없다** — `src/stores/categories.js`에서 이름을 자유롭게 바꿀 수 있는 8개 색상 슬롯일 뿐이다. 즉 "로즈 = 업무" 같은 의미는 사용자가 카테고리 관리 화면(G2)에서 직접 부여한다.
 
 ## Figma 반영 상태
 

@@ -250,6 +250,18 @@ onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp)
 .ghost-slot.is-lavender {
   --card-accent: var(--p-lavender);
 }
+.ghost-slot.is-amber {
+  --card-accent: var(--p-amber);
+}
+.ghost-slot.is-teal {
+  --card-accent: var(--p-teal);
+}
+.ghost-slot.is-plum {
+  --card-accent: var(--p-plum);
+}
+.ghost-slot.is-slate {
+  --card-accent: var(--p-slate);
+}
 .ghost-time {
   font-size: 0.72rem;
   font-weight: 700;
