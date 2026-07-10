@@ -10,6 +10,7 @@ export const useRetrospectiveStore = defineStore('retrospective', () => {
   const status = ref('idle') // idle | loading | ready | error
   const reportsByKey = ref({}) // { 'week:2026-06-29': Report, 'month:2026-07': Report }
   const reflectionsByDate = ref({}) // { [dateISO]: string } — F 데일리 저널의 한 줄 회고
+  const dailyIntentByDate = ref({}) // { [dateISO]: string } — F 데일리 저널의 오늘 계획/다짐 텍스트
 
   function keyFor(periodType, currentDate) {
     if (periodType === 'week') return `week:${toISODate(currentDate.startOf('week').toDate())}`
@@ -67,6 +68,10 @@ export const useRetrospectiveStore = defineStore('retrospective', () => {
     reflectionsByDate.value[dateISO] = text
   }
 
+  function setDailyIntent(dateISO, text) {
+    dailyIntentByDate.value[dateISO] = text
+  }
+
   const weeklyReportsList = computed(() =>
     Object.values(reportsByKey.value)
       .filter((r) => r.periodType === 'week')
@@ -82,9 +87,11 @@ export const useRetrospectiveStore = defineStore('retrospective', () => {
     status,
     reportsByKey,
     reflectionsByDate,
+    dailyIntentByDate,
     loadReport,
     seedReports,
     setReflection,
+    setDailyIntent,
     weeklyReportsList,
     monthlyReportsList,
   }

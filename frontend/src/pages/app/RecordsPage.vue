@@ -1,61 +1,88 @@
 <template>
   <div class="records-layout">
-    <BaseCard class="column">
-      <div class="column-head">
-        <h2>계획</h2>
-        <span class="count">{{ todos.length }}개</span>
+    <BaseCard class="column-retro">
+      <div class="retro-suggest">
+        <span class="ai-badge">AI</span>
+        <p class="suggest-text">{{ aiSuggestionLoading ? '오늘 하루를 돌아보는 중이에요...' : aiSuggestion }}</p>
       </div>
-      <div class="column-body">
-        <div
-          v-for="todo in todos"
-          :key="todo.id"
-          class="record-item"
-          @click="handleItemClick($event, goToDaily)"
-        >
-          <RecordTodoRow :todo="todo" @toggle="handleToggleTodo" @assign-goal="handleAssignGoal" />
-        </div>
-        <p v-if="todos.length === 0" class="empty">오늘 계획된 할 일이 없어요.</p>
-      </div>
+      <BaseButton variant="primary" @click="showReflectionModal = true">
+        {{ hasReflection ? '회고 수정하기' : '회고 등록하기' }}
+      </BaseButton>
     </BaseCard>
 
-    <BaseCard class="column">
-      <div class="column-head">
-        <h2>기록</h2>
-        <span class="count">{{ schedules.length }}개</span>
-      </div>
-      <div class="column-body">
-        <div
-          v-for="schedule in schedules"
-          :key="schedule.id"
-          class="record-item"
-          @click="handleItemClick($event, goToDaily)"
-        >
-          <ScheduleCard :schedule="schedule" :draggable="false" compact @toggle-complete="handleToggleComplete" />
+    <div class="top-row">
+      <BaseCard class="column">
+        <div class="column-head">
+          <h2>계획</h2>
         </div>
-        <p v-if="schedules.length === 0" class="empty">오늘 기록된 일정이 없어요.</p>
-      </div>
-    </BaseCard>
+        <textarea
+          v-model="dailyIntentDraft"
+          class="intent-input neu-sunken"
+          rows="6"
+          placeholder="오늘 하루의 계획이나 목표를 간단히 적어보세요"
+        />
+        <BaseButton variant="secondary" size="sm" class="intent-save-btn" @click="saveDailyIntent">
+          {{ hasDailyIntent ? '계획 수정하기' : '계획 설정하기' }}
+        </BaseButton>
+      </BaseCard>
 
-    <BaseCard class="column">
-      <div class="column-head">
-        <h2>회고</h2>
-        <button type="button" class="detail-link" @click="goToRetrospective">자세히 보기</button>
-      </div>
-      <ReflectionInput :dateISO="dateISO" />
-    </BaseCard>
+      <BaseCard class="column">
+        <div class="column-head">
+          <h2>일정</h2>
+          <span class="count"><strong>{{ doneCount }}</strong>/{{ schedules.length }} 완료</span>
+        </div>
+        <div class="column-body">
+          <div
+            v-for="schedule in schedules"
+            :key="schedule.id"
+            class="record-item"
+            @click="handleItemClick($event, goToDaily)"
+          >
+            <ScheduleCard :schedule="schedule" :draggable="false" compact @toggle-complete="handleToggleComplete" />
+            <select
+              v-if="schedule.todoId && goalStore.weeklyGoals.length > 0"
+              class="goal-select neu-sunken"
+              :value="todoGoalId(schedule.todoId) || ''"
+              @change="handleAssignGoal({ todoId: schedule.todoId, goalId: $event.target.value || null })"
+            >
+              <option value="">목표 미태그</option>
+              <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">{{ goal.title }}</option>
+            </select>
+            <button
+              v-else-if="schedule.todoId"
+              type="button"
+              class="goal-add-link"
+              @click="showGoalModal = true"
+            >
+              주간 목표 추가
+            </button>
+          </div>
+          <p v-if="schedules.length === 0" class="empty empty-link" @click="goToDaily">
+            오늘 기록된 일정이 없어요. 대시보드에서 계획을 세워보세요 →
+          </p>
+        </div>
+      </BaseCard>
+    </div>
+
+    <ReflectionModal v-model="showReflectionModal" :dateISO="dateISO" />
+    <GoalFormModal v-model="showGoalModal" variant="weekly" @save="goalStore.addWeeklyGoal($event)" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import ScheduleCard from '@/components/daily-plan/ScheduleCard.vue'
-import RecordTodoRow from '@/components/retrospective/RecordTodoRow.vue'
-import ReflectionInput from '@/components/retrospective/ReflectionInput.vue'
+import ReflectionModal from '@/components/retrospective/ReflectionModal.vue'
+import GoalFormModal from '@/components/goals/GoalFormModal.vue'
 import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
+import { useGoalStore } from '@/stores/goals'
+import { useRetrospectiveStore } from '@/stores/retrospective'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
+import { suggestReflectionPrompt } from '@/services/ai/suggest-reflection-prompt'
 
 const router = useRouter()
 const calendarNav = useCalendarNavStore()
@@ -63,12 +90,26 @@ const dateISO = computed(() => calendarNav.currentDateISO)
 
 const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()
+const goalStore = useGoalStore()
+const retrospectiveStore = useRetrospectiveStore()
 
 const todos = computed(() => todoStore.list(dateISO.value))
-const schedules = computed(() => scheduleStore.list(dateISO.value))
+const schedules = computed(() =>
+  [...scheduleStore.list(dateISO.value)].sort((a, b) => a.startMinutes - b.startMinutes),
+)
+const doneCount = computed(() => schedules.value.filter((s) => s.completed).length)
 
-function handleToggleTodo(id) {
-  todoStore.toggleTodo(dateISO.value, id)
+const dailyIntentDraft = ref('')
+watch(dateISO, () => { dailyIntentDraft.value = retrospectiveStore.dailyIntentByDate[dateISO.value] || '' }, {
+  immediate: true,
+})
+const hasDailyIntent = computed(() => !!retrospectiveStore.dailyIntentByDate[dateISO.value])
+function saveDailyIntent() {
+  retrospectiveStore.setDailyIntent(dateISO.value, dailyIntentDraft.value)
+}
+
+function todoGoalId(todoId) {
+  return todos.value.find((t) => t.id === todoId)?.goalId ?? null
 }
 function handleAssignGoal({ todoId, goalId }) {
   todoStore.assignGoal(dateISO.value, todoId, goalId)
@@ -80,30 +121,70 @@ function handleToggleComplete(id) {
 }
 
 // 체크박스/셀렉트 등 인터랙션 요소 클릭 시에는 상세 화면 이동을 막는다 (D4는 B3 Timeline 내 내장 상태)
+// BaseCheckbox는 <label> 안에 보이지 않는 <input>과 시각적 <span class="box">를 함께 렌더링하므로
+// tagName만 비교하면 span 클릭이 걸러지지 않는다 — closest로 조상까지 확인한다.
 function handleItemClick(e, navigate) {
-  const interactiveTags = ['INPUT', 'SELECT', 'OPTION', 'BUTTON', 'TEXTAREA', 'LABEL']
-  if (interactiveTags.includes(e.target.tagName)) return
+  if (e.target.closest('input, select, option, button, textarea, label')) return
   navigate()
 }
 function goToDaily() {
   router.push('/app/dashboard/daily')
 }
-function goToRetrospective() {
-  router.push('/app/retrospective/weekly')
+
+const aiSuggestion = ref('')
+const aiSuggestionLoading = ref(false)
+async function loadSuggestion() {
+  aiSuggestionLoading.value = true
+  aiSuggestion.value = await suggestReflectionPrompt({
+    dailyIntent: retrospectiveStore.dailyIntentByDate[dateISO.value] || '',
+    schedules: schedules.value,
+  })
+  aiSuggestionLoading.value = false
 }
+watch(dateISO, loadSuggestion, { immediate: true })
+
+const showReflectionModal = ref(false)
+const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[dateISO.value])
+
+const showGoalModal = ref(false)
 </script>
 
 <style scoped>
 .records-layout {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   margin-top: 20px;
-  align-items: start;
+}
+.top-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  align-items: stretch;
+}
+@media (max-width: 640px) {
+  .top-row {
+    grid-template-columns: 1fr;
+  }
+  .column-retro {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 .column {
   padding: 20px;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.column-retro {
+  padding: 20px 24px;
+  border-left: 3px solid var(--p-lavender);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 .column-head {
   display: flex;
@@ -121,14 +202,27 @@ function goToRetrospective() {
   color: var(--p-ink-faint);
   font-variant-numeric: tabular-nums;
 }
-.detail-link {
-  appearance: none;
+.count strong {
+  font-weight: 700;
+  color: var(--p-ink);
+}
+.intent-input {
+  width: 100%;
+  flex: 1;
   border: none;
-  cursor: pointer;
-  background: transparent;
-  color: var(--p-lavender);
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--p-ink);
+  resize: vertical;
+  line-height: 1.6;
+}
+.intent-input::placeholder {
+  color: var(--p-ink-faint);
+}
+.intent-save-btn {
+  margin-top: 12px;
+  align-self: flex-end;
 }
 .column-body {
   display: flex;
@@ -136,12 +230,77 @@ function goToRetrospective() {
   gap: 8px;
 }
 .record-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
+  border-radius: var(--p-radius-sm);
+  transition: background 120ms ease;
+}
+.record-item:hover {
+  background: var(--p-bg);
+}
+.record-item :deep(.schedule-card) {
+  flex: 1;
+  min-width: 0;
+}
+.goal-select {
+  border: none;
+  font-family: inherit;
+  font-size: 0.76rem;
+  color: var(--p-ink-muted);
+  padding: 6px 10px;
+  border-radius: var(--p-radius-xs);
+  max-width: 320px;
+  flex-shrink: 0;
+}
+.goal-add-link {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-lavender);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.goal-add-link:hover {
+  text-decoration: underline;
+}
+.retro-suggest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.ai-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(145deg, var(--p-lavender), #4b3b8c);
+  padding: 3px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.suggest-text {
+  font-size: 0.9rem;
+  color: var(--p-ink);
+  margin: 0;
 }
 .empty {
   color: var(--p-ink-faint);
   font-size: 0.88rem;
   padding: 16px 4px;
   line-height: 1.7;
+}
+.empty-link {
+  cursor: pointer;
+}
+.empty-link:hover {
+  color: var(--p-ink-muted);
+  text-decoration: underline;
 }
 </style>
