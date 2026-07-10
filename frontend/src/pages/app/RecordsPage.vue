@@ -121,9 +121,10 @@ function handleToggleComplete(id) {
 }
 
 // 체크박스/셀렉트 등 인터랙션 요소 클릭 시에는 상세 화면 이동을 막는다 (D4는 B3 Timeline 내 내장 상태)
+// BaseCheckbox는 <label> 안에 보이지 않는 <input>과 시각적 <span class="box">를 함께 렌더링하므로
+// tagName만 비교하면 span 클릭이 걸러지지 않는다 — closest로 조상까지 확인한다.
 function handleItemClick(e, navigate) {
-  const interactiveTags = ['INPUT', 'SELECT', 'OPTION', 'BUTTON', 'TEXTAREA', 'LABEL']
-  if (interactiveTags.includes(e.target.tagName)) return
+  if (e.target.closest('input, select, option, button, textarea, label')) return
   navigate()
 }
 function goToDaily() {
