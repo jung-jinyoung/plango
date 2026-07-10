@@ -27,20 +27,17 @@
 
         <div class="day-tracks" :style="tracksBackgroundStyle">
           <div v-for="day in days" :key="day.dateISO" class="day-track">
-            <div
+            <button
               v-for="s in schedulesFor(day.dateISO)"
               :key="s.id"
+              type="button"
               class="slot"
-              :class="`is-${s.categoryColor}`"
+              :class="[`is-${s.categoryColor}`, { 'is-completed': s.completed }]"
               :style="slotStyle(s)"
+              @click="$emit('select-day', day.dateISO)"
             >
-              <ScheduleCard
-                :schedule="s"
-                compact
-                :draggable="false"
-                @toggle-complete="scheduleStore.toggleComplete(day.dateISO, $event)"
-              />
-            </div>
+              <span class="slot-title">{{ s.title }}</span>
+            </button>
           </div>
         </div>
 
@@ -52,7 +49,6 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import ScheduleCard from '@/components/daily-plan/ScheduleCard.vue'
 import { getWeekDays } from '@/composables/useCalendarDates'
 import { useScheduleStore } from '@/stores/schedule'
 
@@ -234,31 +230,47 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   position: absolute;
   left: 3px;
   right: 3px;
-  padding: 3px;
-  border-radius: calc(var(--p-radius-sm) + 3px);
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  padding: 5px 8px;
+  border-radius: var(--p-radius-sm);
+  border-left: 3px solid var(--card-accent, var(--p-rose));
+  box-shadow: var(--p-shadow-raised-sm);
+  overflow: hidden;
 }
 .slot.is-rose {
-  background: color-mix(in srgb, var(--p-rose) 16%, transparent);
+  --card-accent: var(--p-rose);
+  background: color-mix(in srgb, var(--p-rose) 18%, var(--p-surface));
 }
 .slot.is-blue {
-  background: color-mix(in srgb, var(--p-blue) 16%, transparent);
+  --card-accent: var(--p-blue);
+  background: color-mix(in srgb, var(--p-blue) 18%, var(--p-surface));
 }
 .slot.is-green {
-  background: color-mix(in srgb, var(--p-green) 16%, transparent);
+  --card-accent: var(--p-green);
+  background: color-mix(in srgb, var(--p-green) 18%, var(--p-surface));
 }
 .slot.is-lavender {
-  background: color-mix(in srgb, var(--p-lavender) 16%, transparent);
+  --card-accent: var(--p-lavender);
+  background: color-mix(in srgb, var(--p-lavender) 18%, var(--p-surface));
 }
-
-/* 좁은 요일 컬럼 폭에 맞춰 ScheduleCard의 시간/제목 줄을 필요시 줄바꿈 (컴포넌트 자체는 안 건드림) */
-.slot :deep(.row-1) {
-  flex-wrap: wrap;
-  row-gap: 2px;
+.slot.is-completed {
+  opacity: 0.55;
 }
-.slot :deep(.time) {
-  flex-shrink: 1;
+.slot-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--p-ink);
 }
-.slot :deep(.title) {
-  white-space: normal;
+.slot.is-completed .slot-title {
+  text-decoration: line-through;
 }
 </style>
