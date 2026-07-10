@@ -34,7 +34,8 @@ export const useGoalStore = defineStore('goals', () => {
     if (categoryIdByColor.value[color]) return categoryIdByColor.value[color]
     const categoryStore = useCategoryStore()
     const local = categoryStore.categories.find((c) => c.color === color)
-    const created = await categoriesApi.createCategory({ name: local?.name ?? color, color })
+    const name = (local?.name ?? '').trim() || color
+    const created = await categoriesApi.createCategory({ name, color })
     categoryIdByColor.value = { ...categoryIdByColor.value, [color]: created.id }
     colorByCategoryId.value = { ...colorByCategoryId.value, [created.id]: color }
     return created.id

@@ -1,6 +1,15 @@
 <template>
   <div class="field">
-    <label v-if="label" :for="id">{{ label }}</label>
+    <div v-if="label || maxlength != null" class="field-header">
+      <label v-if="label" :for="id">{{ label }}</label>
+      <span
+        v-if="maxlength != null"
+        class="counter"
+        :class="{ 'is-limit': modelValue.length >= maxlength }"
+      >
+        {{ modelValue.length }}/{{ maxlength }}
+      </span>
+    </div>
     <input
       :id="id"
       class="input neu-sunken"
@@ -9,6 +18,7 @@
       :placeholder="placeholder"
       :autocomplete="autocomplete"
       :required="required"
+      :maxlength="maxlength"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
       @blur="$emit('blur', $event)"
@@ -26,6 +36,7 @@ defineProps({
   placeholder: { type: String, default: '' },
   autocomplete: { type: String, default: undefined },
   required: { type: Boolean, default: false },
+  maxlength: { type: [String, Number], default: undefined },
   helper: { type: String, default: '' },
   error: { type: String, default: '' },
   id: { type: String, default: () => `field-${Math.random().toString(36).slice(2, 9)}` },
@@ -40,10 +51,27 @@ defineEmits(['update:modelValue', 'blur'])
   gap: 8px;
   width: 100%;
 }
+.field-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
 label {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--p-ink-muted);
+}
+.counter {
+  font-size: 0.72rem;
+  color: var(--p-ink-faint);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.counter.is-limit {
+  color: var(--p-rose-ink);
+  font-weight: 600;
 }
 .input {
   border: none;

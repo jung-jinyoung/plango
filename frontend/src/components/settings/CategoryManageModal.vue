@@ -12,6 +12,8 @@
           class="name-input"
           :model-value="category.name"
           placeholder="카테고리 이름"
+          :maxlength="CATEGORY_NAME_MAX_LENGTH"
+          :error="nameError(category)"
           @update:model-value="categoryStore.rename(category.color, $event)"
         />
         <button
@@ -28,11 +30,13 @@
       </div>
     </div>
 
-    <button type="button" class="add-btn" :disabled="!hasInactive" @click="addBack">
+    <button type="button" class="add-btn" :disabled="!categoryStore.hasInactive" @click="addBack">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
       카테고리 추가
     </button>
-    <p v-if="!hasInactive" class="hint">Plango는 8가지 고정 색상만 지원해요. 더 추가하려면 먼저 하나를 삭제하세요.</p>
+    <p v-if="!categoryStore.hasInactive" class="hint">
+      Plango는 8가지 고정 색상만 지원해요. 더 추가하려면 먼저 하나를 삭제하세요.
+    </p>
 
     <template #actions>
       <BaseButton variant="primary" @click="$emit('update:modelValue', false)">완료</BaseButton>
@@ -41,11 +45,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useCategoryStore } from '@/stores/categories'
+import { CATEGORY_NAME_MAX_LENGTH } from '@/constants/category'
 
 defineProps({
   modelValue: { type: Boolean, default: false },
@@ -54,11 +58,13 @@ defineEmits(['update:modelValue'])
 
 const categoryStore = useCategoryStore()
 
-const hasInactive = computed(() => categoryStore.categories.some((c) => !c.active))
-
 function addBack() {
   const next = categoryStore.categories.find((c) => !c.active)
   if (next) categoryStore.setActive(next.color, true)
+}
+
+function nameError(category) {
+  return categoryStore.isNameTaken(category.name, category.color) ? '이미 사용 중인 이름이에요' : ''
 }
 </script>
 

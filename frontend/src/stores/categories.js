@@ -17,6 +17,7 @@ export const useCategoryStore = defineStore('categories', () => {
   ])
 
   const activeCategories = computed(() => categories.value.filter((c) => c.active))
+  const hasInactive = computed(() => categories.value.some((c) => !c.active))
 
   function rename(color, name) {
     const category = categories.value.find((c) => c.color === color)
@@ -29,5 +30,14 @@ export const useCategoryStore = defineStore('categories', () => {
     if (category) category.active = active
   }
 
-  return { categories, activeCategories, rename, setActive }
+  // 백엔드 카테고리 name은 unique 제약이 있어, 저장 전에 미리 걸러서 500을 방지한다
+  function isNameTaken(name, excludeColor = null) {
+    const target = name.trim().toLowerCase()
+    if (!target) return false
+    return activeCategories.value.some(
+      (c) => c.color !== excludeColor && c.name.trim().toLowerCase() === target,
+    )
+  }
+
+  return { categories, activeCategories, hasInactive, rename, setActive, isNameTaken }
 })
