@@ -20,6 +20,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import { useRetrospectiveStore } from '@/stores/retrospective'
@@ -30,6 +31,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
+const router = useRouter()
 const retrospectiveStore = useRetrospectiveStore()
 const text = ref('')
 
@@ -46,6 +48,7 @@ function close() {
 function submit() {
   retrospectiveStore.setReflection(props.dateISO, text.value)
   emit('update:modelValue', false)
+  router.push('/app/retrospective/weekly')
 }
 </script>
 
