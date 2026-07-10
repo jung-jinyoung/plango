@@ -246,7 +246,7 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   font-family: inherit;
   padding: 5px 8px;
   border-radius: var(--p-radius-sm);
-  border: 1.5px solid var(--card-accent, var(--p-rose));
+  border: 2.5px solid var(--card-accent, var(--p-rose));
   overflow: hidden;
 }
 .slot.is-rose {
@@ -273,6 +273,6 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--p-ink);
+  color: var(--p-ink-muted);
 }
 </style>
