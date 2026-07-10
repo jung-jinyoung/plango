@@ -1,16 +1,29 @@
 <template>
   <div class="records-layout">
+    <BaseCard class="column-retro">
+      <div class="retro-suggest">
+        <span class="ai-badge">AI</span>
+        <p class="suggest-text">{{ aiSuggestionLoading ? '오늘 하루를 돌아보는 중이에요...' : aiSuggestion }}</p>
+      </div>
+      <BaseButton variant="primary" @click="showReflectionModal = true">
+        {{ hasReflection ? '회고 수정하기' : '회고 등록하기' }}
+      </BaseButton>
+    </BaseCard>
+
     <div class="top-row">
-      <BaseCard class="column">
+      <BaseCard class="column column-plan">
         <div class="column-head">
           <h2>계획</h2>
         </div>
         <textarea
-          v-model="dailyIntent"
+          v-model="dailyIntentDraft"
           class="intent-input neu-sunken"
           rows="6"
           placeholder="오늘 하루의 계획이나 목표를 간단히 적어보세요"
         />
+        <BaseButton variant="secondary" size="sm" class="intent-save-btn" @click="saveDailyIntent">
+          {{ hasDailyIntent ? '계획 수정하기' : '계획 설정하기' }}
+        </BaseButton>
       </BaseCard>
 
       <BaseCard class="column">
@@ -42,16 +55,6 @@
         </div>
       </BaseCard>
     </div>
-
-    <BaseCard class="column-retro">
-      <div class="retro-suggest">
-        <span class="ai-badge">AI</span>
-        <p class="suggest-text">{{ aiSuggestionLoading ? '오늘 하루를 돌아보는 중이에요...' : aiSuggestion }}</p>
-      </div>
-      <BaseButton variant="primary" @click="showReflectionModal = true">
-        {{ hasReflection ? '회고 수정하기' : '회고 등록하기' }}
-      </BaseButton>
-    </BaseCard>
 
     <ReflectionModal v-model="showReflectionModal" :dateISO="dateISO" />
   </div>
@@ -86,10 +89,14 @@ const schedules = computed(() =>
 )
 const doneCount = computed(() => schedules.value.filter((s) => s.completed).length)
 
-const dailyIntent = computed({
-  get: () => retrospectiveStore.dailyIntentByDate[dateISO.value] || '',
-  set: (value) => retrospectiveStore.setDailyIntent(dateISO.value, value),
+const dailyIntentDraft = ref('')
+watch(dateISO, () => { dailyIntentDraft.value = retrospectiveStore.dailyIntentByDate[dateISO.value] || '' }, {
+  immediate: true,
 })
+const hasDailyIntent = computed(() => !!retrospectiveStore.dailyIntentByDate[dateISO.value])
+function saveDailyIntent() {
+  retrospectiveStore.setDailyIntent(dateISO.value, dailyIntentDraft.value)
+}
 
 function todoGoalId(todoId) {
   return todos.value.find((t) => t.id === todoId)?.goalId ?? null
@@ -118,7 +125,7 @@ const aiSuggestionLoading = ref(false)
 async function loadSuggestion() {
   aiSuggestionLoading.value = true
   aiSuggestion.value = await suggestReflectionPrompt({
-    dailyIntent: dailyIntent.value,
+    dailyIntent: retrospectiveStore.dailyIntentByDate[dateISO.value] || '',
     schedules: schedules.value,
   })
   aiSuggestionLoading.value = false
@@ -154,6 +161,10 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 .column {
   padding: 20px;
   min-width: 0;
+}
+.column-plan {
+  display: flex;
+  flex-direction: column;
 }
 .column-retro {
   padding: 20px 24px;
@@ -196,6 +207,10 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 }
 .intent-input::placeholder {
   color: var(--p-ink-faint);
+}
+.intent-save-btn {
+  margin-top: 12px;
+  align-self: flex-end;
 }
 .column-body {
   display: flex;
