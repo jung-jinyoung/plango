@@ -1,11 +1,18 @@
 <template>
   <div class="accordion neu-raised" :class="{ 'is-expanded': modelValue }">
-    <button type="button" class="accordion-header" @click="emit('update:modelValue', !modelValue)">
+    <div
+      class="accordion-header"
+      role="button"
+      tabindex="0"
+      @click="emit('update:modelValue', !modelValue)"
+      @keydown.enter.prevent="emit('update:modelValue', !modelValue)"
+      @keydown.space.prevent="emit('update:modelValue', !modelValue)"
+    >
       <span class="header-content"><slot name="header" /></span>
       <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 9l6 6 6-6" />
       </svg>
-    </button>
+    </div>
     <div class="body-wrap">
       <div class="body-inner">
         <div class="body-padding"><slot /></div>

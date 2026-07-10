@@ -12,6 +12,7 @@
         :todo="todo"
         :draggable="false"
         :deletable="false"
+        :taggable="false"
         @toggle="$emit('toggle', $event)"
       />
     </div>

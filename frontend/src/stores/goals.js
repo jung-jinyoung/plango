@@ -126,6 +126,13 @@ export const useGoalStore = defineStore('goals', () => {
     const updated = await monthlyGoalsApi.updateMonthlyGoal(id, { title, categoryId })
     const idx = rawMonthlyGoals.value.findIndex((g) => g.id === id)
     if (idx !== -1) rawMonthlyGoals.value[idx] = updated
+    // 백엔드는 주간 목표가 부모의 카테고리를 상속하도록 계산해서 응답하지만, 그 응답은
+    // 이 PATCH 호출엔 포함되지 않으므로 로컬 캐시도 같은 규칙으로 직접 맞춰준다
+    if (categoryId !== undefined) {
+      rawWeeklyGoals.value.forEach((w) => {
+        if (w.monthlyGoalId === id) w.categoryId = categoryId
+      })
+    }
   }
 
   async function removeMonthlyGoal(id) {

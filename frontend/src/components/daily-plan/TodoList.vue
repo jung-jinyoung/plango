@@ -6,6 +6,7 @@
       :todo="todo"
       @toggle="$emit('toggle', $event)"
       @delete="$emit('delete', $event)"
+      @tag="$emit('tag', $event)"
     />
     <p v-if="todos.length === 0" class="empty">
       오늘 할 일이 없어요. 아래 "+ 할 일 추가"로 자유롭게 적어보세요.
@@ -19,7 +20,7 @@ import TodoItem from './TodoItem.vue'
 defineProps({
   todos: { type: Array, required: true },
 })
-defineEmits(['toggle', 'delete'])
+defineEmits(['toggle', 'delete', 'tag'])
 </script>
 
 <style scoped>

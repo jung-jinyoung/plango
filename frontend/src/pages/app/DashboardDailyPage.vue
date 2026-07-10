@@ -6,7 +6,12 @@
           <h2>할 일</h2>
           <span class="count">{{ unplacedTodos.length }}개</span>
         </div>
-        <TodoList :todos="unplacedTodos" @toggle="handleToggleTodo" @delete="handleDeleteTodo" />
+        <TodoList
+          :todos="unplacedTodos"
+          @toggle="handleToggleTodo"
+          @delete="handleDeleteTodo"
+          @tag="handleTagOne"
+        />
       </BaseCard>
 
       <div class="timeline-panel">
@@ -198,6 +203,15 @@ function handleDiscardAll() {
     todoStore.removeTodo(dateISO.value, id)
   })
   showCarryOver.value = false
+}
+function handleTagOne({ id, goalId }) {
+  todoStore.assignGoal(dateISO.value, id, goalId)
+  $q.notify({
+    message: goalId ? '목표에 태그했습니다' : '태그를 해제했습니다',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
 }
 function handleTagToGoal({ todoIds, goalId }) {
   todoIds.forEach((id) => todoStore.assignGoal(dateISO.value, id, goalId))

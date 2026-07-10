@@ -15,6 +15,28 @@
     <span v-if="todo.estimatedMinutes" class="duration">{{ todo.estimatedMinutes }}분</span>
     <span v-if="todo.deadlineMinutes != null" class="deadline">{{ deadlineLabel }}까지</span>
 
+    <select
+      v-if="taggable && showPicker"
+      ref="pickerEl"
+      class="tag-picker"
+      :value="todo.goalId ?? ''"
+      @change="handlePick($event.target.value)"
+      @blur="showPicker = false"
+    >
+      <option value="">태그 해제</option>
+      <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+    </select>
+    <button
+      v-else-if="taggable && taggedGoal"
+      type="button"
+      class="tag-chip"
+      :class="`is-${taggedGoal.color}`"
+      @click="openPicker"
+    >
+      <span class="dot" aria-hidden="true" />{{ taggedGoal.title }}
+    </button>
+    <button v-else-if="taggable" type="button" class="tag-add" @click="openPicker">+ 태그</button>
+
     <button
       v-if="deletable"
       type="button"
@@ -30,20 +52,40 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import BaseCheckbox from '@/components/ui/BaseCheckbox.vue'
 import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
 import { useDragStore } from '@/stores/drag'
+import { useGoalStore } from '@/stores/goals'
 
 const props = defineProps({
-  todo: { type: Object, required: true }, // { id, title, estimatedMinutes, deadlineMinutes, done }
+  todo: { type: Object, required: true }, // { id, title, estimatedMinutes, deadlineMinutes, done, goalId }
   draggable: { type: Boolean, default: true },
   deletable: { type: Boolean, default: true },
+  taggable: { type: Boolean, default: true },
 })
-defineEmits(['toggle', 'delete'])
+const emit = defineEmits(['toggle', 'delete', 'tag'])
 
 const deadlineLabel = computed(() => minutesToLabel(props.todo.deadlineMinutes))
+
+const goalStore = useGoalStore()
+const taggedGoal = computed(
+  () => goalStore.weeklyGoals.find((g) => g.id === props.todo.goalId) ?? null,
+)
+
+const showPicker = ref(false)
+const pickerEl = ref(null)
+
+function openPicker() {
+  showPicker.value = true
+  nextTick(() => pickerEl.value?.focus())
+}
+
+function handlePick(value) {
+  emit('tag', { id: props.todo.id, goalId: value || null })
+  showPicker.value = false
+}
 
 const dragStore = useDragStore()
 const isDragging = ref(false)
@@ -105,6 +147,93 @@ const { onPointerDown } = usePointerDrag({
 .deadline {
   color: var(--p-rose-ink);
   font-weight: 600;
+}
+.tag-picker {
+  border: none;
+  border-radius: var(--p-radius-xs);
+  background: var(--p-bg);
+  color: var(--p-ink);
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  max-width: 120px;
+  flex-shrink: 0;
+}
+.tag-add {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.tag-add:hover {
+  color: var(--p-lavender);
+  background: var(--p-bg);
+}
+.tag-chip {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: var(--chip-ink, var(--p-rose-ink));
+  background: color-mix(in srgb, var(--chip-color, var(--p-rose)) 16%, var(--p-surface));
+  flex-shrink: 0;
+  max-width: 120px;
+}
+.tag-chip .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chip-color, var(--p-rose));
+  flex-shrink: 0;
+}
+.tag-chip span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tag-chip.is-rose {
+  --chip-color: var(--p-rose);
+  --chip-ink: var(--p-rose-ink);
+}
+.tag-chip.is-amber {
+  --chip-color: var(--p-amber);
+  --chip-ink: var(--p-amber-ink);
+}
+.tag-chip.is-green {
+  --chip-color: var(--p-green);
+  --chip-ink: var(--p-green-ink);
+}
+.tag-chip.is-teal {
+  --chip-color: var(--p-teal);
+  --chip-ink: var(--p-teal-ink);
+}
+.tag-chip.is-blue {
+  --chip-color: var(--p-blue);
+  --chip-ink: var(--p-blue-ink);
+}
+.tag-chip.is-lavender {
+  --chip-color: var(--p-lavender);
+  --chip-ink: var(--p-lavender-ink);
+}
+.tag-chip.is-plum {
+  --chip-color: var(--p-plum);
+  --chip-ink: var(--p-plum-ink);
+}
+.tag-chip.is-slate {
+  --chip-color: var(--p-slate);
+  --chip-ink: var(--p-slate-ink);
 }
 .delete-btn {
   appearance: none;
