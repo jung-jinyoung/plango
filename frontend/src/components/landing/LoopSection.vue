@@ -4,8 +4,8 @@
       <p class="section-eyebrow">Plango Loop</p>
       <h2>계획은 매번 처음부터 세우지 않습니다</h2>
       <p class="section-desc">
-        월간 목표에서 시작해 주간, 일간의 실행으로 좁혀지고, 회고를 거쳐 다시 다음 목표로
-        되돌아가는 순환 구조입니다.
+        월간 목표에서 시작해 주간, 일간의 실행으로 좁혀지고, 회고를 거쳐 다시 다음 목표로 되돌아가는
+        순환 구조입니다.
       </p>
     </div>
     <div class="neu-raised">
@@ -34,8 +34,8 @@
         </div>
       </div>
       <p class="loop-caption">
-        "이 루프가 반복될수록, 계획은 매번 처음부터 다시 세우는 것이 아니라 점점 더 자신에게
-        맞게 다듬어집니다."
+        "이 루프가 반복될수록, 계획은 매번 처음부터 다시 세우는 것이 아니라 점점 더 자신에게 맞게
+        다듬어집니다."
       </p>
     </div>
   </section>
@@ -62,8 +62,9 @@ const nodes = [
     padding: 0 20px;
   }
 }
-section {
-  padding: 64px 0;
+section.wrap {
+  padding-top: 64px;
+  padding-bottom: 64px;
 }
 .section-head {
   max-width: 640px;
@@ -92,6 +93,7 @@ h2 {
 .loop-track {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   overflow-x: auto;
   padding: 30px 24px;
@@ -131,9 +133,8 @@ h2 {
   text-align: center;
   color: var(--p-ink-muted);
   font-size: 0.92rem;
-  margin: 20px auto 0;
+  margin: 20px 0 0;
   font-style: italic;
-  max-width: 60ch;
-  padding-bottom: 8px;
+  padding: 0 24px 8px;
 }
 </style>
