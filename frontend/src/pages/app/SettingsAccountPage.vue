@@ -32,7 +32,7 @@ const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.valu
 
 <style scoped>
 .account-card {
-  max-width: 480px;
+  width: 100%;
 }
 h1 {
   font-size: 1.3rem;

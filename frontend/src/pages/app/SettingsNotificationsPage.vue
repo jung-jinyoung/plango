@@ -29,7 +29,7 @@ const items = reactive([
 
 <style scoped>
 .notif-card {
-  max-width: 480px;
+  width: 100%;
 }
 h1 {
   font-size: 1.3rem;
