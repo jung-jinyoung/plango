@@ -3,7 +3,7 @@
     <BaseCard class="column">
       <div class="column-head">
         <h2>계획</h2>
-        <span class="count">{{ todos.length }}개</span>
+        <span class="count"><strong>{{ doneCount }}</strong>/{{ todos.length }} 완료</span>
       </div>
       <div class="column-body">
         <div
@@ -36,7 +36,7 @@
       </div>
     </BaseCard>
 
-    <BaseCard class="column">
+    <BaseCard class="column column-retro">
       <div class="column-head">
         <h2>회고</h2>
         <button type="button" class="detail-link" @click="goToRetrospective">자세히 보기</button>
@@ -66,6 +66,7 @@ const scheduleStore = useScheduleStore()
 
 const todos = computed(() => todoStore.list(dateISO.value))
 const schedules = computed(() => scheduleStore.list(dateISO.value))
+const doneCount = computed(() => todos.value.filter((t) => t.done).length)
 
 function handleToggleTodo(id) {
   todoStore.toggleTodo(dateISO.value, id)
@@ -101,9 +102,25 @@ function goToRetrospective() {
   margin-top: 20px;
   align-items: start;
 }
+@media (max-width: 960px) {
+  .records-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+  .column-retro {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .records-layout {
+    grid-template-columns: 1fr;
+  }
+}
 .column {
   padding: 20px;
   min-width: 0;
+}
+.column-retro {
+  border-left: 3px solid var(--p-lavender);
 }
 .column-head {
   display: flex;
@@ -121,6 +138,10 @@ function goToRetrospective() {
   color: var(--p-ink-faint);
   font-variant-numeric: tabular-nums;
 }
+.count strong {
+  font-weight: 700;
+  color: var(--p-ink);
+}
 .detail-link {
   appearance: none;
   border: none;
@@ -137,6 +158,11 @@ function goToRetrospective() {
 }
 .record-item {
   cursor: pointer;
+  border-radius: var(--p-radius-sm);
+  transition: background 120ms ease;
+}
+.record-item:hover {
+  background: var(--p-bg);
 }
 .empty {
   color: var(--p-ink-faint);
