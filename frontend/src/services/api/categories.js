@@ -5,8 +5,13 @@ function fromApi(c) {
 }
 
 export async function listCategories() {
-  const rows = await request('/categories')
-  return rows.map(fromApi)
+  // TEMP: dailytodo 목표 태그 기능 브라우저 테스트용 목업 (테스트 후 아래 2줄로 원복할 것)
+  return [
+    { id: 'mock-cat-rose', name: '자기계발', color: 'rose' },
+    { id: 'mock-cat-blue', name: '건강', color: 'blue' },
+  ]
+  // const rows = await request('/categories')
+  // return rows.map(fromApi)
 }
 
 export async function createCategory({ name, color }) {

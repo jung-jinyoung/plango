@@ -30,6 +30,18 @@
           class="deadline-input neu-sunken"
           aria-label="마감 시각(선택)"
         />
+        <select
+          v-if="goalStore.weeklyGoals.length > 0"
+          v-model="row.goalId"
+          class="goal-select neu-sunken"
+          aria-label="주간 목표 태그(선택)"
+        >
+          <option :value="null">태그 없음</option>
+          <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+        </select>
+        <button v-else type="button" class="goal-add-link" @click="showGoalModal = true">
+          + 목표 추가
+        </button>
         <button type="button" class="remove-btn" aria-label="줄 삭제" @click="removeRow(i)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
         </button>
@@ -42,21 +54,49 @@
       <BaseButton variant="primary" :disabled="!hasValidRow" @click="submit">AI 추천 받기</BaseButton>
     </template>
   </BaseModal>
+
+  <GoalFormModal
+    v-model="showGoalModal"
+    variant="weekly"
+    :submitting="savingGoal"
+    :submit-error="goalSaveError"
+    @save="handleSaveGoal"
+  />
 </template>
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
 import BaseModal from '@/components/ui/BaseModal.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import GoalFormModal from '@/components/goals/GoalFormModal.vue'
+import { useGoalStore } from '@/stores/goals'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue', 'submit'])
 
+const goalStore = useGoalStore()
+const showGoalModal = ref(false)
+const savingGoal = ref(false)
+const goalSaveError = ref(null)
+
+async function handleSaveGoal(payload) {
+  goalSaveError.value = null
+  savingGoal.value = true
+  try {
+    await goalStore.addWeeklyGoal(payload)
+    showGoalModal.value = false
+  } catch (e) {
+    goalSaveError.value = e
+  } finally {
+    savingGoal.value = false
+  }
+}
+
 let keyCounter = 0
 function blankRow() {
-  return { key: keyCounter++, title: '', estimatedMinutes: null, deadline: '' }
+  return { key: keyCounter++, title: '', estimatedMinutes: null, deadline: '', goalId: null }
 }
 
 const rows = ref([blankRow()])
@@ -71,6 +111,7 @@ watch(
   (open) => {
     if (open) {
       rows.value = [blankRow()]
+      goalStore.load()
       nextTick(() => inputRefs.value[0]?.focus())
     }
   },
@@ -104,6 +145,7 @@ function submit() {
       title: r.title.trim(),
       estimatedMinutes: r.estimatedMinutes || null,
       deadlineMinutes: toMinutes(r.deadline),
+      goalId: r.goalId || null,
     }))
   emit('submit', todos)
   emit('update:modelValue', false)
@@ -123,12 +165,12 @@ function toMinutes(hhmm) {
   gap: 10px;
 }
 .row {
-  display: grid;
-  grid-template-columns: 1fr 64px 108px 28px;
-  gap: 8px;
+  display: flex;
   align-items: center;
+  gap: 8px;
 }
-.row input {
+.row input,
+.row select {
   border: none;
   font-family: inherit;
   color: var(--p-ink);
@@ -136,13 +178,40 @@ function toMinutes(hhmm) {
   padding: 10px 12px;
   font-size: 0.88rem;
 }
+.title-input {
+  flex: 1;
+  min-width: 0;
+}
 .row input::placeholder {
   color: var(--p-ink-faint);
 }
 .minutes-input {
+  width: 64px;
+  flex-shrink: 0;
   text-align: center;
   padding-left: 4px;
   padding-right: 4px;
+}
+.deadline-input {
+  width: 108px;
+  flex-shrink: 0;
+}
+.goal-select {
+  width: 100px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+.goal-add-link {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-lavender);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .remove-btn {
   appearance: none;
@@ -152,6 +221,7 @@ function toMinutes(hhmm) {
   color: var(--p-ink-faint);
   width: 28px;
   height: 28px;
+  flex-shrink: 0;
   border-radius: 8px;
   display: flex;
   align-items: center;
