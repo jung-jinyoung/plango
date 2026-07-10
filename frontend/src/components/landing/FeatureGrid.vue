@@ -35,7 +35,11 @@ const ICONS = {
 }
 
 const features = [
-  { title: 'Clarity', desc: '월간·주간·일간을 오가지 않고, 한 화면에서 확인합니다.', icon: ICONS.clarity },
+  {
+    title: 'Clarity',
+    desc: '월간·주간·일간을 오가지 않고, 한 화면에서 확인합니다.',
+    icon: ICONS.clarity,
+  },
   {
     title: 'Priority',
     desc: '목표는 사이드에, 일정은 캘린더에 — 섞이지 않게 구분합니다.',
@@ -75,8 +79,9 @@ const features = [
     padding: 0 20px;
   }
 }
-section {
-  padding: 64px 0;
+section.wrap {
+  padding-top: 64px;
+  padding-bottom: 64px;
 }
 .section-head {
   max-width: 640px;

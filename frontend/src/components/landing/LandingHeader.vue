@@ -2,30 +2,16 @@
   <header class="landing-header">
     <div class="wrap header-inner">
       <div class="logo">
-        <span class="logo-mark" aria-hidden="true">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--p-rose)"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 21c0-4 3-5 3-9a3 3 0 0 0-6 0c0 2 1 3 1 5" />
-            <path d="M9 21h6" />
-            <circle cx="13" cy="7" r="1.4" fill="var(--p-rose)" stroke="none" />
-          </svg>
-        </span>
-        Plango
+        <AppLogo :size="34" />
       </div>
       <a href="#start" class="btn btn-primary btn-sm neu-interactive">무료로 시작하기</a>
     </div>
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import AppLogo from '@/components/ui/AppLogo.vue'
+</script>
 
 <style scoped>
 .landing-header {
@@ -58,16 +44,6 @@
   font-weight: 700;
   font-size: 1.25rem;
   letter-spacing: -0.01em;
-}
-.logo-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  background: var(--p-surface);
-  box-shadow: var(--p-shadow-raised-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .btn {
   appearance: none;

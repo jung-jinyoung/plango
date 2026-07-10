@@ -1,7 +1,9 @@
 <template>
   <div class="auth-page">
     <div class="auth-card neu-raised">
-      <router-link to="/" class="logo">Plango</router-link>
+      <router-link to="/" class="logo">
+        <AppLogo :size="32" />
+      </router-link>
       <PagePlaceholder
         code="A2"
         title="회원가입 / 로그인"
@@ -19,6 +21,7 @@
 
 <script setup>
 import PagePlaceholder from '@/components/shell/PagePlaceholder.vue'
+import AppLogo from '@/components/ui/AppLogo.vue'
 </script>
 
 <style scoped>
@@ -36,7 +39,9 @@ import PagePlaceholder from '@/components/shell/PagePlaceholder.vue'
   padding: 40px;
 }
 .logo {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--p-ink);

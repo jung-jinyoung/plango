@@ -50,8 +50,9 @@ const personas = [
     padding: 0 20px;
   }
 }
-section {
-  padding: 64px 0;
+section.wrap {
+  padding-top: 64px;
+  padding-bottom: 64px;
 }
 .section-head {
   max-width: 640px;
