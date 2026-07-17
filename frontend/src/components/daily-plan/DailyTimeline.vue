@@ -3,7 +3,7 @@
     <div class="timeline-scroll">
       <div class="grid" :style="{ height: `${totalHeight}px` }">
         <div class="hours">
-          <div v-for="h in hours" :key="h" class="hour-row" :style="{ height: `${pxPerHour}px` }">
+          <div v-for="h in hours" :key="h" class="hour-row" :style="{ height: `${hourRowHeight(h)}px` }">
             <span class="hour-label">{{ String(h).padStart(2, '0') }}:00</span>
           </div>
         </div>
@@ -15,6 +15,7 @@
             v-for="schedule in schedules"
             :key="schedule.id"
             class="slot"
+            :class="slotClass(schedule)"
             :style="slotStyle(schedule)"
           >
             <ScheduleCard
@@ -25,6 +26,7 @@
               @tag="$emit('tag', $event)"
               @delete="$emit('delete', $event)"
               @move-to-list="$emit('move-to-list', $event)"
+              @note-resize="handleNoteResize"
             />
             <span
               class="resize-handle resize-top"
@@ -80,7 +82,7 @@ const pxPerHour = 84
 const pxPerMinute = pxPerHour / 60
 const MIN_HEIGHT = 36
 const REASON_MIN_HEIGHT = 56
-// 메모(최대 2줄 미리보기)가 잘리지 않고 들어갈 만큼 모든 일정에 최소 높이를 확보한다
+// 메모 한 줄 정도는 잘리지 않고 들어갈 만큼 모든 일정에 최소 높이를 확보한다
 const NOTE_MIN_HEIGHT = 96
 const MIN_DURATION = 15
 
@@ -89,19 +91,64 @@ const hours = computed(() => {
   for (let h = props.startHour; h < props.endHour; h++) arr.push(h)
   return arr
 })
-const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour)
+
+// 펼쳐진 메모가 실제로 필요로 하는 추가 높이(id -> px) — ScheduleCard가 측정해서 알려줌
+const noteExtraHeight = ref({})
+
+function handleNoteResize({ id, extraHeight }) {
+  const next = { ...noteExtraHeight.value }
+  if (extraHeight > 0) next[id] = extraHeight
+  else delete next[id]
+  noteExtraHeight.value = next
+}
+
+// 주어진 시각(minutes) 이전에 끝나는 일정들 중 펼쳐진 것들의 추가 높이 합 — 그만큼 이후 요소들을 밀어낸다
+function displacementBefore(minutes) {
+  let extra = 0
+  for (const s of props.schedules) {
+    const own = noteExtraHeight.value[s.id]
+    if (!own) continue
+    if (s.startMinutes + s.durationMinutes <= minutes) extra += own
+  }
+  return extra
+}
+
+const totalExtraHeight = computed(() =>
+  Object.values(noteExtraHeight.value).reduce((sum, v) => sum + (v || 0), 0),
+)
+const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour + totalExtraHeight.value)
+
+// 펼쳐진 메모가 끝나는 지점이 걸친 시(hour) 행만 그만큼 늘린다 — 일반 문서 흐름이라 이후 행들은 자동으로 밀림
+function hourRowHeight(h) {
+  let extra = 0
+  for (const s of props.schedules) {
+    const own = noteExtraHeight.value[s.id]
+    if (!own) continue
+    const insertionMinute = s.startMinutes + s.durationMinutes
+    if (Math.floor(insertionMinute / 60) === h) extra += own
+  }
+  return pxPerHour + extra
+}
 
 // 리사이즈 중인 일정의 실시간 미리보기 (드래그 중엔 실제 스토어를 건드리지 않고 여기서만 반영)
 const resizePreview = ref(null) // { id, startMinutes, durationMinutes }
+const resizingScheduleId = ref(null)
 
 function slotStyle(schedule) {
   const preview = resizePreview.value?.id === schedule.id ? resizePreview.value : null
   const startMinutes = preview?.startMinutes ?? schedule.startMinutes
   const durationMinutes = preview?.durationMinutes ?? schedule.durationMinutes
-  const top = (startMinutes - props.startHour * 60) * pxPerMinute
+  const top = (startMinutes - props.startHour * 60) * pxPerMinute + displacementBefore(startMinutes)
   const base = Math.max(durationMinutes * pxPerMinute, MIN_HEIGHT)
-  const height = Math.max(base, NOTE_MIN_HEIGHT)
+  const height = Math.max(base, NOTE_MIN_HEIGHT) + (noteExtraHeight.value[schedule.id] || 0)
   return { top: `${top}px`, height: `${height}px` }
+}
+
+function slotClass(schedule) {
+  const isBeingDragged =
+    dragStore.isDragging && dragStore.type === 'schedule' && dragStore.payload?.scheduleId === schedule.id
+  const isBeingResized = resizingScheduleId.value === schedule.id
+  return { 'no-transition': isBeingDragged || isBeingResized }
 }
 
 // ---- 드래그 앤 드롭 (D3) ----
@@ -241,6 +288,7 @@ function startResize(e, schedule, edge) {
     originalStart: schedule.startMinutes,
     originalEnd: schedule.startMinutes + schedule.durationMinutes,
   }
+  resizingScheduleId.value = schedule.id
   resizePreview.value = { id: schedule.id, startMinutes: schedule.startMinutes, durationMinutes: schedule.durationMinutes }
   window.addEventListener('pointermove', handleResizeMove)
   window.addEventListener('pointerup', handleResizeEnd)
@@ -272,6 +320,7 @@ function handleResizeEnd() {
     })
   }
   resizing = null
+  resizingScheduleId.value = null
   resizePreview.value = null
 }
 
@@ -293,7 +342,7 @@ const nowLineTop = computed(() => {
   const min = props.startHour * 60
   const max = props.endHour * 60
   if (nowMinutes.value < min || nowMinutes.value > max) return null
-  return (nowMinutes.value - min) * pxPerMinute
+  return (nowMinutes.value - min) * pxPerMinute + displacementBefore(nowMinutes.value)
 })
 </script>
 
@@ -307,6 +356,7 @@ const nowLineTop = computed(() => {
 }
 .grid {
   position: relative;
+  transition: height 200ms ease;
 }
 .now-line {
   position: absolute;
@@ -316,6 +366,7 @@ const nowLineTop = computed(() => {
   border-top: 2px solid var(--p-rose);
   z-index: 4;
   pointer-events: none;
+  transition: top 200ms ease;
 }
 .now-line::before,
 .now-line::after {
@@ -340,6 +391,7 @@ const nowLineTop = computed(() => {
 .hour-row {
   border-top: 1px solid color-mix(in srgb, var(--p-ink) 8%, transparent);
   position: relative;
+  transition: height 200ms ease;
 }
 .hour-label {
   position: absolute;
@@ -363,6 +415,12 @@ const nowLineTop = computed(() => {
   position: absolute;
   left: 0;
   right: 0;
+  transition:
+    top 200ms ease,
+    height 200ms ease;
+}
+.slot.no-transition {
+  transition: none;
 }
 .resize-handle {
   position: absolute;

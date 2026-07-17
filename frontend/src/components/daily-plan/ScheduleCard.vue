@@ -3,7 +3,11 @@
     class="schedule-card"
     :class="[
       `is-${schedule.categoryColor}`,
-      { 'is-completed': schedule.completed, 'is-compact': compact, 'is-dragging': isDragging },
+      {
+        'is-completed': schedule.completed,
+        'is-compact': compact,
+        'is-dragging': isDragging,
+      },
     ]"
   >
     <span v-if="draggable" class="drag-handle" aria-hidden="true" @pointerdown="onPointerDown">
@@ -61,26 +65,61 @@
 
       <div class="note-row">
         <textarea
-          v-if="noteExpanded"
+          v-if="noteEditing"
           ref="noteInputEl"
           class="note-input"
           rows="1"
           placeholder="메모 남기기 (선택)"
           :value="schedule.note"
           @input="handleNoteInput"
-          @blur="noteExpanded = false"
+          @blur="finishEditNote"
         />
-        <button v-else-if="schedule.note" type="button" class="note-preview" @click="openNote">
-          {{ schedule.note }}
-        </button>
-        <button v-else type="button" class="note-add" @click="openNote">+ 메모</button>
+
+        <div v-else-if="schedule.note" class="note-box">
+          <p class="note-label">memo</p>
+          <div class="note-line">
+            <p ref="noteTextEl" class="note-text" :class="{ 'is-collapsed': !noteExpanded }">{{ schedule.note }}</p>
+            <div class="note-icons">
+              <button
+                v-if="!noteExpanded"
+                type="button"
+                class="note-icon-btn"
+                aria-label="펼치기"
+                @click="expandNote"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              <template v-else>
+                <button type="button" class="note-icon-btn" aria-label="수정" @click="startEditNote">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                </button>
+                <button type="button" class="note-icon-btn" aria-label="메모 삭제" @click="deleteNote">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+                  </svg>
+                </button>
+                <button type="button" class="note-icon-btn" aria-label="접기" @click="collapseNote">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 15 12 9l-6 6" />
+                  </svg>
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <button v-else type="button" class="note-add" @click="startEditNote">+ 메모</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import BaseCheckbox from '@/components/ui/BaseCheckbox.vue'
 import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
@@ -92,7 +131,14 @@ const props = defineProps({
   compact: { type: Boolean, default: false },
   draggable: { type: Boolean, default: true },
 })
-const emit = defineEmits(['toggle-complete', 'update:note', 'tag', 'delete', 'move-to-list'])
+const emit = defineEmits([
+  'toggle-complete',
+  'update:note',
+  'tag',
+  'delete',
+  'move-to-list',
+  'note-resize',
+])
 
 const timeLabel = computed(
   () =>
@@ -117,8 +163,10 @@ function handlePick(value) {
   showPicker.value = false
 }
 
+const noteEditing = ref(false)
 const noteExpanded = ref(false)
 const noteInputEl = ref(null)
+const noteTextEl = ref(null)
 
 // 기본 1줄 높이에서 내용이 늘어나는 만큼만 자연스럽게 커지도록
 function autoGrowNote(el) {
@@ -127,18 +175,64 @@ function autoGrowNote(el) {
   el.style.height = `${el.scrollHeight}px`
 }
 
-function openNote() {
+// 펼쳤을 때(편집 중이면 textarea, 아니면 본문 텍스트) 실제로 필요한 추가 높이(1줄 기준 초과분)를
+// 측정해서 타임라인 슬롯에 알려준다 — 타임라인이 그 시간대 간격 자체를 늘려서 다른 일정을 밀어내는 데 씀
+function reportNoteExtraHeight() {
+  if (!noteExpanded.value) {
+    emit('note-resize', { id: props.schedule.id, extraHeight: 0 })
+    return
+  }
+  const el = noteEditing.value ? noteInputEl.value : noteTextEl.value
+  if (!el) {
+    emit('note-resize', { id: props.schedule.id, extraHeight: 0 })
+    return
+  }
+  const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 16
+  const extraHeight = Math.max(el.scrollHeight - lineHeight, 0)
+  emit('note-resize', { id: props.schedule.id, extraHeight })
+}
+
+function expandNote() {
   noteExpanded.value = true
+  nextTick(reportNoteExtraHeight)
+}
+
+function collapseNote() {
+  noteExpanded.value = false
+  reportNoteExtraHeight()
+}
+
+function startEditNote() {
+  noteEditing.value = true
   nextTick(() => {
     noteInputEl.value?.focus()
     autoGrowNote(noteInputEl.value)
+    reportNoteExtraHeight()
   })
+}
+
+function finishEditNote() {
+  noteEditing.value = false
+  nextTick(reportNoteExtraHeight)
 }
 
 function handleNoteInput(e) {
   emit('update:note', { id: props.schedule.id, text: e.target.value })
   autoGrowNote(e.target)
+  reportNoteExtraHeight()
 }
+
+function deleteNote() {
+  emit('update:note', { id: props.schedule.id, text: '' })
+  noteExpanded.value = false
+  reportNoteExtraHeight()
+}
+
+// 안전망: 위 명시적 호출 외에 상태가 바뀌는 경우(예: 외부에서 note가 갱신되는 경우)를 대비
+watch(
+  [noteExpanded, noteEditing, () => props.schedule.note],
+  () => nextTick(reportNoteExtraHeight),
+)
 
 const dragStore = props.draggable ? useDragStore() : null
 const isDragging = ref(false)
@@ -280,25 +374,64 @@ const { onPointerDown } = usePointerDrag({
 .note-input::placeholder {
   color: var(--p-ink-faint);
 }
-.note-preview {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  width: 100%;
-  max-width: 100%;
-  text-align: left;
+.note-box {
   padding: 4px 8px;
   border-radius: var(--p-radius-xs);
-  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 16%, transparent);
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 45%, white);
+}
+.note-label {
+  margin: 0 0 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--p-ink);
+  opacity: 0.65;
+}
+.note-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.note-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   color: var(--p-ink);
   font-size: 0.76rem;
   font-family: inherit;
   line-height: 1.35;
-  white-space: normal;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+.note-text.is-collapsed {
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.note-icon-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.note-icon-btn:hover {
+  color: var(--p-ink);
+  background: rgba(255, 255, 255, 0.6);
 }
 .note-add {
   appearance: none;
