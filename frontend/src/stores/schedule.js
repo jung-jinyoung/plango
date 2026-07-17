@@ -22,6 +22,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       startMinutes: entry.startMinutes,
       durationMinutes: entry.durationMinutes,
       categoryColor: entry.categoryColor ?? null,
+      goalId: entry.goalId ?? null,
       reason: entry.reason ?? null,
       completed: false,
       note: '',
@@ -45,6 +46,15 @@ export const useScheduleStore = defineStore('schedule', () => {
   function setNote(dateISO, id, text) {
     const schedule = list(dateISO).find((s) => s.id === id)
     if (schedule) schedule.note = text
+  }
+
+  // 타임라인 카드에서 직접 목표 태그를 바꿀 때, goalId와 categoryColor를 함께 갱신한다
+  function setTag(dateISO, id, goalId, categoryColor) {
+    const schedule = list(dateISO).find((s) => s.id === id)
+    if (schedule) {
+      schedule.goalId = goalId
+      schedule.categoryColor = categoryColor
+    }
   }
 
   function removeSchedule(dateISO, id) {
@@ -86,6 +96,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     applyRecommendations,
     toggleComplete,
     setNote,
+    setTag,
     removeSchedule,
     moveSchedule,
     findConflict,

@@ -102,6 +102,7 @@ const { onPointerDown } = usePointerDrag({
         title: props.todo.title,
         estimatedMinutes: props.todo.estimatedMinutes,
         categoryColor: taggedGoal.value?.color ?? null,
+        goalId: props.todo.goalId ?? null,
       },
       e,
     )

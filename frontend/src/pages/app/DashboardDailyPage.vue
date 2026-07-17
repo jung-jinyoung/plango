@@ -64,6 +64,9 @@
           :schedules="schedules"
           @toggle-complete="handleToggleComplete"
           @update:note="handleUpdateNote"
+          @tag="handleScheduleTag"
+          @delete="handleScheduleDelete"
+          @move-to-list="handleScheduleMoveToList"
           @commit-todo="handleCommitTodo"
           @commit-move="handleCommitMove"
           @conflict="handleConflict"
@@ -222,11 +225,43 @@ function handleAiPanelClose(open) {
 }
 
 // ---- D3: 드래그로 배치/재배치 ----
-function handleCommitTodo({ todoId, title, startMinutes, durationMinutes, categoryColor }) {
-  scheduleStore.addSchedule(dateISO.value, { todoId, title, startMinutes, durationMinutes, categoryColor, source: 'manual' })
+function handleCommitTodo({ todoId, title, startMinutes, durationMinutes, categoryColor, goalId }) {
+  scheduleStore.addSchedule(dateISO.value, {
+    todoId,
+    title,
+    startMinutes,
+    durationMinutes,
+    categoryColor,
+    goalId,
+    source: 'manual',
+  })
 }
 function handleCommitMove({ scheduleId, startMinutes }) {
   scheduleStore.moveSchedule(dateISO.value, scheduleId, startMinutes)
+}
+
+// ---- 타임라인 카드에서 직접 태그/삭제/할 일 리스트로 이동 ----
+function handleScheduleTag({ id, goalId }) {
+  const schedule = schedules.value.find((s) => s.id === id)
+  if (!schedule) return
+  const color = goalId ? (goalStore.weeklyGoals.find((g) => g.id === goalId)?.color ?? null) : null
+  scheduleStore.setTag(dateISO.value, id, goalId, color)
+  if (schedule.todoId) todoStore.assignGoal(dateISO.value, schedule.todoId, goalId)
+  $q.notify({
+    message: goalId ? '목표에 태그했습니다' : '태그를 해제했습니다',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
+}
+function handleScheduleDelete(id) {
+  const schedule = schedules.value.find((s) => s.id === id)
+  if (!schedule) return
+  scheduleStore.removeSchedule(dateISO.value, id)
+  if (schedule.todoId) todoStore.removeTodo(dateISO.value, schedule.todoId)
+}
+function handleScheduleMoveToList(id) {
+  scheduleStore.removeSchedule(dateISO.value, id)
 }
 
 // ---- D6: 일정 충돌 알림 ----
@@ -249,6 +284,7 @@ function handleAutoResolve() {
       startMinutes: freeStart,
       durationMinutes: pending.durationMinutes,
       categoryColor: pending.categoryColor,
+      goalId: pending.goalId,
       source: 'manual',
     })
   } else {

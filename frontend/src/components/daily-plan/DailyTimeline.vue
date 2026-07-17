@@ -20,6 +20,9 @@
               :compact="schedule.durationMinutes * pxPerMinute < REASON_MIN_HEIGHT"
               @toggle-complete="$emit('toggle-complete', $event)"
               @update:note="$emit('update:note', $event)"
+              @tag="$emit('tag', $event)"
+              @delete="$emit('delete', $event)"
+              @move-to-list="$emit('move-to-list', $event)"
             />
           </div>
 
@@ -48,7 +51,16 @@ const props = defineProps({
   startHour: { type: Number, default: 6 },
   endHour: { type: Number, default: 24 },
 })
-const emit = defineEmits(['toggle-complete', 'update:note', 'commit-todo', 'commit-move', 'conflict'])
+const emit = defineEmits([
+  'toggle-complete',
+  'update:note',
+  'tag',
+  'delete',
+  'move-to-list',
+  'commit-todo',
+  'commit-move',
+  'conflict',
+])
 
 const pxPerHour = 84
 const pxPerMinute = pxPerHour / 60
@@ -154,6 +166,7 @@ function handleGlobalPointerUp(e) {
       startMinutes,
       durationMinutes: duration,
       categoryColor: payload.categoryColor,
+      goalId: payload.goalId,
     }
     if (conflict) emit('conflict', { pending, existing: conflict })
     else emit('commit-todo', pending)
