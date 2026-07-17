@@ -5,7 +5,7 @@ Guidance for Claude Code when working in this frontend repo. Each section is cap
 ## Architecture
 1. Stack: Quasar(Vue 3) + Pinia + vue-router, pnpm workspace.
 2. 폴더 컨벤션: `src/components/{feature}/` 기능별 분리, `src/pages/app/*`는 인증 후 페이지, `src/stores/*`는 도메인별 Pinia 스토어 1개.
-3. 디자인 토큰(`src/css/tokens.css`)은 색상 슬롯이 `--p-rose/blue/green/lavender` 4개로 고정 — `is-{color}` 클래스로만 사용, 5번째 색상 토큰 없음. "카테고리 추가"류 기능은 이 4슬롯 재할당으로 구현해야 함.
+3. 디자인 토큰(`src/css/tokens.css`)은 색상 슬롯이 `--p-rose/lavender/green/blue/amber/teal/plum/slate` 8개로 고정(2026-07-10부터) — `is-{color}` 클래스로만 사용, 9번째 색상 토큰 없음. "카테고리 추가"류 기능은 이 8슬롯 재할당으로 구현해야 함.
 4. `src/services/ai/*`는 실제 AI 호출, `src/services/mock/*`는 시드 픽스처 — 어떤 게 연결돼 있는지 먼저 확인 후 동작 가정할 것.
 
 ## Testing

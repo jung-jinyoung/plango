@@ -13,6 +13,7 @@
         :draggable="false"
         :deletable="false"
         :taggable="false"
+        :editable="false"
         @toggle="$emit('toggle', $event)"
       />
     </div>

@@ -3,7 +3,11 @@
     class="schedule-card"
     :class="[
       `is-${schedule.categoryColor}`,
-      { 'is-completed': schedule.completed, 'is-compact': compact, 'is-dragging': isDragging },
+      {
+        'is-completed': schedule.completed,
+        'is-compact': compact,
+        'is-dragging': isDragging,
+      },
     ]"
   >
     <span v-if="draggable" class="drag-handle" aria-hidden="true" @pointerdown="onPointerDown">
@@ -18,43 +22,236 @@
       @update:model-value="$emit('toggle-complete', schedule.id)"
     />
 
-    <div class="body">
+    <div ref="bodyEl" class="body">
       <div class="row-1">
         <span class="time">{{ timeLabel }}</span>
         <span class="title" :class="{ 'is-done': schedule.completed }">{{ schedule.title }}</span>
         <span v-if="schedule.source === 'ai'" class="ai-badge">AI</span>
+
+        <select
+          v-if="showPicker"
+          ref="pickerEl"
+          class="tag-picker"
+          :value="schedule.goalId ?? ''"
+          @change="handlePick($event.target.value)"
+          @blur="showPicker = false"
+        >
+          <option value="">태그 해제</option>
+          <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+        </select>
+        <button
+          v-else-if="taggedGoal"
+          type="button"
+          class="tag-chip"
+          :class="`is-${taggedGoal.color}`"
+          :title="taggedGoal.title"
+          :aria-label="`태그: ${taggedGoal.title}`"
+          @click="openPicker"
+        >
+          <span class="dot" aria-hidden="true" />
+        </button>
+        <button v-else type="button" class="tag-add" @click="openPicker">+ 태그</button>
+
+        <button
+          type="button"
+          class="note-toggle-btn"
+          :class="{ 'has-note': !!schedule.note }"
+          :aria-label="schedule.note ? '메모 보기' : '메모 추가'"
+          @click="toggleNotePanel"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </button>
+
+        <button type="button" class="move-btn" aria-label="할 일 목록으로 이동" @click="$emit('move-to-list', schedule.id)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+        </button>
+        <button type="button" class="delete-btn" aria-label="삭제" @click="$emit('delete', schedule.id)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+          </svg>
+        </button>
       </div>
       <p v-if="schedule.reason && !compact" class="reason">{{ schedule.reason }}</p>
 
-      <input
-        v-if="schedule.completed && !compact"
-        class="note-input"
-        type="text"
-        placeholder="메모 남기기 (선택)"
-        :value="schedule.note"
-        @input="$emit('update:note', { id: schedule.id, text: $event.target.value })"
-      />
+      <div v-if="notePanelOpen" class="note-row">
+        <textarea
+          v-if="noteEditing"
+          ref="noteInputEl"
+          class="note-input"
+          rows="1"
+          placeholder="메모 남기기 (선택)"
+          :value="schedule.note"
+          @input="handleNoteInput"
+          @blur="finishEditNote"
+        />
+
+        <div v-else-if="schedule.note" class="note-box">
+          <p class="note-label">memo</p>
+          <div class="note-line">
+            <p class="note-text" :class="{ 'is-collapsed': !noteExpanded }">{{ schedule.note }}</p>
+            <div class="note-icons">
+              <button
+                v-if="!noteExpanded"
+                type="button"
+                class="note-icon-btn"
+                aria-label="펼치기"
+                @click="expandNote"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              <template v-else>
+                <button type="button" class="note-icon-btn" aria-label="수정" @click="startEditNote">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
+                </button>
+                <button type="button" class="note-icon-btn" aria-label="메모 삭제" @click="deleteNote">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+                  </svg>
+                </button>
+                <button type="button" class="note-icon-btn" aria-label="접기" @click="collapseNote">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 15 12 9l-6 6" />
+                  </svg>
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import BaseCheckbox from '@/components/ui/BaseCheckbox.vue'
 import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
 import { useDragStore } from '@/stores/drag'
+import { useGoalStore } from '@/stores/goals'
 
 const props = defineProps({
   schedule: { type: Object, required: true },
   compact: { type: Boolean, default: false },
   draggable: { type: Boolean, default: true },
 })
-defineEmits(['toggle-complete', 'update:note'])
+const emit = defineEmits([
+  'toggle-complete',
+  'update:note',
+  'tag',
+  'delete',
+  'move-to-list',
+  'card-resize',
+])
 
 const timeLabel = computed(
   () =>
     `${minutesToLabel(props.schedule.startMinutes)}–${minutesToLabel(props.schedule.startMinutes + props.schedule.durationMinutes)}`,
+)
+
+const goalStore = useGoalStore()
+const taggedGoal = computed(
+  () => goalStore.weeklyGoals.find((g) => g.id === props.schedule.goalId) ?? null,
+)
+
+const showPicker = ref(false)
+const pickerEl = ref(null)
+
+function openPicker() {
+  showPicker.value = true
+  nextTick(() => pickerEl.value?.focus())
+}
+
+function handlePick(value) {
+  emit('tag', { id: props.schedule.id, goalId: value || null })
+  showPicker.value = false
+}
+
+const notePanelOpen = ref(false)
+const noteEditing = ref(false)
+const noteExpanded = ref(false)
+const noteInputEl = ref(null)
+const bodyEl = ref(null)
+
+// 기본 1줄 높이에서 내용이 늘어나는 만큼만 자연스럽게 커지도록
+function autoGrowNote(el) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
+}
+
+// 카드 콘텐츠(제목줄+reason+메모 영역 전체)의 실제 필요 높이를 측정해서 타임라인에 알려준다.
+// .body는 부모 flex(align-items: flex-start)가 stretch하지 않으므로, 슬롯이 강제하는 높이와
+// 무관하게 항상 콘텐츠 실제 높이로 렌더링됨 — 시간 기반 기본 높이보다 이게 더 크면 그만큼만
+// 타임라인이 슬롯을 늘려 다른 일정을 밀어낸다 (남는 부분은 타임라인 쪽에서 계산).
+function reportCardHeight() {
+  const el = bodyEl.value
+  if (!el) return
+  const CARD_VERTICAL_PADDING = 16 // .schedule-card padding 8px top + 8px bottom
+  const naturalHeight = el.getBoundingClientRect().height + CARD_VERTICAL_PADDING
+  emit('card-resize', { id: props.schedule.id, naturalHeight })
+}
+
+// row-1의 메모 아이콘 — 기본적으로 패널이 닫혀 있어 어떤 길이의 일정이든 시간 정확도에
+// 영향을 주지 않는다. 열 때만(사용자 명시적 동작) 필요한 만큼 타임라인이 밀어준다.
+function toggleNotePanel() {
+  notePanelOpen.value = !notePanelOpen.value
+  if (notePanelOpen.value && !props.schedule.note) {
+    startEditNote()
+  } else {
+    nextTick(reportCardHeight)
+  }
+}
+
+function expandNote() {
+  noteExpanded.value = true
+  nextTick(reportCardHeight)
+}
+
+function collapseNote() {
+  noteExpanded.value = false
+  nextTick(reportCardHeight)
+}
+
+function startEditNote() {
+  noteEditing.value = true
+  nextTick(() => {
+    noteInputEl.value?.focus()
+    autoGrowNote(noteInputEl.value)
+    reportCardHeight()
+  })
+}
+
+function finishEditNote() {
+  noteEditing.value = false
+  if (!props.schedule.note) notePanelOpen.value = false
+  nextTick(reportCardHeight)
+}
+
+function handleNoteInput(e) {
+  emit('update:note', { id: props.schedule.id, text: e.target.value })
+  autoGrowNote(e.target)
+  reportCardHeight()
+}
+
+function deleteNote() {
+  emit('update:note', { id: props.schedule.id, text: '' })
+  noteExpanded.value = false
+  notePanelOpen.value = false
+  nextTick(reportCardHeight)
+}
+
+// 안전망: 위 명시적 호출 외에 상태가 바뀌는 경우(마운트 시 최초 측정 포함)를 대비
+watch(
+  [notePanelOpen, noteExpanded, noteEditing, () => props.schedule.note, () => props.compact],
+  () => nextTick(reportCardHeight),
+  { immediate: true },
 )
 
 const dragStore = props.draggable ? useDragStore() : null
@@ -84,7 +281,8 @@ const { onPointerDown } = usePointerDrag({
 
 <style scoped>
 .schedule-card {
-  height: 100%;
+  /* 연속 배치 시 카드 사이에 시각적 여백을 두기 위해 슬롯 높이보다 살짝 작게 렌더링 */
+  height: calc(100% - 4px);
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -92,8 +290,8 @@ const { onPointerDown } = usePointerDrag({
   border-radius: var(--p-radius-sm);
   background: var(--p-surface);
   box-shadow: var(--p-shadow-raised-sm);
-  border-left: 3px solid var(--card-accent, var(--p-rose));
-  overflow: hidden;
+  border-left: 3px solid var(--card-accent, transparent);
+  position: relative;
 }
 .schedule-card.is-rose {
   --card-accent: var(--p-rose);
@@ -121,6 +319,7 @@ const { onPointerDown } = usePointerDrag({
 }
 .schedule-card.is-completed {
   opacity: 0.7;
+  z-index: 2;
 }
 .drag-handle {
   color: var(--p-ink-faint);
@@ -138,8 +337,8 @@ const { onPointerDown } = usePointerDrag({
 }
 .row-1 {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
 }
 .time {
   font-size: 0.72rem;
@@ -149,6 +348,8 @@ const { onPointerDown } = usePointerDrag({
   flex-shrink: 0;
 }
 .title {
+  flex: 1;
+  min-width: 0;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--p-ink);
@@ -174,18 +375,198 @@ const { onPointerDown } = usePointerDrag({
   color: var(--p-ink-faint);
   margin: 2px 0 0;
 }
-.note-input {
+.note-row {
   margin-top: 6px;
+}
+.note-input {
+  display: block;
   width: 100%;
   border: none;
   background: var(--p-bg);
   border-radius: var(--p-radius-xs);
   padding: 6px 10px;
   font-size: 0.78rem;
+  line-height: 1.4;
   color: var(--p-ink);
   font-family: inherit;
+  resize: none;
+  overflow: hidden;
 }
 .note-input::placeholder {
   color: var(--p-ink-faint);
+}
+.note-box {
+  padding: 4px 8px;
+  border-radius: var(--p-radius-xs);
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 45%, white);
+}
+.note-label {
+  margin: 0 0 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--p-ink);
+  opacity: 0.65;
+}
+.note-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.note-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--p-ink);
+  font-size: 0.76rem;
+  font-family: inherit;
+  line-height: 1.35;
+  white-space: pre-line;
+  overflow-wrap: break-word;
+}
+.note-text.is-collapsed {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.note-icon-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.note-icon-btn:hover {
+  color: var(--p-ink);
+  background: rgba(255, 255, 255, 0.6);
+}
+.note-toggle-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.note-toggle-btn:hover {
+  color: var(--p-lavender);
+  background: var(--p-bg);
+}
+.note-toggle-btn.has-note {
+  color: var(--card-accent, var(--p-lavender));
+}
+.tag-picker {
+  border: none;
+  border-radius: var(--p-radius-xs);
+  background: var(--p-bg);
+  color: var(--p-ink);
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 3px 6px;
+  max-width: 200px;
+  flex-shrink: 0;
+}
+.tag-add {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.tag-add:hover {
+  color: var(--p-lavender);
+  background: var(--p-bg);
+}
+.tag-chip {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip-color, var(--p-rose)) 16%, var(--p-surface));
+  flex-shrink: 0;
+}
+.tag-chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--chip-color, var(--p-rose));
+  flex-shrink: 0;
+}
+.tag-chip.is-rose {
+  --chip-color: var(--p-rose);
+}
+.tag-chip.is-amber {
+  --chip-color: var(--p-amber);
+}
+.tag-chip.is-green {
+  --chip-color: var(--p-green);
+}
+.tag-chip.is-teal {
+  --chip-color: var(--p-teal);
+}
+.tag-chip.is-blue {
+  --chip-color: var(--p-blue);
+}
+.tag-chip.is-lavender {
+  --chip-color: var(--p-lavender);
+}
+.tag-chip.is-plum {
+  --chip-color: var(--p-plum);
+}
+.tag-chip.is-slate {
+  --chip-color: var(--p-slate);
+}
+.move-btn,
+.delete-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.move-btn:hover {
+  color: var(--p-lavender);
+}
+.delete-btn:hover {
+  color: var(--p-rose-ink);
 }
 </style>

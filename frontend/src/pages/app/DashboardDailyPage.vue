@@ -1,30 +1,77 @@
 <template>
   <div>
     <div class="daily-layout">
-      <BaseCard class="todo-panel">
+      <div class="todo-panel">
+        <div class="goal-mini-section" :class="{ 'is-collapsed': !showWeeklyGoals }">
+          <div class="panel-head">
+            <h2>이번 주 목표</h2>
+            <div class="panel-head-right">
+              <span class="count">{{ goalStore.weeklyGoals.length }}개</span>
+              <button
+                type="button"
+                class="mini-toggle"
+                :class="{ 'is-expanded': showWeeklyGoals }"
+                aria-label="이번 주 목표 접기/펼치기"
+                @click="showWeeklyGoals = !showWeeklyGoals"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="goal-mini-body-wrap" :class="{ 'is-expanded': showWeeklyGoals }">
+            <div class="goal-mini-body-inner">
+              <div class="goal-mini-list">
+                <button
+                  v-for="(goal, idx) in goalStore.weeklyGoals"
+                  :key="goal.id"
+                  type="button"
+                  class="goal-mini-item"
+                  :class="`is-${goal.color}`"
+                  @click="goToGoal(goal.id)"
+                >
+                  <span class="index" aria-hidden="true">{{ idx + 1 }}</span>
+                  <span class="dot" aria-hidden="true" />
+                  <span class="title">{{ goal.title }}</span>
+                  <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+                </button>
+                <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="todo-hint">위 목표 번호를 확인하고 "할 일/분/목표번호"로 빠르게 추가해보세요</p>
+
         <div class="panel-head">
           <h2>할 일</h2>
           <span class="count">{{ unplacedTodos.length }}개</span>
         </div>
-        <TodoList
-          :todos="unplacedTodos"
-          @toggle="handleToggleTodo"
-          @delete="handleDeleteTodo"
-          @tag="handleTagOne"
-        />
-      </BaseCard>
+        <BaseCard class="todo-list-card">
+          <TodoList
+            :todos="unplacedTodos"
+            @toggle="handleToggleTodo"
+            @delete="handleDeleteTodo"
+            @tag="handleTagOne"
+            @add="handleQuickAddTodo"
+            @update="handleUpdateTodo"
+          />
+        </BaseCard>
+      </div>
 
       <div class="timeline-panel">
         <div class="panel-head">
-          <h2>타임라인</h2>
           <button type="button" class="end-day-link" @click="handleEndDay">하루 마감</button>
         </div>
         <DailyTimeline
           :schedules="schedules"
+          :is-today="isToday"
           @toggle-complete="handleToggleComplete"
           @update:note="handleUpdateNote"
+          @tag="handleScheduleTag"
+          @delete="handleScheduleDelete"
+          @move-to-list="handleScheduleMoveToList"
           @commit-todo="handleCommitTodo"
           @commit-move="handleCommitMove"
+          @commit-resize="handleCommitResize"
           @conflict="handleConflict"
         />
       </div>
@@ -67,10 +114,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import BaseCard from '@/components/ui/BaseCard.vue'
+import { useRouter } from 'vue-router'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
 import TodoList from '@/components/daily-plan/TodoList.vue'
 import DailyTimeline from '@/components/daily-plan/DailyTimeline.vue'
 import TodoInputModal from '@/components/daily-plan/TodoInputModal.vue'
@@ -81,15 +129,27 @@ import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
 import { useAiPlanningStore } from '@/stores/ai-planning'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
+import { useGoalStore } from '@/stores/goals'
+import { getTodayISO } from '@/utils/date'
 
 const $q = useQuasar()
+const router = useRouter()
 const calendarNav = useCalendarNavStore()
 const dateISO = computed(() => calendarNav.currentDateISO)
+const isToday = computed(() => dateISO.value === getTodayISO())
 
 const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()
 const aiPlanning = useAiPlanningStore()
+const goalStore = useGoalStore()
 
+onMounted(() => goalStore.load())
+
+function goToGoal(goalId) {
+  router.push({ path: '/app/goals', query: { weekly: goalId } })
+}
+
+const showWeeklyGoals = ref(true)
 const showTodoInput = ref(false)
 const showAiPanel = computed(() => aiPlanning.status !== 'idle')
 const showConflictModal = ref(false)
@@ -109,6 +169,9 @@ function handleToggleTodo(id) {
 function handleDeleteTodo(id) {
   todoStore.removeTodo(dateISO.value, id)
 }
+function handleUpdateTodo({ id, title, estimatedMinutes }) {
+  todoStore.updateTodo(dateISO.value, id, { title, estimatedMinutes })
+}
 function handleToggleComplete(id) {
   scheduleStore.toggleComplete(dateISO.value, id)
   const schedule = schedules.value.find((s) => s.id === id)
@@ -121,6 +184,37 @@ function handleUpdateNote({ id, text }) {
 function handleTodoSubmit(todos) {
   todos.forEach((t) => todoStore.addTodo(dateISO.value, t))
   aiPlanning.requestRecommendation(dateISO.value)
+}
+
+// "제목/분/목표번호" 단축 입력 — 목표번호는 "이번 주 목표" 미니 리스트에 보이는 순번(1부터) 기준
+function handleQuickAddTodo(raw) {
+  const [titlePart, minutesPart, goalIndexPart] = raw.split('/').map((s) => s.trim())
+  if (!titlePart) {
+    $q.notify({ message: '할 일 내용을 입력해주세요', icon: 'warning', color: 'warning', position: 'top' })
+    return
+  }
+  const warnings = []
+
+  let estimatedMinutes = null
+  if (minutesPart) {
+    const n = Number(minutesPart)
+    if (Number.isFinite(n) && n > 0) estimatedMinutes = n
+    else warnings.push(`분(${minutesPart})이 숫자가 아니라 무시했어요`)
+  }
+
+  let goalId = null
+  if (goalIndexPart) {
+    const idx = Number(goalIndexPart)
+    const goal = Number.isInteger(idx) && idx > 0 ? goalStore.weeklyGoals[idx - 1] : null
+    if (goal) goalId = goal.id
+    else warnings.push(`목표 번호(${goalIndexPart})가 유효하지 않아 태그하지 않았어요`)
+  }
+
+  todoStore.addTodo(dateISO.value, { title: titlePart, estimatedMinutes, goalId })
+
+  if (warnings.length > 0) {
+    $q.notify({ message: warnings.join(' / '), icon: 'warning', color: 'warning', position: 'top' })
+  }
 }
 
 function handleApplyAll() {
@@ -139,11 +233,46 @@ function handleAiPanelClose(open) {
 }
 
 // ---- D3: 드래그로 배치/재배치 ----
-function handleCommitTodo({ todoId, title, startMinutes, durationMinutes, categoryColor }) {
-  scheduleStore.addSchedule(dateISO.value, { todoId, title, startMinutes, durationMinutes, categoryColor, source: 'manual' })
+function handleCommitTodo({ todoId, title, startMinutes, durationMinutes, categoryColor, goalId }) {
+  scheduleStore.addSchedule(dateISO.value, {
+    todoId,
+    title,
+    startMinutes,
+    durationMinutes,
+    categoryColor,
+    goalId,
+    source: 'manual',
+  })
 }
 function handleCommitMove({ scheduleId, startMinutes }) {
   scheduleStore.moveSchedule(dateISO.value, scheduleId, startMinutes)
+}
+function handleCommitResize({ scheduleId, startMinutes, durationMinutes }) {
+  scheduleStore.resizeSchedule(dateISO.value, scheduleId, startMinutes, durationMinutes)
+}
+
+// ---- 타임라인 카드에서 직접 태그/삭제/할 일 리스트로 이동 ----
+function handleScheduleTag({ id, goalId }) {
+  const schedule = schedules.value.find((s) => s.id === id)
+  if (!schedule) return
+  const color = goalId ? (goalStore.weeklyGoals.find((g) => g.id === goalId)?.color ?? null) : null
+  scheduleStore.setTag(dateISO.value, id, goalId, color)
+  if (schedule.todoId) todoStore.assignGoal(dateISO.value, schedule.todoId, goalId)
+  $q.notify({
+    message: goalId ? '목표에 태그했습니다' : '태그를 해제했습니다',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
+}
+function handleScheduleDelete(id) {
+  const schedule = schedules.value.find((s) => s.id === id)
+  if (!schedule) return
+  scheduleStore.removeSchedule(dateISO.value, id)
+  if (schedule.todoId) todoStore.removeTodo(dateISO.value, schedule.todoId)
+}
+function handleScheduleMoveToList(id) {
+  scheduleStore.removeSchedule(dateISO.value, id)
 }
 
 // ---- D6: 일정 충돌 알림 ----
@@ -166,6 +295,7 @@ function handleAutoResolve() {
       startMinutes: freeStart,
       durationMinutes: pending.durationMinutes,
       categoryColor: pending.categoryColor,
+      goalId: pending.goalId,
       source: 'manual',
     })
   } else {
@@ -228,13 +358,163 @@ function handleTagToGoal({ todoIds, goalId }) {
 <style scoped>
 .daily-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 420px 1fr;
   gap: 24px;
   margin-top: 20px;
   align-items: start;
 }
 .todo-panel {
-  padding: 20px;
+  width: 100%;
+}
+.goal-mini-section {
+  margin-bottom: 20px;
+}
+.goal-mini-section.is-collapsed {
+  margin-bottom: 0;
+}
+.panel-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mini-toggle {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: -6px;
+  border-radius: 50%;
+  transition:
+    transform 200ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+.mini-toggle:hover {
+  background: var(--p-surface);
+  color: var(--p-ink);
+}
+.mini-toggle.is-expanded {
+  transform: rotate(180deg);
+}
+.goal-mini-body-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+.goal-mini-body-wrap.is-expanded {
+  grid-template-rows: 1fr;
+}
+.goal-mini-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-mini-body-wrap {
+    transition: none;
+  }
+}
+.goal-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+.goal-mini-item {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--p-radius-xs);
+  font-family: inherit;
+  text-align: left;
+  transition: background 120ms ease;
+}
+.goal-mini-item:hover {
+  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 10%, var(--p-bg));
+}
+.goal-mini-item:focus-visible {
+  outline: 2px solid var(--dot-color, var(--p-rose));
+  outline-offset: -2px;
+}
+.goal-mini-item .index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--p-bg);
+  color: var(--p-ink-faint);
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.goal-mini-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color, var(--p-rose));
+  flex-shrink: 0;
+}
+.goal-mini-item .title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--p-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.goal-mini-item.is-rose {
+  --dot-color: var(--p-rose);
+}
+.goal-mini-item.is-amber {
+  --dot-color: var(--p-amber);
+}
+.goal-mini-item.is-green {
+  --dot-color: var(--p-green);
+}
+.goal-mini-item.is-teal {
+  --dot-color: var(--p-teal);
+}
+.goal-mini-item.is-blue {
+  --dot-color: var(--p-blue);
+}
+.goal-mini-item.is-lavender {
+  --dot-color: var(--p-lavender);
+}
+.goal-mini-item.is-plum {
+  --dot-color: var(--p-plum);
+}
+.goal-mini-item.is-slate {
+  --dot-color: var(--p-slate);
+}
+.goal-mini-list .empty {
+  color: var(--p-ink-faint);
+  font-size: 0.85rem;
+  padding: 4px;
+  margin: 0;
+}
+.todo-list-card {
+  padding: 12px 20px;
+}
+.todo-hint {
+  font-size: 0.76rem;
+  color: var(--p-ink-faint);
+  margin: 0 4px 14px;
 }
 .panel-head {
   display: flex;
@@ -242,8 +522,7 @@ function handleTagToGoal({ todoIds, goalId }) {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.panel-head h2,
-.timeline-panel h2 {
+.panel-head h2 {
   font-size: 1.02rem;
   font-weight: 700;
   margin: 0;
@@ -254,6 +533,7 @@ function handleTagToGoal({ todoIds, goalId }) {
   font-variant-numeric: tabular-nums;
 }
 .timeline-panel .panel-head {
+  justify-content: flex-end;
   margin-bottom: 12px;
 }
 .end-day-link {

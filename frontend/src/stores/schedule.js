@@ -21,7 +21,8 @@ export const useScheduleStore = defineStore('schedule', () => {
       title: entry.title,
       startMinutes: entry.startMinutes,
       durationMinutes: entry.durationMinutes,
-      categoryColor: entry.categoryColor ?? 'rose',
+      categoryColor: entry.categoryColor ?? null,
+      goalId: entry.goalId ?? null,
       reason: entry.reason ?? null,
       completed: false,
       note: '',
@@ -47,6 +48,15 @@ export const useScheduleStore = defineStore('schedule', () => {
     if (schedule) schedule.note = text
   }
 
+  // 타임라인 카드에서 직접 목표 태그를 바꿀 때, goalId와 categoryColor를 함께 갱신한다
+  function setTag(dateISO, id, goalId, categoryColor) {
+    const schedule = list(dateISO).find((s) => s.id === id)
+    if (schedule) {
+      schedule.goalId = goalId
+      schedule.categoryColor = categoryColor
+    }
+  }
+
   function removeSchedule(dateISO, id) {
     ensureDate(dateISO)
     schedulesByDate.value[dateISO] = list(dateISO).filter((s) => s.id !== id)
@@ -55,6 +65,15 @@ export const useScheduleStore = defineStore('schedule', () => {
   function moveSchedule(dateISO, id, newStartMinutes) {
     const schedule = list(dateISO).find((s) => s.id === id)
     if (schedule) schedule.startMinutes = newStartMinutes
+  }
+
+  // 타임라인에서 가장자리 드래그로 시작/소요시간을 함께 조정
+  function resizeSchedule(dateISO, id, startMinutes, durationMinutes) {
+    const schedule = list(dateISO).find((s) => s.id === id)
+    if (schedule) {
+      schedule.startMinutes = startMinutes
+      schedule.durationMinutes = durationMinutes
+    }
   }
 
   // 주어진 시간대와 겹치는 기존 일정을 찾는다 (excludeId는 자기 자신 재배치 시 제외용)
@@ -86,8 +105,10 @@ export const useScheduleStore = defineStore('schedule', () => {
     applyRecommendations,
     toggleComplete,
     setNote,
+    setTag,
     removeSchedule,
     moveSchedule,
+    resizeSchedule,
     findConflict,
     nextFreeStart,
   }

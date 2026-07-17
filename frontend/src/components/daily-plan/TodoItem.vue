@@ -10,44 +10,81 @@
 
     <BaseCheckbox :model-value="todo.done" @update:model-value="$emit('toggle', todo.id)" />
 
-    <span class="title" :class="{ 'is-done': todo.done }">{{ todo.title }}</span>
+    <template v-if="!isEditing">
+      <span class="title" :class="{ 'is-done': todo.done }">{{ todo.title }}</span>
 
-    <span v-if="todo.estimatedMinutes" class="duration">{{ todo.estimatedMinutes }}분</span>
-    <span v-if="todo.deadlineMinutes != null" class="deadline">{{ deadlineLabel }}까지</span>
+      <span v-if="todo.estimatedMinutes" class="duration">{{ todo.estimatedMinutes }}분</span>
+      <span v-if="todo.deadlineMinutes != null" class="deadline">{{ deadlineLabel }}까지</span>
 
-    <select
-      v-if="taggable && showPicker"
-      ref="pickerEl"
-      class="tag-picker"
-      :value="todo.goalId ?? ''"
-      @change="handlePick($event.target.value)"
-      @blur="showPicker = false"
-    >
-      <option value="">태그 해제</option>
-      <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
-    </select>
-    <button
-      v-else-if="taggable && taggedGoal"
-      type="button"
-      class="tag-chip"
-      :class="`is-${taggedGoal.color}`"
-      @click="openPicker"
-    >
-      <span class="dot" aria-hidden="true" />{{ taggedGoal.title }}
-    </button>
-    <button v-else-if="taggable" type="button" class="tag-add" @click="openPicker">+ 태그</button>
+      <select
+        v-if="taggable && showPicker"
+        ref="pickerEl"
+        class="tag-picker"
+        :value="todo.goalId ?? ''"
+        @change="handlePick($event.target.value)"
+        @blur="showPicker = false"
+      >
+        <option value="">태그 해제</option>
+        <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+      </select>
+      <button
+        v-else-if="taggable && taggedGoal"
+        type="button"
+        class="tag-chip"
+        :class="`is-${taggedGoal.color}`"
+        :title="taggedGoal.title"
+        :aria-label="`태그: ${taggedGoal.title}`"
+        @click="openPicker"
+      >
+        <span class="dot" aria-hidden="true" />
+      </button>
+      <button v-else-if="taggable" type="button" class="tag-add" @click="openPicker">+ 태그</button>
 
-    <button
-      v-if="deletable"
-      type="button"
-      class="delete-btn"
-      aria-label="삭제"
-      @click="$emit('delete', todo.id)"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
-      </svg>
-    </button>
+      <button v-if="editable" type="button" class="edit-btn" aria-label="수정" @click="startEdit">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      </button>
+
+      <button
+        v-if="deletable"
+        type="button"
+        class="delete-btn"
+        aria-label="삭제"
+        @click="$emit('delete', todo.id)"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6" />
+        </svg>
+      </button>
+    </template>
+
+    <template v-else>
+      <input
+        ref="editTitleEl"
+        v-model="editTitle"
+        type="text"
+        class="edit-title-input"
+        @keydown.enter="saveEdit"
+        @keydown.esc="cancelEdit"
+      />
+      <input
+        v-model.number="editMinutes"
+        type="number"
+        min="0"
+        step="5"
+        class="edit-minutes-input"
+        placeholder="분"
+        @keydown.enter="saveEdit"
+        @keydown.esc="cancelEdit"
+      />
+      <button type="button" class="save-btn" aria-label="저장" @click="saveEdit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+      </button>
+      <button type="button" class="cancel-btn" aria-label="취소" @click="cancelEdit">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+    </template>
   </div>
 </template>
 
@@ -64,8 +101,9 @@ const props = defineProps({
   draggable: { type: Boolean, default: true },
   deletable: { type: Boolean, default: true },
   taggable: { type: Boolean, default: true },
+  editable: { type: Boolean, default: true },
 })
-const emit = defineEmits(['toggle', 'delete', 'tag'])
+const emit = defineEmits(['toggle', 'delete', 'tag', 'update'])
 
 const deadlineLabel = computed(() => minutesToLabel(props.todo.deadlineMinutes))
 
@@ -87,6 +125,29 @@ function handlePick(value) {
   showPicker.value = false
 }
 
+const isEditing = ref(false)
+const editTitle = ref('')
+const editMinutes = ref(null)
+const editTitleEl = ref(null)
+
+function startEdit() {
+  editTitle.value = props.todo.title
+  editMinutes.value = props.todo.estimatedMinutes
+  isEditing.value = true
+  nextTick(() => editTitleEl.value?.focus())
+}
+
+function saveEdit() {
+  const title = editTitle.value.trim()
+  if (!title) return
+  emit('update', { id: props.todo.id, title, estimatedMinutes: editMinutes.value || null })
+  isEditing.value = false
+}
+
+function cancelEdit() {
+  isEditing.value = false
+}
+
 const dragStore = useDragStore()
 const isDragging = ref(false)
 
@@ -95,7 +156,13 @@ const { onPointerDown } = usePointerDrag({
     isDragging.value = true
     dragStore.start(
       'todo',
-      { todoId: props.todo.id, title: props.todo.title, estimatedMinutes: props.todo.estimatedMinutes },
+      {
+        todoId: props.todo.id,
+        title: props.todo.title,
+        estimatedMinutes: props.todo.estimatedMinutes,
+        categoryColor: taggedGoal.value?.color ?? null,
+        goalId: props.todo.goalId ?? null,
+      },
       e,
     )
   },
@@ -181,59 +248,44 @@ const { onPointerDown } = usePointerDrag({
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 3px 9px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border-radius: 999px;
-  color: var(--chip-ink, var(--p-rose-ink));
   background: color-mix(in srgb, var(--chip-color, var(--p-rose)) 16%, var(--p-surface));
   flex-shrink: 0;
-  max-width: 120px;
 }
 .tag-chip .dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--chip-color, var(--p-rose));
   flex-shrink: 0;
 }
-.tag-chip span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .tag-chip.is-rose {
   --chip-color: var(--p-rose);
-  --chip-ink: var(--p-rose-ink);
 }
 .tag-chip.is-amber {
   --chip-color: var(--p-amber);
-  --chip-ink: var(--p-amber-ink);
 }
 .tag-chip.is-green {
   --chip-color: var(--p-green);
-  --chip-ink: var(--p-green-ink);
 }
 .tag-chip.is-teal {
   --chip-color: var(--p-teal);
-  --chip-ink: var(--p-teal-ink);
 }
 .tag-chip.is-blue {
   --chip-color: var(--p-blue);
-  --chip-ink: var(--p-blue-ink);
 }
 .tag-chip.is-lavender {
   --chip-color: var(--p-lavender);
-  --chip-ink: var(--p-lavender-ink);
 }
 .tag-chip.is-plum {
   --chip-color: var(--p-plum);
-  --chip-ink: var(--p-plum-ink);
 }
 .tag-chip.is-slate {
   --chip-color: var(--p-slate);
-  --chip-ink: var(--p-slate-ink);
 }
 .delete-btn {
   appearance: none;
@@ -250,6 +302,70 @@ const { onPointerDown } = usePointerDrag({
   flex-shrink: 0;
 }
 .delete-btn:hover {
+  color: var(--p-rose-ink);
+}
+.edit-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.edit-btn:hover {
+  color: var(--p-lavender);
+}
+.edit-title-input,
+.edit-minutes-input {
+  border: none;
+  font-family: inherit;
+  color: var(--p-ink);
+  border-radius: var(--p-radius-xs);
+  background: var(--p-bg);
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+.edit-title-input {
+  flex: 1;
+  min-width: 0;
+}
+.edit-minutes-input {
+  width: 56px;
+  flex-shrink: 0;
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.save-btn,
+.cancel-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.save-btn {
+  color: var(--p-green-ink, var(--p-green));
+}
+.save-btn:hover {
+  background: var(--p-bg);
+}
+.cancel-btn {
+  color: var(--p-ink-faint);
+}
+.cancel-btn:hover {
   color: var(--p-rose-ink);
 }
 </style>
