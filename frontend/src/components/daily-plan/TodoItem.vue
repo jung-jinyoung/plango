@@ -31,9 +31,11 @@
       type="button"
       class="tag-chip"
       :class="`is-${taggedGoal.color}`"
+      :title="taggedGoal.title"
+      :aria-label="`태그: ${taggedGoal.title}`"
       @click="openPicker"
     >
-      <span class="dot" aria-hidden="true" />{{ taggedGoal.title }}
+      <span class="dot" aria-hidden="true" />
     </button>
     <button v-else-if="taggable" type="button" class="tag-add" @click="openPicker">+ 태그</button>
 
@@ -181,59 +183,44 @@ const { onPointerDown } = usePointerDrag({
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 3px 9px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border-radius: 999px;
-  color: var(--chip-ink, var(--p-rose-ink));
   background: color-mix(in srgb, var(--chip-color, var(--p-rose)) 16%, var(--p-surface));
   flex-shrink: 0;
-  max-width: 120px;
 }
 .tag-chip .dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--chip-color, var(--p-rose));
   flex-shrink: 0;
 }
-.tag-chip span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .tag-chip.is-rose {
   --chip-color: var(--p-rose);
-  --chip-ink: var(--p-rose-ink);
 }
 .tag-chip.is-amber {
   --chip-color: var(--p-amber);
-  --chip-ink: var(--p-amber-ink);
 }
 .tag-chip.is-green {
   --chip-color: var(--p-green);
-  --chip-ink: var(--p-green-ink);
 }
 .tag-chip.is-teal {
   --chip-color: var(--p-teal);
-  --chip-ink: var(--p-teal-ink);
 }
 .tag-chip.is-blue {
   --chip-color: var(--p-blue);
-  --chip-ink: var(--p-blue-ink);
 }
 .tag-chip.is-lavender {
   --chip-color: var(--p-lavender);
-  --chip-ink: var(--p-lavender-ink);
 }
 .tag-chip.is-plum {
   --chip-color: var(--p-plum);
-  --chip-ink: var(--p-plum-ink);
 }
 .tag-chip.is-slate {
   --chip-color: var(--p-slate);
-  --chip-ink: var(--p-slate-ink);
 }
 .delete-btn {
   appearance: none;

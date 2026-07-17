@@ -1,22 +1,42 @@
 <template>
   <div>
     <div class="daily-layout">
-      <BaseCard class="todo-panel">
+      <div class="todo-panel">
+        <div class="goal-mini-section">
+          <h3 class="goal-mini-head">이번 주 목표</h3>
+          <div class="goal-mini-list">
+            <button
+              v-for="goal in goalStore.weeklyGoals"
+              :key="goal.id"
+              type="button"
+              class="goal-mini-item"
+              :class="`is-${goal.color}`"
+              @click="goToGoal(goal.id)"
+            >
+              <span class="dot" aria-hidden="true" />
+              <span class="title">{{ goal.title }}</span>
+              <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+            </button>
+            <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+          </div>
+        </div>
+
         <div class="panel-head">
           <h2>할 일</h2>
           <span class="count">{{ unplacedTodos.length }}개</span>
         </div>
-        <TodoList
-          :todos="unplacedTodos"
-          @toggle="handleToggleTodo"
-          @delete="handleDeleteTodo"
-          @tag="handleTagOne"
-        />
-      </BaseCard>
+        <BaseCard class="todo-list-card">
+          <TodoList
+            :todos="unplacedTodos"
+            @toggle="handleToggleTodo"
+            @delete="handleDeleteTodo"
+            @tag="handleTagOne"
+          />
+        </BaseCard>
+      </div>
 
       <div class="timeline-panel">
         <div class="panel-head">
-          <h2>타임라인</h2>
           <button type="button" class="end-day-link" @click="handleEndDay">하루 마감</button>
         </div>
         <DailyTimeline
@@ -67,10 +87,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
-import BaseCard from '@/components/ui/BaseCard.vue'
+import { useRouter } from 'vue-router'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
 import TodoList from '@/components/daily-plan/TodoList.vue'
 import DailyTimeline from '@/components/daily-plan/DailyTimeline.vue'
 import TodoInputModal from '@/components/daily-plan/TodoInputModal.vue'
@@ -81,14 +102,23 @@ import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
 import { useAiPlanningStore } from '@/stores/ai-planning'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
+import { useGoalStore } from '@/stores/goals'
 
 const $q = useQuasar()
+const router = useRouter()
 const calendarNav = useCalendarNavStore()
 const dateISO = computed(() => calendarNav.currentDateISO)
 
 const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()
 const aiPlanning = useAiPlanningStore()
+const goalStore = useGoalStore()
+
+onMounted(() => goalStore.load())
+
+function goToGoal(goalId) {
+  router.push({ path: '/app/goals', query: { weekly: goalId } })
+}
 
 const showTodoInput = ref(false)
 const showAiPanel = computed(() => aiPlanning.status !== 'idle')
@@ -228,13 +258,94 @@ function handleTagToGoal({ todoIds, goalId }) {
 <style scoped>
 .daily-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 420px 1fr;
   gap: 24px;
   margin-top: 20px;
   align-items: start;
 }
 .todo-panel {
-  padding: 20px;
+  width: 100%;
+}
+.goal-mini-section {
+  margin-bottom: 20px;
+}
+.goal-mini-head {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--p-ink-faint);
+  margin: 0 0 8px;
+}
+.goal-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.goal-mini-item {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 4px;
+  border-radius: var(--p-radius-xs);
+  font-family: inherit;
+  text-align: left;
+}
+.goal-mini-item:hover {
+  background: var(--p-bg);
+}
+.goal-mini-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot-color, var(--p-rose));
+  flex-shrink: 0;
+}
+.goal-mini-item .title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--p-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.goal-mini-item.is-rose {
+  --dot-color: var(--p-rose);
+}
+.goal-mini-item.is-amber {
+  --dot-color: var(--p-amber);
+}
+.goal-mini-item.is-green {
+  --dot-color: var(--p-green);
+}
+.goal-mini-item.is-teal {
+  --dot-color: var(--p-teal);
+}
+.goal-mini-item.is-blue {
+  --dot-color: var(--p-blue);
+}
+.goal-mini-item.is-lavender {
+  --dot-color: var(--p-lavender);
+}
+.goal-mini-item.is-plum {
+  --dot-color: var(--p-plum);
+}
+.goal-mini-item.is-slate {
+  --dot-color: var(--p-slate);
+}
+.goal-mini-list .empty {
+  color: var(--p-ink-faint);
+  font-size: 0.85rem;
+  padding: 4px;
+  margin: 0;
+}
+.todo-list-card {
+  padding: 12px 20px;
 }
 .panel-head {
   display: flex;
@@ -242,8 +353,7 @@ function handleTagToGoal({ todoIds, goalId }) {
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.panel-head h2,
-.timeline-panel h2 {
+.panel-head h2 {
   font-size: 1.02rem;
   font-weight: 700;
   margin: 0;
@@ -254,6 +364,7 @@ function handleTagToGoal({ todoIds, goalId }) {
   font-variant-numeric: tabular-nums;
 }
 .timeline-panel .panel-head {
+  justify-content: flex-end;
   margin-bottom: 12px;
 }
 .end-day-link {
