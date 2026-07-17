@@ -26,7 +26,7 @@
               @tag="$emit('tag', $event)"
               @delete="$emit('delete', $event)"
               @move-to-list="$emit('move-to-list', $event)"
-              @note-resize="handleNoteResize"
+              @card-resize="handleCardResize"
             />
             <span
               class="resize-handle resize-top"
@@ -78,12 +78,12 @@ const emit = defineEmits([
   'conflict',
 ])
 
-const pxPerHour = 84
+// 84 -> 112로 확대: 짧은 일정(15~20분)도 체크박스+제목줄 최소 UI가 시간만큼의 높이 안에
+// 최대한 들어가도록 (ScheduleCard의 아이콘 컴팩트화와 함께 적용)
+const pxPerHour = 112
 const pxPerMinute = pxPerHour / 60
 const MIN_HEIGHT = 36
 const REASON_MIN_HEIGHT = 56
-// 메모 한 줄 정도는 잘리지 않고 들어갈 만큼 모든 일정에 최소 높이를 확보한다
-const NOTE_MIN_HEIGHT = 96
 const MIN_DURATION = 15
 
 const hours = computed(() => {
@@ -92,40 +92,56 @@ const hours = computed(() => {
   return arr
 })
 
-// 펼쳐진 메모가 실제로 필요로 하는 추가 높이(id -> px) — ScheduleCard가 측정해서 알려줌
-const noteExtraHeight = ref({})
+// 각 카드가 실제로 필요로 하는 콘텐츠 높이(id -> px, 카드 패딩 포함) — ScheduleCard가 측정해서 알려줌
+const cardNaturalHeight = ref({})
 
-function handleNoteResize({ id, extraHeight }) {
-  const next = { ...noteExtraHeight.value }
-  if (extraHeight > 0) next[id] = extraHeight
+function handleCardResize({ id, naturalHeight }) {
+  const next = { ...cardNaturalHeight.value }
+  if (naturalHeight > 0) next[id] = naturalHeight
   else delete next[id]
-  noteExtraHeight.value = next
+  cardNaturalHeight.value = next
 }
 
-// 주어진 시각(minutes) 이전에 끝나는 일정들 중 펼쳐진 것들의 추가 높이 합 — 그만큼 이후 요소들을 밀어낸다
+// 시간(소요시간)만으로 정해지는 순수 시간 높이 (MIN_HEIGHT 클램프 없음)
+function pureTimeHeight(durationMinutes) {
+  return durationMinutes * pxPerMinute
+}
+
+// 시간 기반 높이 / MIN_HEIGHT / 콘텐츠 실측 높이 중 가장 큰 값 = 이 일정이 실제로 차지하는 높이
+function effectiveHeightOf(schedule) {
+  const timeHeight = pureTimeHeight(schedule.durationMinutes)
+  const natural = cardNaturalHeight.value[schedule.id] || 0
+  return Math.max(timeHeight, MIN_HEIGHT, natural)
+}
+
+// 순수 시간 높이 대비 실제로 더 필요한 높이(MIN_HEIGHT 클램프분 포함) — 이만큼만 이후 일정들을 밀어낸다
+function extraHeightOf(schedule) {
+  const timeHeight = pureTimeHeight(schedule.durationMinutes)
+  return Math.max(effectiveHeightOf(schedule) - timeHeight, 0)
+}
+
+// 주어진 시각(minutes) 이전에 끝나는 일정들의 초과 높이 합 — 그만큼 이후 요소들을 밀어낸다
 function displacementBefore(minutes) {
   let extra = 0
   for (const s of props.schedules) {
-    const own = noteExtraHeight.value[s.id]
-    if (!own) continue
-    if (s.startMinutes + s.durationMinutes <= minutes) extra += own
+    const e = extraHeightOf(s)
+    if (!e) continue
+    if (s.startMinutes + s.durationMinutes <= minutes) extra += e
   }
   return extra
 }
 
-const totalExtraHeight = computed(() =>
-  Object.values(noteExtraHeight.value).reduce((sum, v) => sum + (v || 0), 0),
-)
+const totalExtraHeight = computed(() => props.schedules.reduce((sum, s) => sum + extraHeightOf(s), 0))
 const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour + totalExtraHeight.value)
 
-// 펼쳐진 메모가 끝나는 지점이 걸친 시(hour) 행만 그만큼 늘린다 — 일반 문서 흐름이라 이후 행들은 자동으로 밀림
+// 초과 높이가 발생하는(=일정이 끝나는) 지점이 걸친 시(hour) 행만 그만큼 늘린다 — 일반 문서 흐름이라 이후 행들은 자동으로 밀림
 function hourRowHeight(h) {
   let extra = 0
   for (const s of props.schedules) {
-    const own = noteExtraHeight.value[s.id]
-    if (!own) continue
+    const e = extraHeightOf(s)
+    if (!e) continue
     const insertionMinute = s.startMinutes + s.durationMinutes
-    if (Math.floor(insertionMinute / 60) === h) extra += own
+    if (Math.floor((insertionMinute - 1) / 60) === h) extra += e
   }
   return pxPerHour + extra
 }
@@ -139,8 +155,9 @@ function slotStyle(schedule) {
   const startMinutes = preview?.startMinutes ?? schedule.startMinutes
   const durationMinutes = preview?.durationMinutes ?? schedule.durationMinutes
   const top = (startMinutes - props.startHour * 60) * pxPerMinute + displacementBefore(startMinutes)
-  const base = Math.max(durationMinutes * pxPerMinute, MIN_HEIGHT)
-  const height = Math.max(base, NOTE_MIN_HEIGHT) + (noteExtraHeight.value[schedule.id] || 0)
+  const height = preview
+    ? Math.max(durationMinutes * pxPerMinute, MIN_HEIGHT)
+    : effectiveHeightOf(schedule)
   return { top: `${top}px`, height: `${height}px` }
 }
 
