@@ -2,22 +2,40 @@
   <div>
     <div class="daily-layout">
       <div class="todo-panel">
-        <div class="goal-mini-section">
-          <h3 class="goal-mini-head">이번 주 목표</h3>
-          <div class="goal-mini-list">
-            <button
-              v-for="goal in goalStore.weeklyGoals"
-              :key="goal.id"
-              type="button"
-              class="goal-mini-item"
-              :class="`is-${goal.color}`"
-              @click="goToGoal(goal.id)"
-            >
-              <span class="dot" aria-hidden="true" />
-              <span class="title">{{ goal.title }}</span>
-              <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
-            </button>
-            <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+        <div class="goal-mini-section" :class="{ 'is-collapsed': !showWeeklyGoals }">
+          <div class="panel-head">
+            <h2>이번 주 목표</h2>
+            <div class="panel-head-right">
+              <span class="count">{{ goalStore.weeklyGoals.length }}개</span>
+              <button
+                type="button"
+                class="mini-toggle"
+                :class="{ 'is-expanded': showWeeklyGoals }"
+                aria-label="이번 주 목표 접기/펼치기"
+                @click="showWeeklyGoals = !showWeeklyGoals"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+              </button>
+            </div>
+          </div>
+          <div class="goal-mini-body-wrap" :class="{ 'is-expanded': showWeeklyGoals }">
+            <div class="goal-mini-body-inner">
+              <div class="goal-mini-list">
+                <button
+                  v-for="goal in goalStore.weeklyGoals"
+                  :key="goal.id"
+                  type="button"
+                  class="goal-mini-item"
+                  :class="`is-${goal.color}`"
+                  @click="goToGoal(goal.id)"
+                >
+                  <span class="dot" aria-hidden="true" />
+                  <span class="title">{{ goal.title }}</span>
+                  <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+                </button>
+                <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -120,6 +138,7 @@ function goToGoal(goalId) {
   router.push({ path: '/app/goals', query: { weekly: goalId } })
 }
 
+const showWeeklyGoals = ref(true)
 const showTodoInput = ref(false)
 const showAiPanel = computed(() => aiPlanning.status !== 'idle')
 const showConflictModal = ref(false)
@@ -269,16 +288,61 @@ function handleTagToGoal({ todoIds, goalId }) {
 .goal-mini-section {
   margin-bottom: 20px;
 }
-.goal-mini-head {
-  font-size: 0.82rem;
-  font-weight: 700;
+.goal-mini-section.is-collapsed {
+  margin-bottom: 0;
+}
+.panel-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mini-toggle {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
   color: var(--p-ink-faint);
-  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: -6px;
+  border-radius: 50%;
+  transition:
+    transform 200ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+.mini-toggle:hover {
+  background: var(--p-surface);
+  color: var(--p-ink);
+}
+.mini-toggle.is-expanded {
+  transform: rotate(180deg);
+}
+.goal-mini-body-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+.goal-mini-body-wrap.is-expanded {
+  grid-template-rows: 1fr;
+}
+.goal-mini-body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-mini-body-wrap {
+    transition: none;
+  }
 }
 .goal-mini-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  margin-top: 4px;
 }
 .goal-mini-item {
   appearance: none;
@@ -289,13 +353,18 @@ function handleTagToGoal({ todoIds, goalId }) {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 4px;
+  padding: 8px;
   border-radius: var(--p-radius-xs);
   font-family: inherit;
   text-align: left;
+  transition: background 120ms ease;
 }
 .goal-mini-item:hover {
-  background: var(--p-bg);
+  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 10%, var(--p-bg));
+}
+.goal-mini-item:focus-visible {
+  outline: 2px solid var(--dot-color, var(--p-rose));
+  outline-offset: -2px;
 }
 .goal-mini-item .dot {
   width: 8px;
