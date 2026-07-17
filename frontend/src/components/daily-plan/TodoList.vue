@@ -7,6 +7,7 @@
       @toggle="$emit('toggle', $event)"
       @delete="$emit('delete', $event)"
       @tag="$emit('tag', $event)"
+      @update="$emit('update', $event)"
     />
     <p v-if="todos.length === 0 && !isAdding" class="empty">오늘 할 일이 없어요.</p>
 
@@ -37,7 +38,7 @@ import TodoItem from './TodoItem.vue'
 defineProps({
   todos: { type: Array, required: true },
 })
-const emit = defineEmits(['toggle', 'delete', 'tag', 'add'])
+const emit = defineEmits(['toggle', 'delete', 'tag', 'add', 'update'])
 
 const isAdding = ref(false)
 const newTitle = ref('')

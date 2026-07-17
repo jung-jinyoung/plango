@@ -59,14 +59,22 @@
       </div>
       <p v-if="schedule.reason && !compact" class="reason">{{ schedule.reason }}</p>
 
-      <input
-        v-if="schedule.completed && !compact"
-        class="note-input"
-        type="text"
-        placeholder="메모 남기기 (선택)"
-        :value="schedule.note"
-        @input="$emit('update:note', { id: schedule.id, text: $event.target.value })"
-      />
+      <div class="note-row">
+        <textarea
+          v-if="noteExpanded"
+          ref="noteInputEl"
+          class="note-input"
+          rows="1"
+          placeholder="메모 남기기 (선택)"
+          :value="schedule.note"
+          @input="handleNoteInput"
+          @blur="noteExpanded = false"
+        />
+        <button v-else-if="schedule.note" type="button" class="note-preview" @click="openNote">
+          {{ schedule.note }}
+        </button>
+        <button v-else type="button" class="note-add" @click="openNote">+ 메모</button>
+      </div>
     </div>
   </div>
 </template>
@@ -109,6 +117,29 @@ function handlePick(value) {
   showPicker.value = false
 }
 
+const noteExpanded = ref(false)
+const noteInputEl = ref(null)
+
+// 기본 1줄 높이에서 내용이 늘어나는 만큼만 자연스럽게 커지도록
+function autoGrowNote(el) {
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
+}
+
+function openNote() {
+  noteExpanded.value = true
+  nextTick(() => {
+    noteInputEl.value?.focus()
+    autoGrowNote(noteInputEl.value)
+  })
+}
+
+function handleNoteInput(e) {
+  emit('update:note', { id: props.schedule.id, text: e.target.value })
+  autoGrowNote(e.target)
+}
+
 const dragStore = props.draggable ? useDragStore() : null
 const isDragging = ref(false)
 
@@ -145,7 +176,7 @@ const { onPointerDown } = usePointerDrag({
   background: var(--p-surface);
   box-shadow: var(--p-shadow-raised-sm);
   border-left: 3px solid var(--card-accent, transparent);
-  overflow: hidden;
+  position: relative;
 }
 .schedule-card.is-rose {
   --card-accent: var(--p-rose);
@@ -173,6 +204,7 @@ const { onPointerDown } = usePointerDrag({
 }
 .schedule-card.is-completed {
   opacity: 0.7;
+  z-index: 2;
 }
 .drag-handle {
   color: var(--p-ink-faint);
@@ -228,19 +260,60 @@ const { onPointerDown } = usePointerDrag({
   color: var(--p-ink-faint);
   margin: 2px 0 0;
 }
-.note-input {
+.note-row {
   margin-top: 6px;
+}
+.note-input {
+  display: block;
   width: 100%;
   border: none;
   background: var(--p-bg);
   border-radius: var(--p-radius-xs);
   padding: 6px 10px;
   font-size: 0.78rem;
+  line-height: 1.4;
   color: var(--p-ink);
   font-family: inherit;
+  resize: none;
+  overflow: hidden;
 }
 .note-input::placeholder {
   color: var(--p-ink-faint);
+}
+.note-preview {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  padding: 4px 8px;
+  border-radius: var(--p-radius-xs);
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 16%, transparent);
+  color: var(--p-ink);
+  font-size: 0.76rem;
+  font-family: inherit;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: hidden;
+}
+.note-add {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.note-add:hover {
+  color: var(--p-lavender);
+  background: var(--p-bg);
 }
 .tag-picker {
   border: none;

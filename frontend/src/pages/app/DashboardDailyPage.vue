@@ -52,6 +52,7 @@
             @delete="handleDeleteTodo"
             @tag="handleTagOne"
             @add="handleQuickAddTodo"
+            @update="handleUpdateTodo"
           />
         </BaseCard>
       </div>
@@ -70,6 +71,7 @@
           @move-to-list="handleScheduleMoveToList"
           @commit-todo="handleCommitTodo"
           @commit-move="handleCommitMove"
+          @commit-resize="handleCommitResize"
           @conflict="handleConflict"
         />
       </div>
@@ -167,6 +169,9 @@ function handleToggleTodo(id) {
 function handleDeleteTodo(id) {
   todoStore.removeTodo(dateISO.value, id)
 }
+function handleUpdateTodo({ id, title, estimatedMinutes }) {
+  todoStore.updateTodo(dateISO.value, id, { title, estimatedMinutes })
+}
 function handleToggleComplete(id) {
   scheduleStore.toggleComplete(dateISO.value, id)
   const schedule = schedules.value.find((s) => s.id === id)
@@ -241,6 +246,9 @@ function handleCommitTodo({ todoId, title, startMinutes, durationMinutes, catego
 }
 function handleCommitMove({ scheduleId, startMinutes }) {
   scheduleStore.moveSchedule(dateISO.value, scheduleId, startMinutes)
+}
+function handleCommitResize({ scheduleId, startMinutes, durationMinutes }) {
+  scheduleStore.resizeSchedule(dateISO.value, scheduleId, startMinutes, durationMinutes)
 }
 
 // ---- 타임라인 카드에서 직접 태그/삭제/할 일 리스트로 이동 ----

@@ -52,6 +52,12 @@ export const useTodoStore = defineStore('todos', () => {
     if (todo) todo.done = value
   }
 
+  // 제목/예상 소요시간 등 할 일 내용 수정
+  function updateTodo(dateISO, id, patch) {
+    const todo = list(dateISO).find((t) => t.id === id)
+    if (todo) Object.assign(todo, patch)
+  }
+
   // 할 일을 주간 목표에 태그(또는 태그 해제, goalId=null)한다
   function assignGoal(dateISO, id, goalId) {
     const todo = list(dateISO).find((t) => t.id === id)
@@ -72,5 +78,15 @@ export const useTodoStore = defineStore('todos', () => {
     })
   }
 
-  return { todosByDate, list, addTodo, removeTodo, toggleTodo, setDone, assignGoal, carryOverToTomorrow }
+  return {
+    todosByDate,
+    list,
+    addTodo,
+    removeTodo,
+    toggleTodo,
+    setDone,
+    updateTodo,
+    assignGoal,
+    carryOverToTomorrow,
+  }
 })

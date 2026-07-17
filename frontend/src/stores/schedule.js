@@ -67,6 +67,15 @@ export const useScheduleStore = defineStore('schedule', () => {
     if (schedule) schedule.startMinutes = newStartMinutes
   }
 
+  // 타임라인에서 가장자리 드래그로 시작/소요시간을 함께 조정
+  function resizeSchedule(dateISO, id, startMinutes, durationMinutes) {
+    const schedule = list(dateISO).find((s) => s.id === id)
+    if (schedule) {
+      schedule.startMinutes = startMinutes
+      schedule.durationMinutes = durationMinutes
+    }
+  }
+
   // 주어진 시간대와 겹치는 기존 일정을 찾는다 (excludeId는 자기 자신 재배치 시 제외용)
   function findConflict(dateISO, { startMinutes, durationMinutes }, excludeId = null) {
     const end = startMinutes + durationMinutes
@@ -99,6 +108,7 @@ export const useScheduleStore = defineStore('schedule', () => {
     setTag,
     removeSchedule,
     moveSchedule,
+    resizeSchedule,
     findConflict,
     nextFreeStart,
   }

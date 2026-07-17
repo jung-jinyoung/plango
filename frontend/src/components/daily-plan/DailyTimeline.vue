@@ -26,6 +26,16 @@
               @delete="$emit('delete', $event)"
               @move-to-list="$emit('move-to-list', $event)"
             />
+            <span
+              class="resize-handle resize-top"
+              aria-hidden="true"
+              @pointerdown="startResize($event, schedule, 'top')"
+            />
+            <span
+              class="resize-handle resize-bottom"
+              aria-hidden="true"
+              @pointerdown="startResize($event, schedule, 'bottom')"
+            />
           </div>
 
           <div v-if="ghost" class="ghost-slot" :class="`is-${ghost.categoryColor}`" :style="ghostStyle">
@@ -62,6 +72,7 @@ const emit = defineEmits([
   'move-to-list',
   'commit-todo',
   'commit-move',
+  'commit-resize',
   'conflict',
 ])
 
@@ -69,6 +80,9 @@ const pxPerHour = 84
 const pxPerMinute = pxPerHour / 60
 const MIN_HEIGHT = 36
 const REASON_MIN_HEIGHT = 56
+// 메모(최대 2줄 미리보기)가 잘리지 않고 들어갈 만큼 모든 일정에 최소 높이를 확보한다
+const NOTE_MIN_HEIGHT = 96
+const MIN_DURATION = 15
 
 const hours = computed(() => {
   const arr = []
@@ -77,9 +91,16 @@ const hours = computed(() => {
 })
 const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour)
 
+// 리사이즈 중인 일정의 실시간 미리보기 (드래그 중엔 실제 스토어를 건드리지 않고 여기서만 반영)
+const resizePreview = ref(null) // { id, startMinutes, durationMinutes }
+
 function slotStyle(schedule) {
-  const top = (schedule.startMinutes - props.startHour * 60) * pxPerMinute
-  const height = Math.max(schedule.durationMinutes * pxPerMinute, MIN_HEIGHT)
+  const preview = resizePreview.value?.id === schedule.id ? resizePreview.value : null
+  const startMinutes = preview?.startMinutes ?? schedule.startMinutes
+  const durationMinutes = preview?.durationMinutes ?? schedule.durationMinutes
+  const top = (startMinutes - props.startHour * 60) * pxPerMinute
+  const base = Math.max(durationMinutes * pxPerMinute, MIN_HEIGHT)
+  const height = Math.max(base, NOTE_MIN_HEIGHT)
   return { top: `${top}px`, height: `${height}px` }
 }
 
@@ -183,6 +204,77 @@ function handleGlobalPointerUp(e) {
   }
 }
 
+// ---- 위/아래 가장자리 드래그로 시간 길이 조정 (캘린더 리사이즈) ----
+// 다른 일정과 겹치기 직전까지만 허용 — 충돌 모달 없이 조용히 클램프한다
+let resizing = null // { id, edge, originalStart, originalEnd }
+
+function clampResize(id, edge, candidateStart, candidateDuration, originalStart, originalEnd) {
+  const others = props.schedules.filter((s) => s.id !== id)
+  const dayStart = props.startHour * 60
+  const dayEnd = props.endHour * 60
+
+  if (edge === 'bottom') {
+    let maxEnd = dayEnd
+    for (const o of others) {
+      if (o.startMinutes >= originalStart) maxEnd = Math.min(maxEnd, o.startMinutes)
+    }
+    const end = Math.min(originalStart + candidateDuration, maxEnd)
+    return { start: originalStart, duration: Math.max(end - originalStart, MIN_DURATION) }
+  }
+
+  let minStart = dayStart
+  for (const o of others) {
+    const oEnd = o.startMinutes + o.durationMinutes
+    if (oEnd <= originalEnd) minStart = Math.max(minStart, oEnd)
+  }
+  const start = Math.max(candidateStart, minStart)
+  return { start, duration: Math.max(originalEnd - start, MIN_DURATION) }
+}
+
+function startResize(e, schedule, edge) {
+  e.preventDefault()
+  e.stopPropagation()
+  e.target.setPointerCapture?.(e.pointerId)
+  resizing = {
+    id: schedule.id,
+    edge,
+    originalStart: schedule.startMinutes,
+    originalEnd: schedule.startMinutes + schedule.durationMinutes,
+  }
+  resizePreview.value = { id: schedule.id, startMinutes: schedule.startMinutes, durationMinutes: schedule.durationMinutes }
+  window.addEventListener('pointermove', handleResizeMove)
+  window.addEventListener('pointerup', handleResizeEnd)
+}
+
+function handleResizeMove(e) {
+  if (!resizing || !slotsEl.value) return
+  const rect = slotsEl.value.getBoundingClientRect()
+  const raw = props.startHour * 60 + (e.clientY - rect.top) / pxPerMinute
+  const snapped = Math.round(raw / 15) * 15
+  const { id, edge, originalStart, originalEnd } = resizing
+
+  const candidateStart = edge === 'top' ? snapped : originalStart
+  const candidateDuration =
+    edge === 'bottom' ? Math.max(snapped - originalStart, MIN_DURATION) : originalEnd - snapped
+
+  const clamped = clampResize(id, edge, candidateStart, candidateDuration, originalStart, originalEnd)
+  resizePreview.value = { id, startMinutes: clamped.start, durationMinutes: clamped.duration }
+}
+
+function handleResizeEnd() {
+  window.removeEventListener('pointermove', handleResizeMove)
+  window.removeEventListener('pointerup', handleResizeEnd)
+  if (resizePreview.value) {
+    emit('commit-resize', {
+      scheduleId: resizePreview.value.id,
+      startMinutes: resizePreview.value.startMinutes,
+      durationMinutes: resizePreview.value.durationMinutes,
+    })
+  }
+  resizing = null
+  resizePreview.value = null
+}
+
 onMounted(() => window.addEventListener('pointerup', handleGlobalPointerUp))
 onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp))
 
@@ -271,6 +363,25 @@ const nowLineTop = computed(() => {
   position: absolute;
   left: 0;
   right: 0;
+}
+.resize-handle {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 8px;
+  cursor: ns-resize;
+  touch-action: none;
+  border-radius: 3px;
+  z-index: 3;
+}
+.resize-handle:hover {
+  background: color-mix(in srgb, var(--p-ink) 15%, transparent);
+}
+.resize-top {
+  top: -4px;
+}
+.resize-bottom {
+  bottom: -4px;
 }
 .empty {
   position: absolute;
