@@ -62,6 +62,7 @@
         </div>
         <DailyTimeline
           :schedules="schedules"
+          :is-today="isToday"
           @toggle-complete="handleToggleComplete"
           @update:note="handleUpdateNote"
           @tag="handleScheduleTag"
@@ -127,11 +128,13 @@ import { useScheduleStore } from '@/stores/schedule'
 import { useAiPlanningStore } from '@/stores/ai-planning'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { useGoalStore } from '@/stores/goals'
+import { getTodayISO } from '@/utils/date'
 
 const $q = useQuasar()
 const router = useRouter()
 const calendarNav = useCalendarNavStore()
 const dateISO = computed(() => calendarNav.currentDateISO)
+const isToday = computed(() => dateISO.value === getTodayISO())
 
 const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()

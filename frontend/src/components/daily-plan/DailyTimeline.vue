@@ -1,5 +1,5 @@
 <template>
-  <div class="timeline neu-sunken">
+  <div class="timeline neu-raised">
     <div class="timeline-scroll">
       <div class="grid" :style="{ height: `${totalHeight}px` }">
         <div class="hours">
@@ -7,6 +7,8 @@
             <span class="hour-label">{{ String(h).padStart(2, '0') }}:00</span>
           </div>
         </div>
+
+        <div v-if="isToday && nowLineTop !== null" class="now-line" :style="{ top: `${nowLineTop}px` }" />
 
         <div ref="slotsEl" class="slots">
           <div
@@ -50,6 +52,7 @@ const props = defineProps({
   schedules: { type: Array, required: true },
   startHour: { type: Number, default: 6 },
   endHour: { type: Number, default: 24 },
+  isToday: { type: Boolean, default: false },
 })
 const emit = defineEmits([
   'toggle-complete',
@@ -182,19 +185,61 @@ function handleGlobalPointerUp(e) {
 
 onMounted(() => window.addEventListener('pointerup', handleGlobalPointerUp))
 onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp))
+
+// 현재 시각 표시선 (WeekCalendarGrid와 동일 패턴) — 1분 단위로 갱신하기엔 과하니 1분 간격이면 충분
+const nowMinutes = ref(new Date().getHours() * 60 + new Date().getMinutes())
+let nowTimer = null
+onMounted(() => {
+  nowTimer = setInterval(() => {
+    nowMinutes.value = new Date().getHours() * 60 + new Date().getMinutes()
+  }, 60000)
+})
+onUnmounted(() => {
+  if (nowTimer) clearInterval(nowTimer)
+})
+const nowLineTop = computed(() => {
+  const min = props.startHour * 60
+  const max = props.endHour * 60
+  if (nowMinutes.value < min || nowMinutes.value > max) return null
+  return (nowMinutes.value - min) * pxPerMinute
+})
 </script>
 
 <style scoped>
 .timeline {
-  padding: 0;
-  overflow: hidden;
+  padding: 12px;
 }
 .timeline-scroll {
-  max-height: 640px;
-  overflow-y: auto;
+  margin-top: 8px;
+  padding-top: 12px;
 }
 .grid {
   position: relative;
+}
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 2px solid var(--p-rose);
+  z-index: 4;
+  pointer-events: none;
+}
+.now-line::before,
+.now-line::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--p-rose);
+}
+.now-line::before {
+  left: -3px;
+}
+.now-line::after {
+  right: -3px;
 }
 .hours {
   position: absolute;
@@ -212,7 +257,7 @@ onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp)
   color: var(--p-ink-faint);
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'SF Mono', monospace;
-  background: var(--p-bg);
+  background: var(--p-surface);
   padding: 0 4px;
 }
 .slots {
