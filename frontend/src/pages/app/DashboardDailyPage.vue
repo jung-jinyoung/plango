@@ -39,6 +39,7 @@
             </div>
           </div>
         </div>
+        <p class="todo-hint">위 목표 번호를 확인하고 "할 일/분/목표번호"로 빠르게 추가해보세요</p>
 
         <div class="panel-head">
           <h2>할 일</h2>
@@ -462,6 +463,11 @@ function handleTagToGoal({ todoIds, goalId }) {
 }
 .todo-list-card {
   padding: 12px 20px;
+}
+.todo-hint {
+  font-size: 0.76rem;
+  color: var(--p-ink-faint);
+  margin: 0 4px 14px;
 }
 .panel-head {
   display: flex;

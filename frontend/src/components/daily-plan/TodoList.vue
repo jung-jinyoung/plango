@@ -8,9 +8,7 @@
       @delete="$emit('delete', $event)"
       @tag="$emit('tag', $event)"
     />
-    <p v-if="todos.length === 0 && !isAdding" class="empty">
-      오늘 할 일이 없어요. 아래 "+ 할 일 추가"로 자유롭게 적어보세요.
-    </p>
+    <p v-if="todos.length === 0 && !isAdding" class="empty">오늘 할 일이 없어요.</p>
 
     <input
       v-if="isAdding"
@@ -100,6 +98,7 @@ function cancelAdd() {
   font-size: 0.88rem;
   font-weight: 600;
   padding: 10px 4px;
+  margin-top: 12px;
   border-radius: var(--p-radius-xs);
 }
 .quick-add-btn:hover {
@@ -111,7 +110,8 @@ function cancelAdd() {
   font-family: inherit;
   color: var(--p-ink);
   border-radius: var(--p-radius-xs);
-  padding: 10px 12px;
+  padding: 12px;
+  margin-top: 12px;
   font-size: 0.9rem;
 }
 .quick-add-input::placeholder {
