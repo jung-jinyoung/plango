@@ -49,6 +49,7 @@
             @toggle="handleToggleTodo"
             @delete="handleDeleteTodo"
             @tag="handleTagOne"
+            @add="handleQuickAddTodo"
           />
         </BaseCard>
       </div>
@@ -170,6 +171,10 @@ function handleUpdateNote({ id, text }) {
 function handleTodoSubmit(todos) {
   todos.forEach((t) => todoStore.addTodo(dateISO.value, t))
   aiPlanning.requestRecommendation(dateISO.value)
+}
+
+function handleQuickAddTodo(title) {
+  todoStore.addTodo(dateISO.value, { title })
 }
 
 function handleApplyAll() {

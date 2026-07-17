@@ -13,7 +13,9 @@
           type="text"
           class="title-input neu-sunken"
           placeholder="할 일을 입력하세요"
-          @keydown.enter.prevent="handleEnter(i)"
+          @keydown.enter.prevent="handleEnter(i, $event)"
+          @compositionstart="isComposing = true"
+          @compositionend="isComposing = false"
         />
         <input
           v-model.number="row.estimatedMinutes"
@@ -101,6 +103,7 @@ function blankRow() {
 
 const rows = ref([blankRow()])
 const inputRefs = ref([])
+const isComposing = ref(false)
 
 function setInputRef(el, i) {
   inputRefs.value[i] = el
@@ -124,7 +127,10 @@ function addRow() {
   nextTick(() => inputRefs.value[rows.value.length - 1]?.focus())
 }
 
-function handleEnter(i) {
+// 한글 등 조합형 입력(IME) 중에는 Enter가 조합 확정 목적으로 한 번 더 발화될 수 있어
+// isComposing 중엔 무시한다 — 안 그러면 빈 줄이 중복으로 추가됨
+function handleEnter(i, e) {
+  if (isComposing.value || e.isComposing) return
   if (i === rows.value.length - 1 && rows.value[i].title.trim()) {
     addRow()
   }
