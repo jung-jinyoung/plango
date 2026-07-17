@@ -92,7 +92,7 @@ const { onPointerDown } = usePointerDrag({
   border-radius: var(--p-radius-sm);
   background: var(--p-surface);
   box-shadow: var(--p-shadow-raised-sm);
-  border-left: 3px solid var(--card-accent, var(--p-rose));
+  border-left: 3px solid var(--card-accent, transparent);
   overflow: hidden;
 }
 .schedule-card.is-rose {

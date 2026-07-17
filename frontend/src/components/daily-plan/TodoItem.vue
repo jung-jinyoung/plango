@@ -97,7 +97,12 @@ const { onPointerDown } = usePointerDrag({
     isDragging.value = true
     dragStore.start(
       'todo',
-      { todoId: props.todo.id, title: props.todo.title, estimatedMinutes: props.todo.estimatedMinutes },
+      {
+        todoId: props.todo.id,
+        title: props.todo.title,
+        estimatedMinutes: props.todo.estimatedMinutes,
+        categoryColor: taggedGoal.value?.color ?? null,
+      },
       e,
     )
   },

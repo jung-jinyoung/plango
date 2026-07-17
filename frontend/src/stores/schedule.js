@@ -21,7 +21,7 @@ export const useScheduleStore = defineStore('schedule', () => {
       title: entry.title,
       startMinutes: entry.startMinutes,
       durationMinutes: entry.durationMinutes,
-      categoryColor: entry.categoryColor ?? 'rose',
+      categoryColor: entry.categoryColor ?? null,
       reason: entry.reason ?? null,
       completed: false,
       note: '',

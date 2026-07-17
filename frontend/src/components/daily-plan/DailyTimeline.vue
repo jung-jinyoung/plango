@@ -109,7 +109,7 @@ const ghost = computed(() => {
       startMinutes: minutesFromClientY(dragStore.pointerY, duration),
       durationMinutes: duration,
       title: dragStore.payload.title,
-      categoryColor: 'rose',
+      categoryColor: dragStore.payload.categoryColor,
     }
   }
   if (dragStore.type === 'schedule') {
@@ -153,7 +153,7 @@ function handleGlobalPointerUp(e) {
       title: payload.title,
       startMinutes,
       durationMinutes: duration,
-      categoryColor: 'rose',
+      categoryColor: payload.categoryColor,
     }
     if (conflict) emit('conflict', { pending, existing: conflict })
     else emit('commit-todo', pending)
@@ -229,8 +229,8 @@ onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp)
   left: 0;
   right: 0;
   border-radius: var(--p-radius-sm);
-  border: 2px dashed var(--card-accent, var(--p-rose));
-  background: color-mix(in srgb, var(--card-accent, var(--p-rose)) 12%, transparent);
+  border: 2px dashed var(--card-accent, var(--p-ink-faint));
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 12%, transparent);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -265,7 +265,7 @@ onUnmounted(() => window.removeEventListener('pointerup', handleGlobalPointerUp)
 .ghost-time {
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--card-accent, var(--p-rose));
+  color: var(--card-accent, var(--p-ink-faint));
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'SF Mono', monospace;
   flex-shrink: 0;
