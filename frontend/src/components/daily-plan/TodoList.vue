@@ -18,7 +18,7 @@
       v-model="newTitle"
       type="text"
       class="quick-add-input neu-sunken"
-      placeholder="할 일을 입력하고 Enter"
+      placeholder="할 일을 입력하고 Enter (예: 독서하기/60/1)"
       @keydown.enter.prevent="handleEnter"
       @keydown.esc.prevent="cancelAdd"
       @compositionstart="isComposing = true"

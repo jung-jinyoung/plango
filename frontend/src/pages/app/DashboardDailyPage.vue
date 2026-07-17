@@ -22,13 +22,14 @@
             <div class="goal-mini-body-inner">
               <div class="goal-mini-list">
                 <button
-                  v-for="goal in goalStore.weeklyGoals"
+                  v-for="(goal, idx) in goalStore.weeklyGoals"
                   :key="goal.id"
                   type="button"
                   class="goal-mini-item"
                   :class="`is-${goal.color}`"
                   @click="goToGoal(goal.id)"
                 >
+                  <span class="index" aria-hidden="true">{{ idx + 1 }}</span>
                   <span class="dot" aria-hidden="true" />
                   <span class="title">{{ goal.title }}</span>
                   <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
@@ -173,8 +174,35 @@ function handleTodoSubmit(todos) {
   aiPlanning.requestRecommendation(dateISO.value)
 }
 
-function handleQuickAddTodo(title) {
-  todoStore.addTodo(dateISO.value, { title })
+// "제목/분/목표번호" 단축 입력 — 목표번호는 "이번 주 목표" 미니 리스트에 보이는 순번(1부터) 기준
+function handleQuickAddTodo(raw) {
+  const [titlePart, minutesPart, goalIndexPart] = raw.split('/').map((s) => s.trim())
+  if (!titlePart) {
+    $q.notify({ message: '할 일 내용을 입력해주세요', icon: 'warning', color: 'warning', position: 'top' })
+    return
+  }
+  const warnings = []
+
+  let estimatedMinutes = null
+  if (minutesPart) {
+    const n = Number(minutesPart)
+    if (Number.isFinite(n) && n > 0) estimatedMinutes = n
+    else warnings.push(`분(${minutesPart})이 숫자가 아니라 무시했어요`)
+  }
+
+  let goalId = null
+  if (goalIndexPart) {
+    const idx = Number(goalIndexPart)
+    const goal = Number.isInteger(idx) && idx > 0 ? goalStore.weeklyGoals[idx - 1] : null
+    if (goal) goalId = goal.id
+    else warnings.push(`목표 번호(${goalIndexPart})가 유효하지 않아 태그하지 않았어요`)
+  }
+
+  todoStore.addTodo(dateISO.value, { title: titlePart, estimatedMinutes, goalId })
+
+  if (warnings.length > 0) {
+    $q.notify({ message: warnings.join(' / '), icon: 'warning', color: 'warning', position: 'top' })
+  }
 }
 
 function handleApplyAll() {
@@ -370,6 +398,20 @@ function handleTagToGoal({ todoIds, goalId }) {
 .goal-mini-item:focus-visible {
   outline: 2px solid var(--dot-color, var(--p-rose));
   outline-offset: -2px;
+}
+.goal-mini-item .index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--p-bg);
+  color: var(--p-ink-faint);
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 .goal-mini-item .dot {
   width: 8px;
