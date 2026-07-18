@@ -23,8 +23,13 @@
     />
 
     <div ref="bodyEl" class="body">
+      <div class="time-row">
+        <span class="time-badges">
+          <span class="time-badge">{{ startLabel }}</span>
+          <span class="time-badge">{{ endLabel }}</span>
+        </span>
+      </div>
       <div class="row-1">
-        <span class="time">{{ timeLabel }}</span>
         <span class="title" :class="{ 'is-done': schedule.completed }">{{ schedule.title }}</span>
         <span v-if="schedule.source === 'ai'" class="ai-badge">AI</span>
 
@@ -150,9 +155,9 @@ const emit = defineEmits([
   'card-resize',
 ])
 
-const timeLabel = computed(
-  () =>
-    `${minutesToLabel(props.schedule.startMinutes)}–${minutesToLabel(props.schedule.startMinutes + props.schedule.durationMinutes)}`,
+const startLabel = computed(() => minutesToLabel(props.schedule.startMinutes))
+const endLabel = computed(() =>
+  minutesToLabel(props.schedule.startMinutes + props.schedule.durationMinutes),
 )
 
 const goalStore = useGoalStore()
@@ -288,9 +293,13 @@ const { onPointerDown } = usePointerDrag({
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--p-radius-sm);
-  background: var(--p-surface);
+  /* 진짜 반투명(유리) 효과 — surface가 아니라 transparent로 섞어야 뒤 타임라인 그리드가 비쳐 보인다.
+     태그된 일정은 그 색으로, 태그 없는 일정은 중립 톤으로 옅게 — 둘 다 "유리" 느낌은 유지한다 */
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 20%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: var(--p-shadow-raised-sm);
-  border-left: 3px solid var(--card-accent, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 45%, transparent);
   position: relative;
 }
 .schedule-card.is-rose {
@@ -335,17 +344,29 @@ const { onPointerDown } = usePointerDrag({
   flex: 1;
   min-width: 0;
 }
+.time-row {
+  margin-bottom: 3px;
+}
 .row-1 {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.time {
-  font-size: 0.72rem;
-  color: var(--p-ink-faint);
+.time-badges {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.time-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--card-accent, var(--p-ink-faint));
+  padding: 2px 6px;
+  border-radius: 999px;
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'SF Mono', monospace;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 .title {
   flex: 1;
