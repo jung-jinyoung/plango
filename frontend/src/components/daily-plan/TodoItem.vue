@@ -20,12 +20,19 @@
         v-if="taggable && showPicker"
         ref="pickerEl"
         class="tag-picker"
-        :value="todo.goalId ?? ''"
+        :value="pickerValue"
         @change="handlePick($event.target.value)"
         @blur="showPicker = false"
       >
         <option value="">태그 해제</option>
-        <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+        <optgroup label="목표">
+          <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="`goal:${g.id}`">{{ g.title }}</option>
+        </optgroup>
+        <optgroup label="카테고리">
+          <option v-for="c in categoryStore.activeCategories" :key="c.color" :value="`category:${c.color}`">
+            {{ c.name }}
+          </option>
+        </optgroup>
       </select>
       <button
         v-else-if="taggable && taggedGoal"
@@ -34,6 +41,17 @@
         :class="`is-${taggedGoal.color}`"
         :title="taggedGoal.title"
         :aria-label="`태그: ${taggedGoal.title}`"
+        @click="openPicker"
+      >
+        <span class="dot" aria-hidden="true" />
+      </button>
+      <button
+        v-else-if="taggable && taggedCategory"
+        type="button"
+        class="tag-chip"
+        :class="`is-${taggedCategory.color}`"
+        :title="taggedCategory.name"
+        :aria-label="`태그: ${taggedCategory.name}`"
         @click="openPicker"
       >
         <span class="dot" aria-hidden="true" />
@@ -95,22 +113,36 @@ import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
 import { useDragStore } from '@/stores/drag'
 import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
+import { resolveTodoColor } from '@/utils/todo-color'
 
 const props = defineProps({
-  todo: { type: Object, required: true }, // { id, title, estimatedMinutes, deadlineMinutes, done, goalId }
+  todo: { type: Object, required: true }, // { id, title, estimatedMinutes, deadlineMinutes, done, goalId, categoryColor }
   draggable: { type: Boolean, default: true },
   deletable: { type: Boolean, default: true },
   taggable: { type: Boolean, default: true },
   editable: { type: Boolean, default: true },
 })
-const emit = defineEmits(['toggle', 'delete', 'tag', 'update'])
+const emit = defineEmits(['toggle', 'delete', 'tag', 'tag-category', 'update'])
 
 const deadlineLabel = computed(() => minutesToLabel(props.todo.deadlineMinutes))
 
 const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
 const taggedGoal = computed(
   () => goalStore.weeklyGoals.find((g) => g.id === props.todo.goalId) ?? null,
 )
+// 목표 태그가 없을 때만 카테고리 칩을 보여준다 — 목표가 카테고리보다 우선
+const taggedCategory = computed(() =>
+  taggedGoal.value
+    ? null
+    : (categoryStore.activeCategories.find((c) => c.color === props.todo.categoryColor) ?? null),
+)
+const pickerValue = computed(() => {
+  if (props.todo.goalId) return `goal:${props.todo.goalId}`
+  if (props.todo.categoryColor) return `category:${props.todo.categoryColor}`
+  return ''
+})
 
 const showPicker = ref(false)
 const pickerEl = ref(null)
@@ -121,7 +153,15 @@ function openPicker() {
 }
 
 function handlePick(value) {
-  emit('tag', { id: props.todo.id, goalId: value || null })
+  if (!value) {
+    if (taggedGoal.value) emit('tag', { id: props.todo.id, goalId: null })
+    else emit('tag-category', { id: props.todo.id, categoryColor: null })
+    showPicker.value = false
+    return
+  }
+  const [kind, val] = value.split(':')
+  if (kind === 'goal') emit('tag', { id: props.todo.id, goalId: val })
+  else emit('tag-category', { id: props.todo.id, categoryColor: val })
   showPicker.value = false
 }
 
@@ -160,7 +200,7 @@ const { onPointerDown } = usePointerDrag({
         todoId: props.todo.id,
         title: props.todo.title,
         estimatedMinutes: props.todo.estimatedMinutes,
-        categoryColor: taggedGoal.value?.color ?? null,
+        categoryColor: resolveTodoColor(props.todo, goalStore.weeklyGoals),
         goalId: props.todo.goalId ?? null,
       },
       e,

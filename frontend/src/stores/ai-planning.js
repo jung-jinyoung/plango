@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { recommendDailyPlan } from '@/services/ai/recommend-daily-plan'
+import { resolveTodoColor } from '@/utils/todo-color'
 import { useTodoStore } from './todos'
 import { useScheduleStore } from './schedule'
+import { useGoalStore } from './goals'
 
 export const useAiPlanningStore = defineStore('aiPlanning', () => {
   const status = ref('idle') // idle | loading | proposed | error
@@ -16,8 +18,12 @@ export const useAiPlanningStore = defineStore('aiPlanning', () => {
     try {
       const todoStore = useTodoStore()
       const scheduleStore = useScheduleStore()
+      const goalStore = useGoalStore()
       const alreadyScheduledIds = new Set(scheduleStore.list(dateISO).map((s) => s.todoId))
-      const todos = todoStore.list(dateISO).filter((t) => !t.done && !alreadyScheduledIds.has(t.id))
+      const todos = todoStore
+        .list(dateISO)
+        .filter((t) => !t.done && !alreadyScheduledIds.has(t.id))
+        .map((t) => ({ ...t, color: resolveTodoColor(t, goalStore.weeklyGoals) }))
 
       const result = await recommendDailyPlan({
         dateISO,

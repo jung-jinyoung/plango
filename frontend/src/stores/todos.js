@@ -13,6 +13,7 @@ export const useTodoStore = defineStore('todos', () => {
       id: crypto.randomUUID(),
       done: false,
       goalId: null,
+      categoryColor: null,
       ...t,
     }))
   }
@@ -22,7 +23,10 @@ export const useTodoStore = defineStore('todos', () => {
     return todosByDate.value[dateISO]
   }
 
-  function addTodo(dateISO, { title, estimatedMinutes = null, deadlineMinutes = null, goalId = null }) {
+  function addTodo(
+    dateISO,
+    { title, estimatedMinutes = null, deadlineMinutes = null, goalId = null, categoryColor = null },
+  ) {
     ensureDate(dateISO)
     const todo = {
       id: crypto.randomUUID(),
@@ -31,6 +35,7 @@ export const useTodoStore = defineStore('todos', () => {
       deadlineMinutes,
       done: false,
       goalId,
+      categoryColor,
     }
     todosByDate.value[dateISO].push(todo)
     return todo
@@ -64,6 +69,13 @@ export const useTodoStore = defineStore('todos', () => {
     if (todo) todo.goalId = goalId
   }
 
+  // 할 일을 카테고리에 태그(또는 태그 해제, categoryColor=null)한다.
+  // goalId는 건드리지 않는다 — 목표 태그가 있으면 표시/색상은 resolveTodoColor에서 항상 목표를 우선한다.
+  function assignCategory(dateISO, id, categoryColor) {
+    const todo = list(dateISO).find((t) => t.id === id)
+    if (todo) todo.categoryColor = categoryColor
+  }
+
   // D5 미완료 이월: 오늘 항목을 내일 날짜로 옮기고, 오늘 마감이었던 시간 정보는 초기화한다
   function carryOverToTomorrow(dateISO, id) {
     const todo = list(dateISO).find((t) => t.id === id)
@@ -87,6 +99,7 @@ export const useTodoStore = defineStore('todos', () => {
     setDone,
     updateTodo,
     assignGoal,
+    assignCategory,
     carryOverToTomorrow,
   }
 })

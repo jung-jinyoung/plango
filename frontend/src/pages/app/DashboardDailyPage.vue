@@ -39,7 +39,6 @@
             </div>
           </div>
         </div>
-        <p class="todo-hint">위 목표 번호를 확인하고 "할 일/분/목표번호"로 빠르게 추가해보세요</p>
 
         <div class="panel-head">
           <h2>할 일</h2>
@@ -51,10 +50,12 @@
             @toggle="handleToggleTodo"
             @delete="handleDeleteTodo"
             @tag="handleTagOne"
-            @add="handleQuickAddTodo"
+            @tag-category="handleCategoryTagOne"
             @update="handleUpdateTodo"
           />
         </BaseCard>
+
+        <TodoComposer :has-unplaced-todos="unplacedTodos.length > 0" @add-todo="handleAddTodo" @request-ai="handleRequestAi" />
       </div>
 
       <div class="timeline-panel">
@@ -76,13 +77,6 @@
         />
       </div>
     </div>
-
-    <BaseButton variant="primary" class="fab" @click="showTodoInput = true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14" /></svg>
-      할 일 추가
-    </BaseButton>
-
-    <TodoInputModal v-model="showTodoInput" @submit="handleTodoSubmit" />
 
     <AiRecommendationPanel
       :model-value="showAiPanel"
@@ -117,11 +111,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
-import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import TodoList from '@/components/daily-plan/TodoList.vue'
 import DailyTimeline from '@/components/daily-plan/DailyTimeline.vue'
-import TodoInputModal from '@/components/daily-plan/TodoInputModal.vue'
+import TodoComposer from '@/components/daily-plan/TodoComposer.vue'
 import AiRecommendationPanel from '@/components/daily-plan/AiRecommendationPanel.vue'
 import ScheduleConflictModal from '@/components/daily-plan/ScheduleConflictModal.vue'
 import CarryOverDialog from '@/components/daily-plan/CarryOverDialog.vue'
@@ -150,7 +143,6 @@ function goToGoal(goalId) {
 }
 
 const showWeeklyGoals = ref(true)
-const showTodoInput = ref(false)
 const showAiPanel = computed(() => aiPlanning.status !== 'idle')
 const showConflictModal = ref(false)
 const pendingConflict = ref(null) // { pending, existing }
@@ -181,40 +173,16 @@ function handleUpdateNote({ id, text }) {
   scheduleStore.setNote(dateISO.value, id, text)
 }
 
-function handleTodoSubmit(todos) {
-  todos.forEach((t) => todoStore.addTodo(dateISO.value, t))
-  aiPlanning.requestRecommendation(dateISO.value)
+function handleAddTodo(todo) {
+  todoStore.addTodo(dateISO.value, todo)
 }
 
-// "제목/분/목표번호" 단축 입력 — 목표번호는 "이번 주 목표" 미니 리스트에 보이는 순번(1부터) 기준
-function handleQuickAddTodo(raw) {
-  const [titlePart, minutesPart, goalIndexPart] = raw.split('/').map((s) => s.trim())
-  if (!titlePart) {
-    $q.notify({ message: '할 일 내용을 입력해주세요', icon: 'warning', color: 'warning', position: 'top' })
+function handleRequestAi() {
+  if (unplacedTodos.value.length === 0) {
+    $q.notify({ message: '배치할 할 일이 없어요', icon: 'warning', color: 'warning', position: 'top' })
     return
   }
-  const warnings = []
-
-  let estimatedMinutes = null
-  if (minutesPart) {
-    const n = Number(minutesPart)
-    if (Number.isFinite(n) && n > 0) estimatedMinutes = n
-    else warnings.push(`분(${minutesPart})이 숫자가 아니라 무시했어요`)
-  }
-
-  let goalId = null
-  if (goalIndexPart) {
-    const idx = Number(goalIndexPart)
-    const goal = Number.isInteger(idx) && idx > 0 ? goalStore.weeklyGoals[idx - 1] : null
-    if (goal) goalId = goal.id
-    else warnings.push(`목표 번호(${goalIndexPart})가 유효하지 않아 태그하지 않았어요`)
-  }
-
-  todoStore.addTodo(dateISO.value, { title: titlePart, estimatedMinutes, goalId })
-
-  if (warnings.length > 0) {
-    $q.notify({ message: warnings.join(' / '), icon: 'warning', color: 'warning', position: 'top' })
-  }
+  aiPlanning.requestRecommendation(dateISO.value)
 }
 
 function handleApplyAll() {
@@ -343,6 +311,15 @@ function handleTagOne({ id, goalId }) {
     position: 'top',
   })
 }
+function handleCategoryTagOne({ id, categoryColor }) {
+  todoStore.assignCategory(dateISO.value, id, categoryColor)
+  $q.notify({
+    message: categoryColor ? '카테고리에 태그했습니다' : '태그를 해제했습니다',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
+}
 function handleTagToGoal({ todoIds, goalId }) {
   todoIds.forEach((id) => todoStore.assignGoal(dateISO.value, id, goalId))
   showCarryOver.value = false
@@ -358,7 +335,7 @@ function handleTagToGoal({ todoIds, goalId }) {
 <style scoped>
 .daily-layout {
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 560px 1fr;
   gap: 24px;
   margin-top: 20px;
   align-items: start;
@@ -511,11 +488,6 @@ function handleTagToGoal({ todoIds, goalId }) {
 .todo-list-card {
   padding: 12px 20px;
 }
-.todo-hint {
-  font-size: 0.76rem;
-  color: var(--p-ink-faint);
-  margin: 0 4px 14px;
-}
 .panel-head {
   display: flex;
   align-items: baseline;
@@ -544,11 +516,5 @@ function handleTagToGoal({ todoIds, goalId }) {
   color: var(--p-lavender);
   font-size: 0.85rem;
   font-weight: 600;
-}
-.fab {
-  position: fixed;
-  right: 40px;
-  bottom: 36px;
-  z-index: 30;
 }
 </style>
