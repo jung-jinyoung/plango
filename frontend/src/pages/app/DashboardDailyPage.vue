@@ -57,6 +57,8 @@
                   </span>
                 </div>
               </div>
+
+              <p class="tag-hint">이번 주 목표는 번호로, 카테고리는 이름으로 할 일 입력창에서 바로 태그할 수 있어요.</p>
             </div>
           </div>
         </div>
@@ -76,7 +78,12 @@
           />
         </BaseCard>
 
-        <TodoComposer :has-unplaced-todos="unplacedTodos.length > 0" @add-todo="handleAddTodo" @request-ai="handleRequestAi" />
+        <TodoComposer
+          :has-unplaced-todos="unplacedTodos.length > 0"
+          @add-todo="handleAddTodo"
+          @request-ai="handleRequestAi"
+          @parse-warning="handleComposerWarning"
+        />
       </div>
 
       <div class="timeline-panel">
@@ -198,6 +205,10 @@ function handleUpdateNote({ id, text }) {
 
 function handleAddTodo(todo) {
   todoStore.addTodo(dateISO.value, todo)
+}
+
+function handleComposerWarning(message) {
+  $q.notify({ message, icon: 'warning', color: 'warning', position: 'top' })
 }
 
 function handleRequestAi() {
@@ -522,6 +533,11 @@ function handleTagToGoal({ todoIds, goalId }) {
   font-size: 0.85rem;
   padding: 4px;
   margin: 0;
+}
+.tag-hint {
+  font-size: 0.76rem;
+  color: var(--p-ink-faint);
+  margin: 12px 0 0;
 }
 .todo-list-card {
   padding: 12px 20px;

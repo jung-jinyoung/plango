@@ -5,10 +5,10 @@
         v-model.number="minutes"
         type="number"
         min="0"
-        step="5"
+        step="15"
         class="minutes-input neu-sunken"
         placeholder="분"
-        aria-label="예상 소요시간(분)"
+        aria-label="예상 소요시간(15분 단위)"
       />
       <input v-model="deadline" type="time" class="deadline-input neu-sunken" aria-label="마감 시각(선택)" />
       <select
@@ -40,7 +40,7 @@
         v-model="title"
         type="text"
         class="title-input neu-sunken"
-        placeholder="할 일을 입력하세요"
+        placeholder="할 일을 입력하세요 (예: 독서하기/30/1 또는 독서하기/30/독서)"
         @keydown.enter.prevent="handleEnter"
         @keydown.esc="resetFields"
         @compositionstart="isComposing = true"
@@ -78,7 +78,7 @@ import { inferCategoryColor } from '@/utils/todo-color'
 defineProps({
   hasUnplacedTodos: { type: Boolean, default: false },
 })
-const emit = defineEmits(['add-todo', 'request-ai'])
+const emit = defineEmits(['add-todo', 'request-ai', 'parse-warning'])
 
 const goalStore = useGoalStore()
 const categoryStore = useCategoryStore()
@@ -128,7 +128,8 @@ async function handleSaveGoal(payload) {
 // isComposing 중엔 무시한다
 function handleEnter(e) {
   if (isComposing.value || e.isComposing) return
-  submit()
+  if (title.value.includes('/')) submitShorthand()
+  else submit()
 }
 
 function submit() {
@@ -136,13 +137,64 @@ function submit() {
   if (!trimmed) return
   emit('add-todo', {
     title: trimmed,
-    estimatedMinutes: minutes.value || null,
+    estimatedMinutes: normalizeMinutes(minutes.value),
     deadlineMinutes: toMinutes(deadline.value),
     goalId: goalId.value || null,
     categoryColor: goalId.value ? null : categoryColor.value || null,
   })
   resetFields()
   nextTick(() => inputEl.value?.focus())
+}
+
+// 빠른 한 줄 입력: "할일 내용/시간/태그" — 태그는 태그 아코디언에 보이는 목표 번호(1부터) 또는 카테고리 이름
+function submitShorthand() {
+  const [titlePart, minutesPart, tagPart] = title.value.split('/').map((s) => s.trim())
+  if (!titlePart) return
+  const warnings = []
+
+  let estimatedMinutes = null
+  if (minutesPart) {
+    const n = Number(minutesPart)
+    if (Number.isFinite(n) && n > 0) {
+      estimatedMinutes = normalizeMinutes(n)
+      if (estimatedMinutes !== n) warnings.push(`시간은 15분 단위만 가능해 ${estimatedMinutes}분으로 보정했어요`)
+    } else {
+      warnings.push(`시간(${minutesPart})이 숫자가 아니라 무시했어요`)
+    }
+  }
+
+  let goalIdParsed = null
+  let categoryColorParsed = null
+  if (tagPart) {
+    const idx = Number(tagPart)
+    if (Number.isInteger(idx) && idx > 0) {
+      const goal = goalStore.weeklyGoals[idx - 1]
+      if (goal) goalIdParsed = goal.id
+      else warnings.push(`목표 번호(${tagPart})가 유효하지 않아 태그하지 않았어요`)
+    } else {
+      const category = categoryStore.activeCategories.find((c) => c.name === tagPart)
+      if (category) categoryColorParsed = category.color
+      else warnings.push(`카테고리(${tagPart})를 찾을 수 없어 태그하지 않았어요`)
+    }
+  }
+
+  emit('add-todo', {
+    title: titlePart,
+    estimatedMinutes,
+    deadlineMinutes: null,
+    goalId: goalIdParsed,
+    categoryColor: goalIdParsed ? null : categoryColorParsed,
+  })
+
+  if (warnings.length > 0) emit('parse-warning', warnings.join(' / '))
+
+  resetFields()
+  nextTick(() => inputEl.value?.focus())
+}
+
+function normalizeMinutes(n) {
+  if (!n || n <= 0) return null
+  return Math.max(15, Math.round(n / 15) * 15)
 }
 
 function resetFields() {
