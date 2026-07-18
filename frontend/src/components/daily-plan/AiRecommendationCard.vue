@@ -8,6 +8,7 @@
       <span class="time">{{ timeLabel }}</span>
     </div>
     <p class="title">{{ recommendation.title }}</p>
+    <p v-if="tagLabel" class="tag-label">{{ tagLabel }}</p>
     <p class="reason">{{ recommendation.reason }}</p>
     <button type="button" class="exclude-btn" @click="$emit('exclude', recommendation.todoId)">
       제외하기
@@ -18,16 +19,31 @@
 <script setup>
 import { computed } from 'vue'
 import { minutesToLabel } from '@/utils/date'
+import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
 
 const props = defineProps({
   recommendation: { type: Object, required: true },
 })
 defineEmits(['exclude'])
 
+const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
+
 const timeLabel = computed(
   () =>
     `${minutesToLabel(props.recommendation.startMinutes)}–${minutesToLabel(props.recommendation.startMinutes + props.recommendation.durationMinutes)} · ${props.recommendation.durationMinutes}분`,
 )
+
+const tagLabel = computed(() => {
+  if (props.recommendation.goalId) {
+    return goalStore.weeklyGoals.find((g) => g.id === props.recommendation.goalId)?.title ?? null
+  }
+  if (props.recommendation.categoryColor) {
+    return categoryStore.activeCategories.find((c) => c.color === props.recommendation.categoryColor)?.name ?? null
+  }
+  return null
+})
 </script>
 
 <style scoped>
@@ -90,6 +106,13 @@ const timeLabel = computed(
   font-weight: 700;
   color: var(--p-ink);
   margin: 0 0 4px;
+}
+.tag-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--card-accent, var(--p-lavender));
+  margin: 0 0 6px;
 }
 .reason {
   font-size: 0.8rem;

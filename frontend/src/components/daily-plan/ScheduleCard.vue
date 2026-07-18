@@ -23,8 +23,13 @@
     />
 
     <div ref="bodyEl" class="body">
+      <div class="time-row">
+        <span class="time-badges">
+          <span class="time-badge">{{ startLabel }}</span>
+          <span class="time-badge">{{ endLabel }}</span>
+        </span>
+      </div>
       <div class="row-1">
-        <span class="time">{{ timeLabel }}</span>
         <span class="title" :class="{ 'is-done': schedule.completed }">{{ schedule.title }}</span>
         <span v-if="schedule.source === 'ai'" class="ai-badge">AI</span>
 
@@ -32,20 +37,38 @@
           v-if="showPicker"
           ref="pickerEl"
           class="tag-picker"
-          :value="schedule.goalId ?? ''"
+          :value="pickerValue"
           @change="handlePick($event.target.value)"
           @blur="showPicker = false"
         >
           <option value="">태그 해제</option>
-          <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+          <optgroup label="목표">
+            <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="`goal:${g.id}`">{{ g.title }}</option>
+          </optgroup>
+          <optgroup label="카테고리">
+            <option v-for="c in categoryStore.activeCategories" :key="c.color" :value="`category:${c.color}`">
+              {{ c.name }}
+            </option>
+          </optgroup>
         </select>
         <button
           v-else-if="taggedGoal"
           type="button"
-          class="tag-chip"
+          class="tag-chip is-goal"
           :class="`is-${taggedGoal.color}`"
           :title="taggedGoal.title"
-          :aria-label="`태그: ${taggedGoal.title}`"
+          :aria-label="`목표 태그: ${taggedGoal.title}`"
+          @click="openPicker"
+        >
+          <span class="goal-index" aria-hidden="true">{{ taggedGoalIndex }}</span>
+        </button>
+        <button
+          v-else-if="taggedCategory"
+          type="button"
+          class="tag-chip"
+          :class="`is-${taggedCategory.color}`"
+          :title="taggedCategory.name"
+          :aria-label="`카테고리 태그: ${taggedCategory.name}`"
           @click="openPicker"
         >
           <span class="dot" aria-hidden="true" />
@@ -135,6 +158,7 @@ import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
 import { useDragStore } from '@/stores/drag'
 import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
 
 const props = defineProps({
   schedule: { type: Object, required: true },
@@ -145,20 +169,36 @@ const emit = defineEmits([
   'toggle-complete',
   'update:note',
   'tag',
+  'tag-category',
   'delete',
   'move-to-list',
   'card-resize',
 ])
 
-const timeLabel = computed(
-  () =>
-    `${minutesToLabel(props.schedule.startMinutes)}–${minutesToLabel(props.schedule.startMinutes + props.schedule.durationMinutes)}`,
+const startLabel = computed(() => minutesToLabel(props.schedule.startMinutes))
+const endLabel = computed(() =>
+  minutesToLabel(props.schedule.startMinutes + props.schedule.durationMinutes),
 )
 
 const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
 const taggedGoal = computed(
   () => goalStore.weeklyGoals.find((g) => g.id === props.schedule.goalId) ?? null,
 )
+const taggedGoalIndex = computed(
+  () => goalStore.weeklyGoals.findIndex((g) => g.id === props.schedule.goalId) + 1,
+)
+// 목표 태그가 없을 때만 카테고리 칩을 보여준다 — 목표가 카테고리보다 우선
+const taggedCategory = computed(() =>
+  taggedGoal.value
+    ? null
+    : (categoryStore.activeCategories.find((c) => c.color === props.schedule.categoryColor) ?? null),
+)
+const pickerValue = computed(() => {
+  if (props.schedule.goalId) return `goal:${props.schedule.goalId}`
+  if (props.schedule.categoryColor) return `category:${props.schedule.categoryColor}`
+  return ''
+})
 
 const showPicker = ref(false)
 const pickerEl = ref(null)
@@ -169,7 +209,15 @@ function openPicker() {
 }
 
 function handlePick(value) {
-  emit('tag', { id: props.schedule.id, goalId: value || null })
+  if (!value) {
+    if (taggedGoal.value) emit('tag', { id: props.schedule.id, goalId: null })
+    else emit('tag-category', { id: props.schedule.id, categoryColor: null })
+    showPicker.value = false
+    return
+  }
+  const [kind, val] = value.split(':')
+  if (kind === 'goal') emit('tag', { id: props.schedule.id, goalId: val })
+  else emit('tag-category', { id: props.schedule.id, categoryColor: val })
   showPicker.value = false
 }
 
@@ -288,9 +336,13 @@ const { onPointerDown } = usePointerDrag({
   gap: 8px;
   padding: 8px 12px;
   border-radius: var(--p-radius-sm);
-  background: var(--p-surface);
+  /* 진짜 반투명(유리) 효과 — surface가 아니라 transparent로 섞어야 뒤 타임라인 그리드가 비쳐 보인다.
+     태그된 일정은 그 색으로, 태그 없는 일정은 중립 톤으로 옅게 — 둘 다 "유리" 느낌은 유지한다 */
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 20%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: var(--p-shadow-raised-sm);
-  border-left: 3px solid var(--card-accent, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 45%, transparent);
   position: relative;
 }
 .schedule-card.is-rose {
@@ -335,17 +387,29 @@ const { onPointerDown } = usePointerDrag({
   flex: 1;
   min-width: 0;
 }
+.time-row {
+  margin-bottom: 3px;
+}
 .row-1 {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.time {
-  font-size: 0.72rem;
-  color: var(--p-ink-faint);
+.time-badges {
+  display: flex;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.time-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--card-accent, var(--p-ink-faint));
+  padding: 2px 6px;
+  border-radius: 999px;
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'SF Mono', monospace;
-  flex-shrink: 0;
+  white-space: nowrap;
 }
 .title {
   flex: 1;
@@ -523,6 +587,17 @@ const { onPointerDown } = usePointerDrag({
   border-radius: 50%;
   background: var(--chip-color, var(--p-rose));
   flex-shrink: 0;
+}
+/* 목표/카테고리 모두 같은 원형 칩이지만, 목표는 진하게 채운 원 안에 흰 숫자, 카테고리는 점으로 구분한다 */
+.tag-chip.is-goal {
+  background: var(--chip-color, var(--p-rose));
+}
+.tag-chip .goal-index {
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 .tag-chip.is-rose {
   --chip-color: var(--p-rose);

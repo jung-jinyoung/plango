@@ -24,6 +24,7 @@
               @toggle-complete="$emit('toggle-complete', $event)"
               @update:note="$emit('update:note', $event)"
               @tag="$emit('tag', $event)"
+              @tag-category="$emit('tag-category', $event)"
               @delete="$emit('delete', $event)"
               @move-to-list="$emit('move-to-list', $event)"
               @card-resize="handleCardResize"
@@ -70,6 +71,7 @@ const emit = defineEmits([
   'toggle-complete',
   'update:note',
   'tag',
+  'tag-category',
   'delete',
   'move-to-list',
   'commit-todo',

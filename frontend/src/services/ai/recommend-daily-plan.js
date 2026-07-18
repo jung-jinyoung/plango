@@ -4,10 +4,10 @@ import { minutesToLabel } from '@/utils/date'
  * 실제 AI 연동 지점. 지금은 마감 임박도·예상 소요시간 기준의 규칙 기반 목업이며,
  * 나중에 이 함수 내부만 실제 API 호출로 교체하면 됩니다. 시그니처(입력/출력 shape)는 유지하세요.
  *
- * @param {{ todos: Array<{id:string,title:string,estimatedMinutes:number|null,deadlineMinutes:number|null}>,
+ * @param {{ todos: Array<{id:string,title:string,estimatedMinutes:number|null,deadlineMinutes:number|null,goalId:string|null,color:string|null}>,
  *           existingSchedules: Array<{startMinutes:number,durationMinutes:number}>,
  *           dateISO: string }} input
- * @returns {Promise<{ recommendations: Array<{todoId:string,title:string,startMinutes:number,durationMinutes:number,categoryColor:string,reason:string}>, summary: string }>}
+ * @returns {Promise<{ recommendations: Array<{todoId:string,title:string,startMinutes:number,durationMinutes:number,categoryColor:string|null,goalId:string|null,reason:string}>, summary: string }>}
  */
 export function recommendDailyPlan({ todos, existingSchedules }) {
   return new Promise((resolve) => {
@@ -21,7 +21,6 @@ const WORK_START = 9 * 60
 const WORK_END = 21 * 60
 const LUNCH = [12 * 60, 13 * 60]
 const GAP = 10
-const COLORS = ['rose', 'blue', 'green', 'lavender']
 
 function buildRecommendations(todos, existingSchedules) {
   const sorted = [...todos].sort(compareTodos)
@@ -31,7 +30,7 @@ function buildRecommendations(todos, existingSchedules) {
   let cursor = WORK_START
   let urgentTitle = null
 
-  for (const [i, todo] of sorted.entries()) {
+  for (const todo of sorted) {
     const duration = todo.estimatedMinutes || 30
     const start = findFreeStart(cursor, duration, blocked)
     blocked.push([start, start + duration])
@@ -44,7 +43,8 @@ function buildRecommendations(todos, existingSchedules) {
       title: todo.title,
       startMinutes: start,
       durationMinutes: duration,
-      categoryColor: COLORS[i % COLORS.length],
+      categoryColor: todo.color ?? null,
+      goalId: todo.goalId ?? null,
       reason: reasonFor(todo, duration),
     })
   }
