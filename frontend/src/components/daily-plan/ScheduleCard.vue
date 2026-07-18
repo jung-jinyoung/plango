@@ -37,20 +37,38 @@
           v-if="showPicker"
           ref="pickerEl"
           class="tag-picker"
-          :value="schedule.goalId ?? ''"
+          :value="pickerValue"
           @change="handlePick($event.target.value)"
           @blur="showPicker = false"
         >
           <option value="">태그 해제</option>
-          <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="g.id">{{ g.title }}</option>
+          <optgroup label="목표">
+            <option v-for="g in goalStore.weeklyGoals" :key="g.id" :value="`goal:${g.id}`">{{ g.title }}</option>
+          </optgroup>
+          <optgroup label="카테고리">
+            <option v-for="c in categoryStore.activeCategories" :key="c.color" :value="`category:${c.color}`">
+              {{ c.name }}
+            </option>
+          </optgroup>
         </select>
         <button
           v-else-if="taggedGoal"
           type="button"
-          class="tag-chip"
+          class="tag-chip is-goal"
           :class="`is-${taggedGoal.color}`"
           :title="taggedGoal.title"
-          :aria-label="`태그: ${taggedGoal.title}`"
+          :aria-label="`목표 태그: ${taggedGoal.title}`"
+          @click="openPicker"
+        >
+          <span class="goal-index" aria-hidden="true">{{ taggedGoalIndex }}</span>
+        </button>
+        <button
+          v-else-if="taggedCategory"
+          type="button"
+          class="tag-chip"
+          :class="`is-${taggedCategory.color}`"
+          :title="taggedCategory.name"
+          :aria-label="`카테고리 태그: ${taggedCategory.name}`"
           @click="openPicker"
         >
           <span class="dot" aria-hidden="true" />
@@ -140,6 +158,7 @@ import { minutesToLabel } from '@/utils/date'
 import { usePointerDrag } from '@/composables/usePointerDrag'
 import { useDragStore } from '@/stores/drag'
 import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
 
 const props = defineProps({
   schedule: { type: Object, required: true },
@@ -150,6 +169,7 @@ const emit = defineEmits([
   'toggle-complete',
   'update:note',
   'tag',
+  'tag-category',
   'delete',
   'move-to-list',
   'card-resize',
@@ -161,9 +181,24 @@ const endLabel = computed(() =>
 )
 
 const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
 const taggedGoal = computed(
   () => goalStore.weeklyGoals.find((g) => g.id === props.schedule.goalId) ?? null,
 )
+const taggedGoalIndex = computed(
+  () => goalStore.weeklyGoals.findIndex((g) => g.id === props.schedule.goalId) + 1,
+)
+// 목표 태그가 없을 때만 카테고리 칩을 보여준다 — 목표가 카테고리보다 우선
+const taggedCategory = computed(() =>
+  taggedGoal.value
+    ? null
+    : (categoryStore.activeCategories.find((c) => c.color === props.schedule.categoryColor) ?? null),
+)
+const pickerValue = computed(() => {
+  if (props.schedule.goalId) return `goal:${props.schedule.goalId}`
+  if (props.schedule.categoryColor) return `category:${props.schedule.categoryColor}`
+  return ''
+})
 
 const showPicker = ref(false)
 const pickerEl = ref(null)
@@ -174,7 +209,15 @@ function openPicker() {
 }
 
 function handlePick(value) {
-  emit('tag', { id: props.schedule.id, goalId: value || null })
+  if (!value) {
+    if (taggedGoal.value) emit('tag', { id: props.schedule.id, goalId: null })
+    else emit('tag-category', { id: props.schedule.id, categoryColor: null })
+    showPicker.value = false
+    return
+  }
+  const [kind, val] = value.split(':')
+  if (kind === 'goal') emit('tag', { id: props.schedule.id, goalId: val })
+  else emit('tag-category', { id: props.schedule.id, categoryColor: val })
   showPicker.value = false
 }
 
@@ -544,6 +587,17 @@ const { onPointerDown } = usePointerDrag({
   border-radius: 50%;
   background: var(--chip-color, var(--p-rose));
   flex-shrink: 0;
+}
+/* 목표/카테고리 모두 같은 원형 칩이지만, 목표는 진하게 채운 원 안에 흰 숫자, 카테고리는 점으로 구분한다 */
+.tag-chip.is-goal {
+  background: var(--chip-color, var(--p-rose));
+}
+.tag-chip .goal-index {
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 .tag-chip.is-rose {
   --chip-color: var(--p-rose);

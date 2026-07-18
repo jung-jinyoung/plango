@@ -90,6 +90,7 @@
           @toggle-complete="handleToggleComplete"
           @update:note="handleUpdateNote"
           @tag="handleScheduleTag"
+          @tag-category="handleScheduleCategoryTag"
           @delete="handleScheduleDelete"
           @move-to-list="handleScheduleMoveToList"
           @commit-todo="handleCommitTodo"
@@ -273,6 +274,21 @@ function handleScheduleTag({ id, goalId }) {
     position: 'top',
   })
 }
+function handleScheduleCategoryTag({ id, categoryColor }) {
+  const schedule = schedules.value.find((s) => s.id === id)
+  if (!schedule) return
+  scheduleStore.setTag(dateISO.value, id, null, categoryColor)
+  if (schedule.todoId) {
+    todoStore.assignGoal(dateISO.value, schedule.todoId, null)
+    todoStore.assignCategory(dateISO.value, schedule.todoId, categoryColor)
+  }
+  $q.notify({
+    message: categoryColor ? '카테고리에 태그했습니다' : '태그를 해제했습니다',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
+}
 function handleScheduleDelete(id) {
   const schedule = schedules.value.find((s) => s.id === id)
   if (!schedule) return
@@ -352,6 +368,7 @@ function handleTagOne({ id, goalId }) {
   })
 }
 function handleCategoryTagOne({ id, categoryColor }) {
+  todoStore.assignGoal(dateISO.value, id, null)
   todoStore.assignCategory(dateISO.value, id, categoryColor)
   $q.notify({
     message: categoryColor ? '카테고리에 태그했습니다' : '태그를 해제했습니다',
