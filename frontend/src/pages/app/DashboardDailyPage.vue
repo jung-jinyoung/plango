@@ -2,39 +2,60 @@
   <div>
     <div class="daily-layout">
       <div class="todo-panel">
-        <div class="goal-mini-section" :class="{ 'is-collapsed': !showWeeklyGoals }">
+        <div class="tag-accordion" :class="{ 'is-collapsed': !showTagAccordion }">
           <div class="panel-head">
-            <h2>이번 주 목표</h2>
-            <div class="panel-head-right">
-              <span class="count">{{ goalStore.weeklyGoals.length }}개</span>
-              <button
-                type="button"
-                class="mini-toggle"
-                :class="{ 'is-expanded': showWeeklyGoals }"
-                aria-label="이번 주 목표 접기/펼치기"
-                @click="showWeeklyGoals = !showWeeklyGoals"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-              </button>
-            </div>
+            <h2>태그</h2>
+            <button
+              type="button"
+              class="mini-toggle"
+              :class="{ 'is-expanded': showTagAccordion }"
+              aria-label="태그 접기/펼치기"
+              @click="showTagAccordion = !showTagAccordion"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
           </div>
-          <div class="goal-mini-body-wrap" :class="{ 'is-expanded': showWeeklyGoals }">
-            <div class="goal-mini-body-inner">
-              <div class="goal-mini-list">
-                <button
-                  v-for="(goal, idx) in goalStore.weeklyGoals"
-                  :key="goal.id"
-                  type="button"
-                  class="goal-mini-item"
-                  :class="`is-${goal.color}`"
-                  @click="goToGoal(goal.id)"
-                >
-                  <span class="index" aria-hidden="true">{{ idx + 1 }}</span>
-                  <span class="dot" aria-hidden="true" />
-                  <span class="title">{{ goal.title }}</span>
-                  <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
-                </button>
-                <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+          <div class="tag-body-wrap" :class="{ 'is-expanded': showTagAccordion }">
+            <div class="tag-body-inner">
+              <div class="tag-group">
+                <div class="tag-group-head">
+                  <span class="tag-group-label">이번 주 목표</span>
+                  <span class="count">{{ goalStore.weeklyGoals.length }}개</span>
+                </div>
+                <div class="tag-chip-row">
+                  <button
+                    v-for="(goal, idx) in goalStore.weeklyGoals"
+                    :key="goal.id"
+                    type="button"
+                    class="tag-pill"
+                    :class="`is-${goal.color}`"
+                    @click="goToGoal(goal.id)"
+                  >
+                    <span class="index" aria-hidden="true">{{ idx + 1 }}</span>
+                    <span class="dot" aria-hidden="true" />
+                    <span class="title">{{ goal.title }}</span>
+                    <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+                  </button>
+                  <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+                </div>
+              </div>
+
+              <div class="tag-group">
+                <div class="tag-group-head">
+                  <span class="tag-group-label">카테고리</span>
+                  <span class="count">{{ categoryStore.activeCategories.length }}개</span>
+                </div>
+                <div class="tag-chip-row">
+                  <span
+                    v-for="c in categoryStore.activeCategories"
+                    :key="c.color"
+                    class="tag-pill is-static"
+                    :class="`is-${c.color}`"
+                  >
+                    <span class="dot" aria-hidden="true" />
+                    <span class="title">{{ c.name }}</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -123,6 +144,7 @@ import { useScheduleStore } from '@/stores/schedule'
 import { useAiPlanningStore } from '@/stores/ai-planning'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
 import { getTodayISO } from '@/utils/date'
 
 const $q = useQuasar()
@@ -135,6 +157,7 @@ const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()
 const aiPlanning = useAiPlanningStore()
 const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
 
 onMounted(() => goalStore.load())
 
@@ -142,7 +165,7 @@ function goToGoal(goalId) {
   router.push({ path: '/app/goals', query: { weekly: goalId } })
 }
 
-const showWeeklyGoals = ref(true)
+const showTagAccordion = ref(true)
 const showAiPanel = computed(() => aiPlanning.status !== 'idle')
 const showConflictModal = ref(false)
 const pendingConflict = ref(null) // { pending, existing }
@@ -343,16 +366,11 @@ function handleTagToGoal({ todoIds, goalId }) {
 .todo-panel {
   width: 100%;
 }
-.goal-mini-section {
+.tag-accordion {
   margin-bottom: 20px;
 }
-.goal-mini-section.is-collapsed {
+.tag-accordion.is-collapsed {
   margin-bottom: 0;
-}
-.panel-head-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 .mini-toggle {
   appearance: none;
@@ -379,52 +397,70 @@ function handleTagToGoal({ todoIds, goalId }) {
 .mini-toggle.is-expanded {
   transform: rotate(180deg);
 }
-.goal-mini-body-wrap {
+.tag-body-wrap {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 220ms ease;
 }
-.goal-mini-body-wrap.is-expanded {
+.tag-body-wrap.is-expanded {
   grid-template-rows: 1fr;
 }
-.goal-mini-body-inner {
+.tag-body-inner {
   overflow: hidden;
   min-height: 0;
 }
 @media (prefers-reduced-motion: reduce) {
-  .goal-mini-body-wrap {
+  .tag-body-wrap {
     transition: none;
   }
 }
-.goal-mini-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 4px;
+.tag-group {
+  margin-top: 10px;
 }
-.goal-mini-item {
+.tag-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.tag-group-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--p-ink-faint);
+}
+.tag-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag-pill {
   appearance: none;
   border: none;
   cursor: pointer;
-  background: transparent;
-  display: flex;
+  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 10%, var(--p-bg));
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px;
-  border-radius: var(--p-radius-xs);
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
   font-family: inherit;
-  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--p-ink);
+  max-width: 220px;
   transition: background 120ms ease;
 }
-.goal-mini-item:hover {
-  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 10%, var(--p-bg));
+.tag-pill:hover {
+  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 18%, var(--p-bg));
 }
-.goal-mini-item:focus-visible {
+.tag-pill:focus-visible {
   outline: 2px solid var(--dot-color, var(--p-rose));
   outline-offset: -2px;
 }
-.goal-mini-item .index {
+.tag-pill.is-static {
+  cursor: default;
+}
+.tag-pill .index {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -438,48 +474,50 @@ function handleTagToGoal({ todoIds, goalId }) {
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
-.goal-mini-item .dot {
+.tag-pill .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--dot-color, var(--p-rose));
   flex-shrink: 0;
 }
-.goal-mini-item .title {
-  flex: 1;
+.tag-pill .title {
   min-width: 0;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--p-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.goal-mini-item.is-rose {
+.tag-pill .count {
+  font-size: 0.72rem;
+  color: var(--p-ink-faint);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.tag-pill.is-rose {
   --dot-color: var(--p-rose);
 }
-.goal-mini-item.is-amber {
+.tag-pill.is-amber {
   --dot-color: var(--p-amber);
 }
-.goal-mini-item.is-green {
+.tag-pill.is-green {
   --dot-color: var(--p-green);
 }
-.goal-mini-item.is-teal {
+.tag-pill.is-teal {
   --dot-color: var(--p-teal);
 }
-.goal-mini-item.is-blue {
+.tag-pill.is-blue {
   --dot-color: var(--p-blue);
 }
-.goal-mini-item.is-lavender {
+.tag-pill.is-lavender {
   --dot-color: var(--p-lavender);
 }
-.goal-mini-item.is-plum {
+.tag-pill.is-plum {
   --dot-color: var(--p-plum);
 }
-.goal-mini-item.is-slate {
+.tag-pill.is-slate {
   --dot-color: var(--p-slate);
 }
-.goal-mini-list .empty {
+.tag-chip-row .empty {
   color: var(--p-ink-faint);
   font-size: 0.85rem;
   padding: 4px;
