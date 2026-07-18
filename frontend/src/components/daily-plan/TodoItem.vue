@@ -37,13 +37,13 @@
       <button
         v-else-if="taggable && taggedGoal"
         type="button"
-        class="tag-chip"
+        class="tag-chip is-goal"
         :class="`is-${taggedGoal.color}`"
         :title="taggedGoal.title"
-        :aria-label="`태그: ${taggedGoal.title}`"
+        :aria-label="`목표 태그: ${taggedGoal.title}`"
         @click="openPicker"
       >
-        <span class="dot" aria-hidden="true" />
+        <span class="goal-index" aria-hidden="true">{{ taggedGoalIndex }}</span>
       </button>
       <button
         v-else-if="taggable && taggedCategory"
@@ -51,7 +51,7 @@
         class="tag-chip"
         :class="`is-${taggedCategory.color}`"
         :title="taggedCategory.name"
-        :aria-label="`태그: ${taggedCategory.name}`"
+        :aria-label="`카테고리 태그: ${taggedCategory.name}`"
         @click="openPicker"
       >
         <span class="dot" aria-hidden="true" />
@@ -132,6 +132,8 @@ const categoryStore = useCategoryStore()
 const taggedGoal = computed(
   () => goalStore.weeklyGoals.find((g) => g.id === props.todo.goalId) ?? null,
 )
+// 태그 아코디언에 보이는 목표 순번과 같은 숫자
+const taggedGoalIndex = computed(() => goalStore.weeklyGoals.findIndex((g) => g.id === props.todo.goalId) + 1)
 // 목표 태그가 없을 때만 카테고리 칩을 보여준다 — 목표가 카테고리보다 우선
 const taggedCategory = computed(() =>
   taggedGoal.value
@@ -302,6 +304,18 @@ const { onPointerDown } = usePointerDrag({
   border-radius: 50%;
   background: var(--chip-color, var(--p-rose));
   flex-shrink: 0;
+}
+/* 목표/카테고리 모두 같은 원형 칩이지만, 목표는 숫자, 카테고리는 점으로 내용만 다르게 해서 구분한다.
+   목표 숫자는 진하게 채운 원 위에 흰 글자로 더 잘 보이게 한다 */
+.tag-chip.is-goal {
+  background: var(--chip-color, var(--p-rose));
+}
+.tag-chip .goal-index {
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 .tag-chip.is-rose {
   --chip-color: var(--p-rose);

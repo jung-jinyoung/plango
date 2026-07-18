@@ -27,12 +27,11 @@
                     v-for="(goal, idx) in goalStore.weeklyGoals"
                     :key="goal.id"
                     type="button"
-                    class="tag-pill"
+                    class="tag-pill is-goal"
                     :class="`is-${goal.color}`"
                     @click="goToGoal(goal.id)"
                   >
                     <span class="index" aria-hidden="true">{{ idx + 1 }}</span>
-                    <span class="dot" aria-hidden="true" />
                     <span class="title">{{ goal.title }}</span>
                     <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
                   </button>
@@ -478,17 +477,19 @@ function handleTagToGoal({ todoIds, goalId }) {
 .tag-pill.is-static {
   cursor: default;
 }
+/* 목표/카테고리 모두 GoalCard와 같은 연한 파스텔 톤을 유지 — 숫자 배지만 진하게 채워 흰 글자로 잘 보이게 한다 */
 .tag-pill .index {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--p-bg);
-  color: var(--p-ink-faint);
-  font-size: 0.65rem;
-  font-weight: 700;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--dot-color, var(--p-rose));
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
