@@ -46,6 +46,15 @@
         @compositionstart="isComposing = true"
         @compositionend="isComposing = false"
       />
+      <BaseButton
+        variant="primary"
+        size="sm"
+        class="submit-btn"
+        :disabled="title.trim().length === 0"
+        @click="dispatchSubmit"
+      >
+        등록
+      </BaseButton>
     </div>
   </div>
 
@@ -60,6 +69,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import GoalFormModal from '@/components/goals/GoalFormModal.vue'
 import { useGoalStore } from '@/stores/goals'
 import { useCategoryStore } from '@/stores/categories'
@@ -115,6 +125,11 @@ async function handleSaveGoal(payload) {
 // isComposing 중엔 무시한다
 function handleEnter(e) {
   if (isComposing.value || e.isComposing) return
+  dispatchSubmit()
+}
+
+function dispatchSubmit() {
+  if (title.value.trim().length === 0) return
   if (title.value.includes('/')) submitShorthand()
   else submit()
 }
@@ -276,5 +291,8 @@ function toMinutes(hhmm) {
 }
 .title-input::placeholder {
   color: var(--p-ink-faint);
+}
+.submit-btn {
+  flex-shrink: 0;
 }
 </style>
