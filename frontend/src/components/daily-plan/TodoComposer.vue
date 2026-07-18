@@ -46,16 +46,6 @@
         @compositionstart="isComposing = true"
         @compositionend="isComposing = false"
       />
-      <button
-        type="button"
-        class="ai-btn"
-        :disabled="!hasUnplacedTodos"
-        title="미배치 할 일을 AI가 시간표에 배치해줘요"
-        @click="$emit('request-ai')"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></svg>
-        AI로 배치
-      </button>
     </div>
   </div>
 
@@ -75,10 +65,7 @@ import { useGoalStore } from '@/stores/goals'
 import { useCategoryStore } from '@/stores/categories'
 import { inferCategoryColor } from '@/utils/todo-color'
 
-defineProps({
-  hasUnplacedTodos: { type: Boolean, default: false },
-})
-const emit = defineEmits(['add-todo', 'request-ai', 'parse-warning'])
+const emit = defineEmits(['add-todo', 'parse-warning'])
 
 const goalStore = useGoalStore()
 const categoryStore = useCategoryStore()
@@ -289,26 +276,5 @@ function toMinutes(hhmm) {
 }
 .title-input::placeholder {
   color: var(--p-ink-faint);
-}
-.ai-btn {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  background: linear-gradient(145deg, var(--p-lavender), #4b3b8c);
-  color: #fff;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 10px 14px;
-  border-radius: var(--p-radius-xs);
-  white-space: nowrap;
-}
-.ai-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 </style>

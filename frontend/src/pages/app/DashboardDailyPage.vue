@@ -78,12 +78,7 @@
           />
         </BaseCard>
 
-        <TodoComposer
-          :has-unplaced-todos="unplacedTodos.length > 0"
-          @add-todo="handleAddTodo"
-          @request-ai="handleRequestAi"
-          @parse-warning="handleComposerWarning"
-        />
+        <TodoComposer @add-todo="handleAddTodo" @parse-warning="handleComposerWarning" />
       </div>
 
       <div class="timeline-panel">
@@ -105,6 +100,18 @@
         />
       </div>
     </div>
+
+    <button
+      type="button"
+      class="ai-fab"
+      :disabled="unplacedTodos.length === 0"
+      title="미배치 할 일을 AI가 시간표에 배치해줘요"
+      @click="handleRequestAi"
+    >
+      <span class="ai-fab-shine" aria-hidden="true" />
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></svg>
+      AI로 배치
+    </button>
 
     <AiRecommendationPanel
       :model-value="showAiPanel"
@@ -570,5 +577,69 @@ function handleTagToGoal({ todoIds, goalId }) {
   color: var(--p-lavender);
   font-size: 0.85rem;
   font-weight: 600;
+}
+.ai-fab {
+  position: fixed;
+  right: 40px;
+  bottom: 36px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(145deg, var(--p-lavender), #4b3b8c);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--p-lavender) 45%, transparent);
+  animation: ai-fab-pulse 2.4s ease-in-out infinite;
+}
+.ai-fab:disabled {
+  cursor: default;
+  opacity: 0.45;
+  animation: none;
+  box-shadow: none;
+}
+.ai-fab-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.65) 48%, transparent 66%);
+  transform: translateX(-130%);
+  animation: ai-fab-shine 2.8s ease-in-out infinite;
+}
+.ai-fab:disabled .ai-fab-shine {
+  animation: none;
+  display: none;
+}
+@keyframes ai-fab-pulse {
+  0%,
+  100% {
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--p-lavender) 45%, transparent);
+  }
+  50% {
+    box-shadow: 0 6px 30px color-mix(in srgb, var(--p-lavender) 75%, transparent);
+  }
+}
+@keyframes ai-fab-shine {
+  0% {
+    transform: translateX(-130%);
+  }
+  55%,
+  100% {
+    transform: translateX(130%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-fab,
+  .ai-fab-shine {
+    animation: none;
+  }
 }
 </style>
