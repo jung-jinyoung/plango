@@ -122,7 +122,6 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
 
 <style scoped>
 .week-grid {
-  max-width: 960px;
   padding: 12px;
 }
 .header-row {
