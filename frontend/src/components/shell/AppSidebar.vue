@@ -80,7 +80,9 @@ const navItems = [
   display: flex;
   flex-direction: column;
   padding: 20px 16px;
-  min-height: 100dvh;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
 }
 .logo {
   display: flex;
