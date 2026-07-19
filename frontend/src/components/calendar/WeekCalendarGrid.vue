@@ -246,7 +246,8 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   font-family: inherit;
   padding: 5px 8px;
   border-radius: var(--p-radius-sm);
-  border: 2.5px solid var(--card-accent, var(--p-rose));
+  border: 2.5px solid var(--card-accent, var(--p-ink-faint));
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 18%, transparent);
   overflow: hidden;
 }
 .slot.is-rose {
@@ -264,6 +265,22 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
 .slot.is-lavender {
   --card-accent: var(--p-lavender);
   background: color-mix(in srgb, var(--p-lavender) 18%, transparent);
+}
+.slot.is-amber {
+  --card-accent: var(--p-amber);
+  background: color-mix(in srgb, var(--p-amber) 18%, transparent);
+}
+.slot.is-teal {
+  --card-accent: var(--p-teal);
+  background: color-mix(in srgb, var(--p-teal) 18%, transparent);
+}
+.slot.is-plum {
+  --card-accent: var(--p-plum);
+  background: color-mix(in srgb, var(--p-plum) 18%, transparent);
+}
+.slot.is-slate {
+  --card-accent: var(--p-slate);
+  background: color-mix(in srgb, var(--p-slate) 18%, transparent);
 }
 .slot-title {
   display: -webkit-box;
