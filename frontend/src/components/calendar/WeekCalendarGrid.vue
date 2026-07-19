@@ -33,7 +33,7 @@
               type="button"
               class="slot"
               :class="`is-${s.categoryColor}`"
-              :style="slotStyle(s)"
+              :style="slotStyle(s, schedulesFor(day.dateISO))"
               @click="openInfo(day.dateISO, s)"
             >
               <span class="slot-title">{{ s.title }}</span>
@@ -67,7 +67,7 @@ const days = computed(() => getWeekDays(props.currentDate))
 
 const WEEKDAY_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
-const pxPerHour = 56
+const pxPerHour = 72
 const pxPerMinute = pxPerHour / 60
 const MIN_HEIGHT = 30
 
@@ -76,7 +76,6 @@ const hours = computed(() => {
   for (let h = props.startHour; h < props.endHour; h++) arr.push(h)
   return arr
 })
-const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour)
 
 const tracksBackgroundStyle = computed(() => ({
   backgroundImage: `repeating-linear-gradient(to bottom, color-mix(in srgb, var(--p-ink) 8%, transparent) 0, color-mix(in srgb, var(--p-ink) 8%, transparent) 1px, transparent 1px, transparent ${pxPerHour}px)`,
@@ -86,9 +85,41 @@ function schedulesFor(dateISO) {
   return [...scheduleStore.list(dateISO)].sort((a, b) => a.startMinutes - b.startMinutes)
 }
 
-function slotStyle(schedule) {
-  const top = (schedule.startMinutes - props.startHour * 60) * pxPerMinute
-  const height = Math.max(schedule.durationMinutes * pxPerMinute, MIN_HEIGHT)
+// 짧은 일정은 MIN_HEIGHT 때문에 실제 소요 시간보다 크게 그려진다 — 그 초과분만큼
+// 같은 날짜의 뒤에 오는 일정들을 아래로 밀어내야 서로 겹치지 않는다 (DailyTimeline과 동일한 패턴)
+function pureTimeHeight(durationMinutes) {
+  return durationMinutes * pxPerMinute
+}
+function effectiveHeightOf(schedule) {
+  return Math.max(pureTimeHeight(schedule.durationMinutes), MIN_HEIGHT)
+}
+function extraHeightOf(schedule) {
+  return Math.max(effectiveHeightOf(schedule) - pureTimeHeight(schedule.durationMinutes), 0)
+}
+function displacementBefore(daySchedules, minutes) {
+  let extra = 0
+  for (const s of daySchedules) {
+    const e = extraHeightOf(s)
+    if (!e) continue
+    if (s.startMinutes + s.durationMinutes <= minutes) extra += e
+  }
+  return extra
+}
+function totalExtraForDay(dateISO) {
+  return schedulesFor(dateISO).reduce((sum, s) => sum + extraHeightOf(s), 0)
+}
+
+// 일정이 몰린 요일 기준으로 전체 높이를 늘려, 밀려난 일정이 그리드 밖으로 잘리지 않게 한다
+const totalHeight = computed(() => {
+  const base = (props.endHour - props.startHour) * pxPerHour
+  const maxExtra = Math.max(0, ...days.value.map((d) => totalExtraForDay(d.dateISO)))
+  return base + maxExtra
+})
+
+function slotStyle(schedule, daySchedules) {
+  const top =
+    (schedule.startMinutes - props.startHour * 60) * pxPerMinute + displacementBefore(daySchedules, schedule.startMinutes)
+  const height = effectiveHeightOf(schedule)
   return { top: `${top}px`, height: `${height}px` }
 }
 
@@ -122,7 +153,6 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
 
 <style scoped>
 .week-grid {
-  max-width: 960px;
   padding: 12px;
 }
 .header-row {
@@ -246,7 +276,8 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   font-family: inherit;
   padding: 5px 8px;
   border-radius: var(--p-radius-sm);
-  border: 2.5px solid var(--card-accent, var(--p-rose));
+  border: 2.5px solid var(--card-accent, var(--p-ink-faint));
+  background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 18%, transparent);
   overflow: hidden;
 }
 .slot.is-rose {
@@ -264,6 +295,22 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
 .slot.is-lavender {
   --card-accent: var(--p-lavender);
   background: color-mix(in srgb, var(--p-lavender) 18%, transparent);
+}
+.slot.is-amber {
+  --card-accent: var(--p-amber);
+  background: color-mix(in srgb, var(--p-amber) 18%, transparent);
+}
+.slot.is-teal {
+  --card-accent: var(--p-teal);
+  background: color-mix(in srgb, var(--p-teal) 18%, transparent);
+}
+.slot.is-plum {
+  --card-accent: var(--p-plum);
+  background: color-mix(in srgb, var(--p-plum) 18%, transparent);
+}
+.slot.is-slate {
+  --card-accent: var(--p-slate);
+  background: color-mix(in srgb, var(--p-slate) 18%, transparent);
 }
 .slot-title {
   display: -webkit-box;
