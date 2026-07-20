@@ -35,9 +35,9 @@
               :key="s.id"
               type="button"
               class="slot"
-              :class="`is-${s.categoryColor}`"
+              :class="[`is-${s.categoryColor}`, { 'is-goal-linked': !!s.goalId }]"
               :style="slotStyle(s, day.dateISO)"
-              :title="`${minutesToLabel(s.startMinutes)} ${s.title}`"
+              :title="goalTitleOf(s)"
               @click="openInfo(day.dateISO, s)"
             >
               <span class="slot-time">{{ minutesToLabel(s.startMinutes) }}</span>
@@ -59,6 +59,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import ScheduleInfoModal from './ScheduleInfoModal.vue'
 import { getWeekDays } from '@/composables/useCalendarDates'
 import { useScheduleStore } from '@/stores/schedule'
+import { useGoalStore } from '@/stores/goals'
 import { minutesToLabel } from '@/utils/date'
 
 const props = defineProps({
@@ -69,13 +70,22 @@ const props = defineProps({
 defineEmits(['select-day'])
 
 const scheduleStore = useScheduleStore()
+const goalStore = useGoalStore()
 const days = computed(() => getWeekDays(props.currentDate))
+
+// 목표에 연결된 일정은 보더가 있는 카드로, 카테고리만 있는 일정은 보더 없는 투명한 카드로 구분한다
+function goalTitleOf(schedule) {
+  const base = `${minutesToLabel(schedule.startMinutes)} ${schedule.title}`
+  if (!schedule.goalId) return base
+  const goal = goalStore.weeklyGoals.find((g) => g.id === schedule.goalId)
+  return goal ? `${base} · 목표: ${goal.title}` : base
+}
 
 const WEEKDAY_LABELS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
 const pxPerHour = 72
 const pxPerMinute = pxPerHour / 60
-const MIN_HEIGHT = 38
+const MIN_HEIGHT = 50
 const COMPACT_DURATION_MINUTES = 45
 
 function isCompact(schedule) {
@@ -314,57 +324,58 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
   right: 3px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
   appearance: none;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
-  padding: 4px 7px;
+  padding: 6px 9px;
   border-radius: var(--p-radius-sm);
-  border: 2.5px solid var(--card-accent, var(--p-ink-faint));
+  border: 2.5px solid transparent;
   background: color-mix(in srgb, var(--card-accent, var(--p-ink-faint)) 16%, var(--p-surface));
   overflow: hidden;
 }
+/* 목표에 연결된 일정만 보더가 있는 카드로, 카테고리만 있는 일정은 보더 없이 카테고리 색 틴트만 남긴다 */
+.slot.is-goal-linked {
+  border-color: var(--card-accent, var(--p-ink-faint));
+}
 .slot.is-rose {
   --card-accent: var(--p-rose);
-  --card-accent-ink: var(--p-rose-ink);
 }
 .slot.is-blue {
   --card-accent: var(--p-blue);
-  --card-accent-ink: var(--p-blue-ink);
 }
 .slot.is-green {
   --card-accent: var(--p-green);
-  --card-accent-ink: var(--p-green-ink);
 }
 .slot.is-lavender {
   --card-accent: var(--p-lavender);
-  --card-accent-ink: var(--p-lavender-ink);
 }
 .slot.is-amber {
   --card-accent: var(--p-amber);
-  --card-accent-ink: var(--p-amber-ink);
 }
 .slot.is-teal {
   --card-accent: var(--p-teal);
-  --card-accent-ink: var(--p-teal-ink);
 }
 .slot.is-plum {
   --card-accent: var(--p-plum);
-  --card-accent-ink: var(--p-plum-ink);
 }
 .slot.is-slate {
   --card-accent: var(--p-slate);
-  --card-accent-ink: var(--p-slate-ink);
 }
+/* DailyTimeline의 .time-badge(알약형 시간 뱃지)와 동일한 스타일 */
 .slot-time {
+  align-self: flex-start;
   flex-shrink: 0;
-  font-size: 0.66rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  line-height: 1;
+  color: #fff;
+  background: var(--card-accent, var(--p-ink-faint));
+  padding: 1px 5px;
+  border-radius: 999px;
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'SF Mono', monospace;
-  color: var(--card-accent-ink, var(--p-ink-muted));
+  white-space: nowrap;
 }
 .slot-title {
   display: -webkit-box;
