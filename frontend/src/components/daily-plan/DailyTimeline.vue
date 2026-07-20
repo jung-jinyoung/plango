@@ -133,6 +133,18 @@ function displacementBefore(minutes) {
   return extra
 }
 
+// slotStyle의 top 계산(= 시각 -> y좌표)의 역함수. displacementBefore가 계단형(구간별 상수)
+// 함수라 닫힌 형태로 못 구하고, 대신 몇 번만 반복해도 안정적으로 수렴하는 고정점 반복으로 구한다
+// — 그래야 일정이 몰려 특정 시간대 행이 늘어났을 때도 마우스 좌표가 실제 그리드(라벨·행 높이)와
+// 어긋나지 않는다
+function minutesFromRelativeY(relativeY) {
+  let minutes = props.startHour * 60 + relativeY / pxPerMinute
+  for (let i = 0; i < 4; i++) {
+    minutes = props.startHour * 60 + (relativeY - displacementBefore(minutes)) / pxPerMinute
+  }
+  return minutes
+}
+
 const totalExtraHeight = computed(() => props.schedules.reduce((sum, s) => sum + extraHeightOf(s), 0))
 const totalHeight = computed(() => (props.endHour - props.startHour) * pxPerHour + totalExtraHeight.value)
 
@@ -182,7 +194,7 @@ function clampStart(start, duration) {
 
 function minutesFromClientY(clientY, duration) {
   const rect = slotsEl.value.getBoundingClientRect()
-  const raw = props.startHour * 60 + (clientY - rect.top) / pxPerMinute
+  const raw = minutesFromRelativeY(clientY - rect.top)
   const snapped = Math.round(raw / 15) * 15
   return clampStart(snapped, duration)
 }
@@ -228,7 +240,8 @@ const ghost = computed(() => {
 
 const ghostStyle = computed(() => {
   if (!ghost.value) return {}
-  const top = (ghost.value.startMinutes - props.startHour * 60) * pxPerMinute
+  const top =
+    (ghost.value.startMinutes - props.startHour * 60) * pxPerMinute + displacementBefore(ghost.value.startMinutes)
   const height = Math.max(ghost.value.durationMinutes * pxPerMinute, MIN_HEIGHT)
   return { top: `${top}px`, height: `${height}px` }
 })
@@ -316,7 +329,7 @@ function startResize(e, schedule, edge) {
 function handleResizeMove(e) {
   if (!resizing || !slotsEl.value) return
   const rect = slotsEl.value.getBoundingClientRect()
-  const raw = props.startHour * 60 + (e.clientY - rect.top) / pxPerMinute
+  const raw = minutesFromRelativeY(e.clientY - rect.top)
   const snapped = Math.round(raw / 15) * 15
   const { id, edge, originalStart, originalEnd } = resizing
 
