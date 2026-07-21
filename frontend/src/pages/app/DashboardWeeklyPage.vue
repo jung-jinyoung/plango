@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import GoalPanel from '@/components/goals/GoalPanel.vue'
@@ -68,6 +68,13 @@ function goToDay(dateISO) {
 function toggleSelectedGoal(goalId) {
   selectedGoalId.value = selectedGoalId.value === goalId ? null : goalId
 }
+
+// 목표 카드 바깥을 클릭하면 필터를 해제한다 (카드 자체 클릭은 toggleSelectedGoal이 이미 처리)
+function clearSelectionOnOutsideClick(event) {
+  if (!event.target.closest('.goal-card')) selectedGoalId.value = null
+}
+onMounted(() => document.addEventListener('click', clearSelectionOnOutsideClick))
+onUnmounted(() => document.removeEventListener('click', clearSelectionOnOutsideClick))
 </script>
 
 <style scoped>
