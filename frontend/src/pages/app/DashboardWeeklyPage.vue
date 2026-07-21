@@ -6,10 +6,15 @@
         :goals="goalStore.weeklyGoals"
         :loading="goalStore.loading"
         :error="goalStore.error"
-        @select="goToGoal"
+        :selected-goal-id="selectedGoalId"
+        @select="toggleSelectedGoal"
         @add="showGoalForm = true"
       />
-      <WeekCalendarGrid :current-date="calendarNav.currentDate" @select-day="goToDay" />
+      <WeekCalendarGrid
+        :current-date="calendarNav.currentDate"
+        :selected-goal-id="selectedGoalId"
+        @select-day="goToDay"
+      />
     </div>
 
     <GoalFormModal
@@ -38,6 +43,7 @@ const calendarNav = useCalendarNavStore()
 const showGoalForm = ref(false)
 const formError = ref(null)
 const saving = ref(false)
+const selectedGoalId = ref(null)
 
 onMounted(() => goalStore.load())
 
@@ -59,8 +65,8 @@ function goToDay(dateISO) {
   router.push('/app/dashboard/daily')
 }
 
-function goToGoal(goalId) {
-  router.push({ path: '/app/goals', query: { weekly: goalId } })
+function toggleSelectedGoal(goalId) {
+  selectedGoalId.value = selectedGoalId.value === goalId ? null : goalId
 }
 </script>
 

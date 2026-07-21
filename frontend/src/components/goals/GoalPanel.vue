@@ -8,7 +8,13 @@
       <p v-if="loading && goals.length === 0" class="empty">불러오는 중…</p>
       <p v-else-if="error" class="empty is-error">목표를 불러오지 못했어요.</p>
       <template v-else>
-        <GoalCard v-for="goal in goals" :key="goal.id" :goal="goal" @select="$emit('select', goal.id)" />
+        <GoalCard
+          v-for="goal in goals"
+          :key="goal.id"
+          :goal="goal"
+          :selected="goal.id === selectedGoalId"
+          @select="$emit('select', goal.id)"
+        />
         <p v-if="goals.length === 0" class="empty">아직 등록된 목표가 없어요.</p>
       </template>
     </div>
@@ -23,6 +29,7 @@ defineProps({
   goals: { type: Array, required: true },
   loading: { type: Boolean, default: false },
   error: { type: Object, default: null },
+  selectedGoalId: { type: [String, Number], default: null },
 })
 defineEmits(['select', 'add'])
 </script>

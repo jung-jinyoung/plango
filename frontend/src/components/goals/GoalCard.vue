@@ -2,7 +2,7 @@
   <button
     type="button"
     class="goal-card neu-raised neu-interactive"
-    :class="`is-${goal.color}`"
+    :class="[`is-${goal.color}`, { 'is-selected': selected }]"
     @click="$emit('select', goal.id)"
   >
     <span class="tag">{{ goal.taskCount }}개 태스크</span>
@@ -21,6 +21,7 @@ import { useGoalStore } from '@/stores/goals'
 const props = defineProps({
   // { id, title, progress, color, taskCount, doneCount, monthlyGoalId? } — monthlyGoalId만 있으면 주간 목표
   goal: { type: Object, required: true },
+  selected: { type: Boolean, default: false },
 })
 defineEmits(['select'])
 
@@ -84,6 +85,11 @@ const parentLabel = computed(() => {
 .goal-card.is-slate {
   --tag-color: var(--p-slate);
   --tag-ink: var(--p-slate-ink);
+}
+.goal-card.is-selected {
+  box-shadow:
+    0 0 0 2.5px var(--tag-color, var(--p-rose)),
+    var(--p-shadow-raised-sm);
 }
 h3 {
   font-size: 0.94rem;
