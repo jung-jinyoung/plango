@@ -14,6 +14,7 @@
           :goal="goal"
           :selected="goal.id === selectedGoalId"
           @select="$emit('select', goal.id)"
+          @details="$emit('details', goal.id)"
         />
         <p v-if="goals.length === 0" class="empty">아직 등록된 목표가 없어요.</p>
       </template>
@@ -31,7 +32,7 @@ defineProps({
   error: { type: Object, default: null },
   selectedGoalId: { type: [String, Number], default: null },
 })
-defineEmits(['select', 'add'])
+defineEmits(['select', 'add', 'details'])
 </script>
 
 <style scoped>

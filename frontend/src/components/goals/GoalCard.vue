@@ -1,16 +1,28 @@
 <template>
-  <button
-    type="button"
+  <div
     class="goal-card neu-raised neu-interactive"
     :class="[`is-${goal.color}`, { 'is-selected': selected }]"
+    role="button"
+    tabindex="0"
     @click="$emit('select', goal.id)"
+    @keydown.enter="$emit('select', goal.id)"
   >
+    <button
+      type="button"
+      class="details-btn"
+      aria-label="목표 상세"
+      @click.stop="$emit('details', goal.id)"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
+      </svg>
+    </button>
     <span class="tag">{{ goal.taskCount }}개 태스크</span>
     <h3>{{ goal.title }}</h3>
     <p v-if="parentLabel" class="parent">{{ parentLabel }}</p>
     <ProgressBar :value="goal.progress" :color="goal.color" show-label />
     <p class="meta">{{ goal.doneCount }}/{{ goal.taskCount }} 완료</p>
-  </button>
+  </div>
 </template>
 
 <script setup>
@@ -23,7 +35,7 @@ const props = defineProps({
   goal: { type: Object, required: true },
   selected: { type: Boolean, default: false },
 })
-defineEmits(['select'])
+defineEmits(['select', 'details'])
 
 const goalStore = useGoalStore()
 const parentLabel = computed(() => {
@@ -36,6 +48,7 @@ const parentLabel = computed(() => {
 
 <style scoped>
 .goal-card {
+  position: relative;
   padding: 16px;
   display: block;
   width: 100%;
@@ -43,6 +56,26 @@ const parentLabel = computed(() => {
   text-align: left;
   font-family: inherit;
   cursor: pointer;
+}
+.details-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--p-ink-faint);
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.details-btn:hover {
+  color: var(--p-ink);
+  background: var(--p-bg);
 }
 .tag {
   display: inline-block;
