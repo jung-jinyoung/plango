@@ -35,7 +35,14 @@
               :key="s.id"
               type="button"
               class="slot"
-              :class="[`is-${s.categoryColor}`, { 'is-goal-linked': !!s.goalId }]"
+              :class="[
+                `is-${s.categoryColor}`,
+                {
+                  'is-goal-linked': !!s.goalId,
+                  'is-highlighted': !!props.selectedGoalId && s.goalId === props.selectedGoalId,
+                  'is-dimmed': !!props.selectedGoalId && s.goalId !== props.selectedGoalId,
+                },
+              ]"
               :style="slotStyle(s, day.dateISO)"
               :title="goalTitleOf(s)"
               @click="openInfo(day.dateISO, s)"
@@ -66,6 +73,7 @@ const props = defineProps({
   currentDate: { type: Object, required: true }, // dayjs
   startHour: { type: Number, default: 6 },
   endHour: { type: Number, default: 24 },
+  selectedGoalId: { type: [String, Number], default: null },
 })
 defineEmits(['select-day'])
 
@@ -338,6 +346,16 @@ const isCurrentWeek = computed(() => days.value.some((d) => d.isToday))
 /* 목표에 연결된 일정만 보더가 있는 카드로, 카테고리만 있는 일정은 보더 없이 카테고리 색 틴트만 남긴다 */
 .slot.is-goal-linked {
   border-color: var(--card-accent, var(--p-ink-faint));
+}
+/* 목표 선택 시: 해당 목표 일정은 강조, 나머지는 dim 처리 */
+.slot.is-highlighted {
+  border-color: var(--card-accent, var(--p-ink-faint));
+  box-shadow: 0 0 0 2.5px var(--card-accent, var(--p-ink-faint));
+  z-index: 2;
+}
+.slot.is-dimmed {
+  opacity: 0.35;
+  filter: grayscale(0.4);
 }
 .slot.is-rose {
   --card-accent: var(--p-rose);

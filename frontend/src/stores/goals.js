@@ -118,6 +118,12 @@ export const useGoalStore = defineStore('goals', () => {
       .sort((a, b) => b.progress - a.progress),
   )
 
+  // 주간 목표가 속한 상위 월간 목표를 찾는다 (미분류면 null)
+  function parentOf(weeklyGoal) {
+    if (!weeklyGoal?.monthlyGoalId) return null
+    return monthlyGoals.value.find((g) => g.id === weeklyGoal.monthlyGoalId) ?? null
+  }
+
   async function addMonthlyGoal({ title, color = 'rose' }) {
     const categoryId = await ensureCategoryId(color)
     const goal = await monthlyGoalsApi.createMonthlyGoal({ title, categoryId })
@@ -180,6 +186,7 @@ export const useGoalStore = defineStore('goals', () => {
     load,
     monthlyGoals,
     weeklyGoals,
+    parentOf,
     addMonthlyGoal,
     updateMonthlyGoal,
     removeMonthlyGoal,
