@@ -6,7 +6,9 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <div v-if="goal" class="detail">
-      <p v-if="parentLabel" class="parent">{{ parentLabel }}</p>
+      <p v-if="parentGoal" class="parent-label-text">상위 월간목표: {{ parentGoal.title }}</p>
+      <p v-else class="parent-unlinked">미분류</p>
+
       <ProgressBar :value="goal.progress" :color="goal.color" show-label />
       <p class="meta">{{ goal.doneCount }}/{{ goal.taskCount }} 완료</p>
     </div>
@@ -34,12 +36,7 @@ const props = defineProps({
 defineEmits(['update:modelValue', 'edit', 'delete', 'navigate'])
 
 const goalStore = useGoalStore()
-const parentLabel = computed(() => {
-  if (!props.goal || !('monthlyGoalId' in props.goal)) return null
-  if (!props.goal.monthlyGoalId) return '상위: 미분류'
-  const parent = goalStore.monthlyGoals.find((g) => g.id === props.goal.monthlyGoalId)
-  return parent ? `상위: ${parent.title}` : '상위: 미분류'
-})
+const parentGoal = computed(() => goalStore.parentOf(props.goal))
 </script>
 
 <style scoped>
@@ -48,8 +45,14 @@ const parentLabel = computed(() => {
   flex-direction: column;
   gap: 12px;
 }
-.parent {
+.parent-label-text {
   font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--p-ink-faint);
+  margin: 0;
+}
+.parent-unlinked {
+  font-size: 0.8rem;
   color: var(--p-ink-faint);
   margin: 0;
 }
