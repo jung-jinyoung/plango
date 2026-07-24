@@ -1,5 +1,18 @@
 <template>
   <div class="records-layout">
+    <div class="journey-steps">
+      <template v-for="(step, i) in journeySteps" :key="step.key">
+        <div
+          class="journey-step"
+          :class="{ 'is-active': step.key === currentStepKey, 'is-done': step.done }"
+        >
+          <span class="step-index">{{ step.done ? '✓' : i + 1 }}</span>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
+        <span v-if="i < journeySteps.length - 1" class="step-arrow" aria-hidden="true">→</span>
+      </template>
+    </div>
+
     <div v-if="!hasDailyIntent" class="start-mode">
       <div class="start-goals">
         <div class="start-goals-head">
@@ -170,6 +183,7 @@
 
 <script setup>
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
@@ -183,6 +197,7 @@ import { useRetrospectiveStore } from '@/stores/retrospective'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { suggestReflectionPrompt } from '@/services/ai/suggest-reflection-prompt'
 
+const $q = useQuasar()
 const router = useRouter()
 const calendarNav = useCalendarNavStore()
 const dateISO = computed(() => calendarNav.currentDateISO)
@@ -224,6 +239,13 @@ function autoGrowComposer() {
 function handleComposerSend() {
   if (!dailyIntentDraft.value.trim()) return
   saveDailyIntent()
+  $q.notify({
+    message: '일일 계획을 저장했어요. 월간·주간 목표를 확인하고 오늘 일정을 세워보세요!',
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+  })
+  router.push('/app/dashboard/monthly')
 }
 
 const todos = computed(() => todoStore.list(dateISO.value))
@@ -291,6 +313,30 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 
 const showGoalModal = ref(false)
 
+// 하루 여정 4단계: 계획 작성 → 목표 확인/할 일 정하기(대시보드) → 일정 실행 → 회고.
+// 저널 화면만으로는 대시보드 단계 진행 여부를 알 수 없어 일정 존재 여부로 근사한다.
+const JOURNEY_STEP_LABELS = {
+  plan: '오늘 계획 작성',
+  dashboard: '목표 확인 · 할 일 정하기',
+  execute: '일정 실행',
+  reflect: '오늘 회고',
+}
+const currentStepKey = computed(() => {
+  if (!hasDailyIntent.value) return 'plan'
+  if (schedules.value.length === 0) return 'dashboard'
+  if (!hasReflection.value) return 'execute'
+  return 'reflect'
+})
+const journeySteps = computed(() => {
+  const order = Object.keys(JOURNEY_STEP_LABELS)
+  const currentIdx = order.indexOf(currentStepKey.value)
+  return order.map((key, idx) => ({
+    key,
+    label: JOURNEY_STEP_LABELS[key],
+    done: idx < currentIdx,
+  }))
+})
+
 // 계획이 없으면 "하루 시작" 모드(계획 작성 카드만)를, 계획이 있으면 "하루 종료" 모드(계획·일정 비교 + 회고 배너)를 보여준다
 // 배너는 하루 종료 모드에서만 렌더링되므로 진행중/완료 2단계만 다루면 된다
 const journalPhase = computed(() => (hasReflection.value ? 'done' : 'in-progress'))
@@ -312,6 +358,59 @@ function handleBannerAction() {
   flex-direction: column;
   gap: 24px;
   margin-top: 20px;
+}
+.journey-steps {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.journey-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 6px;
+  border-radius: 999px;
+  color: var(--p-ink-faint);
+}
+.journey-step .step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--p-bg);
+  color: var(--p-ink-faint);
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.journey-step .step-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.journey-step.is-done .step-index {
+  background: var(--p-green);
+  color: #fff;
+}
+.journey-step.is-done .step-label {
+  color: var(--p-ink-faint);
+}
+.journey-step.is-active {
+  color: var(--p-lavender);
+}
+.journey-step.is-active .step-index {
+  background: var(--p-lavender);
+  color: #fff;
+}
+.journey-step.is-active .step-label {
+  color: var(--p-ink);
+}
+.step-arrow {
+  color: var(--p-ink-faint);
+  font-size: 0.78rem;
 }
 .top-row {
   display: grid;
@@ -370,15 +469,16 @@ function handleBannerAction() {
   gap: 8px;
   padding: 8px 10px;
   border-radius: var(--p-radius-sm);
-  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 8%, var(--p-bg));
+  border-left: 3px solid var(--dot-color, var(--p-rose));
+  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 15%, var(--p-bg));
   font-size: 0.85rem;
 }
 .goal-mini-item.is-parent .title {
   font-weight: 700;
 }
 .goal-mini-item .dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--dot-color, var(--p-rose));
   flex-shrink: 0;
@@ -389,7 +489,7 @@ function handleBannerAction() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--p-ink);
+  color: var(--tag-ink, var(--p-ink));
   font-weight: 600;
 }
 .goal-mini-item .count {
@@ -400,27 +500,35 @@ function handleBannerAction() {
 }
 .goal-mini-item.is-rose {
   --dot-color: var(--p-rose);
+  --tag-ink: var(--p-rose-ink);
 }
 .goal-mini-item.is-amber {
   --dot-color: var(--p-amber);
+  --tag-ink: var(--p-amber-ink);
 }
 .goal-mini-item.is-green {
   --dot-color: var(--p-green);
+  --tag-ink: var(--p-green-ink);
 }
 .goal-mini-item.is-teal {
   --dot-color: var(--p-teal);
+  --tag-ink: var(--p-teal-ink);
 }
 .goal-mini-item.is-blue {
   --dot-color: var(--p-blue);
+  --tag-ink: var(--p-blue-ink);
 }
 .goal-mini-item.is-lavender {
   --dot-color: var(--p-lavender);
+  --tag-ink: var(--p-lavender-ink);
 }
 .goal-mini-item.is-plum {
   --dot-color: var(--p-plum);
+  --tag-ink: var(--p-plum-ink);
 }
 .goal-mini-item.is-slate {
   --dot-color: var(--p-slate);
+  --tag-ink: var(--p-slate-ink);
 }
 .plan-composer {
   position: sticky;
