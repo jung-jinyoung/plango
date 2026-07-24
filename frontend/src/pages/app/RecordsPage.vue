@@ -2,11 +2,11 @@
   <div class="records-layout">
     <BaseCard class="column-retro">
       <div class="retro-suggest">
-        <span class="ai-badge">AI</span>
-        <p class="suggest-text">{{ aiSuggestionLoading ? '오늘 하루를 돌아보는 중이에요...' : aiSuggestion }}</p>
+        <span class="ai-badge" :class="`is-${journalPhase}`">{{ bannerBadgeLabel }}</span>
+        <p class="suggest-text">{{ bannerText }}</p>
       </div>
-      <BaseButton variant="primary" @click="showReflectionModal = true">
-        {{ hasReflection ? '회고 수정하기' : '회고 등록하기' }}
+      <BaseButton variant="primary" @click="handleBannerAction">
+        {{ bannerButtonLabel }}
       </BaseButton>
     </BaseCard>
 
@@ -16,6 +16,7 @@
           <h2>계획</h2>
         </div>
         <textarea
+          ref="intentInputRef"
           v-model="dailyIntentDraft"
           class="intent-input neu-sunken"
           rows="6"
@@ -29,7 +30,10 @@
       <BaseCard class="column">
         <div class="column-head">
           <h2>일정</h2>
-          <span class="count"><strong>{{ doneCount }}</strong>/{{ schedules.length }} 완료</span>
+          <span class="count"
+            ><strong>{{ doneCount }}</strong
+            >/{{ schedules.length }} 완료</span
+          >
         </div>
         <div class="column-body">
           <div
@@ -38,15 +42,24 @@
             class="record-item"
             @click="handleItemClick($event, goToDaily)"
           >
-            <ScheduleCard :schedule="schedule" :draggable="false" compact @toggle-complete="handleToggleComplete" />
+            <ScheduleCard
+              :schedule="schedule"
+              :draggable="false"
+              compact
+              @toggle-complete="handleToggleComplete"
+            />
             <select
               v-if="schedule.todoId && goalStore.weeklyGoals.length > 0"
               class="goal-select neu-sunken"
               :value="todoGoalId(schedule.todoId) || ''"
-              @change="handleAssignGoal({ todoId: schedule.todoId, goalId: $event.target.value || null })"
+              @change="
+                handleAssignGoal({ todoId: schedule.todoId, goalId: $event.target.value || null })
+              "
             >
               <option value="">목표 미태그</option>
-              <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">{{ goal.title }}</option>
+              <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">
+                {{ goal.title }}
+              </option>
             </select>
             <button
               v-else-if="schedule.todoId"
@@ -57,7 +70,7 @@
               주간 목표 추가
             </button>
           </div>
-          <p v-if="schedules.length === 0" class="empty empty-link" @click="goToDaily">
+          <p v-if="schedules.length === 0" class="empty empty-link" @click="goToMonthlyDashboard">
             오늘 기록된 일정이 없어요. 대시보드에서 계획을 세워보세요 →
           </p>
         </div>
@@ -65,7 +78,11 @@
     </div>
 
     <ReflectionModal v-model="showReflectionModal" :dateISO="dateISO" />
-    <GoalFormModal v-model="showGoalModal" variant="weekly" @save="goalStore.addWeeklyGoal($event)" />
+    <GoalFormModal
+      v-model="showGoalModal"
+      variant="weekly"
+      @save="goalStore.addWeeklyGoal($event)"
+    />
   </div>
 </template>
 
@@ -100,9 +117,15 @@ const schedules = computed(() =>
 const doneCount = computed(() => schedules.value.filter((s) => s.completed).length)
 
 const dailyIntentDraft = ref('')
-watch(dateISO, () => { dailyIntentDraft.value = retrospectiveStore.dailyIntentByDate[dateISO.value] || '' }, {
-  immediate: true,
-})
+watch(
+  dateISO,
+  () => {
+    dailyIntentDraft.value = retrospectiveStore.dailyIntentByDate[dateISO.value] || ''
+  },
+  {
+    immediate: true,
+  },
+)
 const hasDailyIntent = computed(() => !!retrospectiveStore.dailyIntentByDate[dateISO.value])
 function saveDailyIntent() {
   retrospectiveStore.setDailyIntent(dateISO.value, dailyIntentDraft.value)
@@ -130,6 +153,9 @@ function handleItemClick(e, navigate) {
 function goToDaily() {
   router.push('/app/dashboard/daily')
 }
+function goToMonthlyDashboard() {
+  router.push('/app/dashboard/monthly')
+}
 
 const aiSuggestion = ref('')
 const aiSuggestionLoading = ref(false)
@@ -147,6 +173,36 @@ const showReflectionModal = ref(false)
 const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[dateISO.value])
 
 const showGoalModal = ref(false)
+
+// 아침(계획 미작성) → 하루 중(일정 진행중) → 저녁(하루 종료) 3단계로 배너를 분기한다
+const journalPhase = computed(() => {
+  if (!hasDailyIntent.value) return 'no-plan'
+  if (!hasReflection.value) return 'in-progress'
+  return 'done'
+})
+const bannerBadgeLabel = computed(() =>
+  journalPhase.value === 'no-plan' ? 'PLAN' : journalPhase.value === 'done' ? 'DONE' : 'AI',
+)
+const bannerText = computed(() => {
+  if (journalPhase.value === 'no-plan')
+    return '아직 오늘의 계획을 적지 않았어요. 먼저 계획을 적어보세요.'
+  if (journalPhase.value === 'done')
+    return '오늘의 회고를 등록했어요. 필요하면 언제든 수정할 수 있어요.'
+  return aiSuggestionLoading.value ? '오늘 하루를 돌아보는 중이에요...' : aiSuggestion.value
+})
+const bannerButtonLabel = computed(() => {
+  if (journalPhase.value === 'no-plan') return '계획 먼저 적기'
+  return hasReflection.value ? '회고 수정하기' : '회고 등록하기'
+})
+const intentInputRef = ref(null)
+function handleBannerAction() {
+  if (journalPhase.value === 'no-plan') {
+    intentInputRef.value?.focus()
+    intentInputRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
+  showReflectionModal.value = true
+}
 </script>
 
 <style scoped>
@@ -284,6 +340,12 @@ const showGoalModal = ref(false)
   padding: 3px 8px;
   border-radius: 999px;
   flex-shrink: 0;
+}
+.ai-badge.is-no-plan {
+  background: linear-gradient(145deg, var(--p-amber), #a86a1f);
+}
+.ai-badge.is-done {
+  background: linear-gradient(145deg, var(--p-green), #2f6b4f);
 }
 .suggest-text {
   font-size: 0.9rem;

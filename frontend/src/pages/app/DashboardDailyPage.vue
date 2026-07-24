@@ -12,7 +12,18 @@
               aria-label="태그 접기/펼치기"
               @click="showTagAccordion = !showTagAccordion"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
             </button>
           </div>
           <div class="tag-body-wrap" :class="{ 'is-expanded': showTagAccordion }">
@@ -35,7 +46,9 @@
                     <span class="title">{{ goal.title }}</span>
                     <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
                   </button>
-                  <p v-if="goalStore.weeklyGoals.length === 0" class="empty">아직 등록된 주간 목표가 없어요.</p>
+                  <p v-if="goalStore.weeklyGoals.length === 0" class="empty">
+                    아직 등록된 주간 목표가 없어요.
+                  </p>
                 </div>
               </div>
 
@@ -57,7 +70,9 @@
                 </div>
               </div>
 
-              <p class="tag-hint">이번 주 목표는 번호로, 카테고리는 이름으로 할 일 입력창에서 바로 태그할 수 있어요.</p>
+              <p class="tag-hint">
+                이번 주 목표는 번호로, 카테고리는 이름으로 할 일 입력창에서 바로 태그할 수 있어요.
+              </p>
             </div>
           </div>
         </div>
@@ -109,7 +124,20 @@
       @click="handleRequestAi"
     >
       <span class="ai-fab-shine" aria-hidden="true" />
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></svg>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"
+        />
+      </svg>
       AI로 배치
     </button>
 
@@ -137,7 +165,6 @@
       @toggle="handleToggleTodo"
       @carry-to-tomorrow="handleCarryOverAll"
       @discard="handleDiscardAll"
-      @tag-to-goal="handleTagToGoal"
     />
   </div>
 </template>
@@ -220,7 +247,12 @@ function handleComposerWarning(message) {
 
 function handleRequestAi() {
   if (unplacedTodos.value.length === 0) {
-    $q.notify({ message: '배치할 할 일이 없어요', icon: 'warning', color: 'warning', position: 'top' })
+    $q.notify({
+      message: '배치할 할 일이 없어요',
+      icon: 'warning',
+      color: 'warning',
+      position: 'top',
+    })
     return
   }
   aiPlanning.requestRecommendation(dateISO.value)
@@ -330,9 +362,20 @@ function handleAutoResolve() {
 }
 
 // ---- D5: 미완료 이월 처리 ----
+function notifyEndDay(message) {
+  $q.notify({
+    message,
+    icon: 'check_circle',
+    color: 'positive',
+    position: 'top',
+    actions: [
+      { label: '회고 쓰러 가기', color: 'white', handler: () => router.push('/app/records') },
+    ],
+  })
+}
 function handleEndDay() {
   if (incompleteTodos.value.length === 0) {
-    $q.notify({ message: '오늘 하루도 수고하셨어요!', icon: 'check_circle', color: 'positive', position: 'top' })
+    notifyEndDay('오늘 하루도 수고하셨어요!')
     return
   }
   showCarryOver.value = true
@@ -348,7 +391,7 @@ function handleCarryOverAll() {
     todoStore.carryOverToTomorrow(dateISO.value, id)
   })
   showCarryOver.value = false
-  $q.notify({ message: `${ids.length}개를 내일로 이월했습니다`, icon: 'check_circle', color: 'positive', position: 'top' })
+  notifyEndDay(`${ids.length}개를 내일로 이월했습니다`)
 }
 function handleDiscardAll() {
   const ids = incompleteTodos.value.map((t) => t.id)
@@ -357,6 +400,7 @@ function handleDiscardAll() {
     todoStore.removeTodo(dateISO.value, id)
   })
   showCarryOver.value = false
+  notifyEndDay('오늘 하루도 수고하셨어요!')
 }
 function handleTagOne({ id, goalId }) {
   todoStore.assignGoal(dateISO.value, id, goalId)
@@ -372,16 +416,6 @@ function handleCategoryTagOne({ id, categoryColor }) {
   todoStore.assignCategory(dateISO.value, id, categoryColor)
   $q.notify({
     message: categoryColor ? '카테고리에 태그했습니다' : '태그를 해제했습니다',
-    icon: 'check_circle',
-    color: 'positive',
-    position: 'top',
-  })
-}
-function handleTagToGoal({ todoIds, goalId }) {
-  todoIds.forEach((id) => todoStore.assignGoal(dateISO.value, id, goalId))
-  showCarryOver.value = false
-  $q.notify({
-    message: `${todoIds.length}개를 주간 목표에 태그했습니다`,
     icon: 'check_circle',
     color: 'positive',
     position: 'top',
@@ -628,7 +662,12 @@ function handleTagToGoal({ todoIds, goalId }) {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.65) 48%, transparent 66%);
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.65) 48%,
+    transparent 66%
+  );
   transform: translateX(-130%);
   animation: ai-fab-shine 2.8s ease-in-out infinite;
 }
