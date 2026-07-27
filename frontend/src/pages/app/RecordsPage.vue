@@ -20,7 +20,16 @@
             <h2 class="start-hero-title">실천중인 목표</h2>
 
             <div v-for="group in monthlyGroups" :key="group.monthly.id" class="hero-goal-group">
-              <p class="hero-monthly-title">{{ group.monthly.title }}</p>
+              <p class="hero-monthly-title">
+                <span class="group-dot" :class="`is-${group.monthly.color}`" aria-hidden="true" />
+                {{ group.monthly.title }}
+              </p>
+              <ProgressBar
+                class="hero-monthly-progress"
+                :value="group.monthly.progress"
+                :color="group.monthly.color"
+                show-label
+              />
               <ul class="hero-weekly-list">
                 <li v-for="goal in group.weeklyGoals" :key="goal.id">
                   {{ goal.title }}
@@ -633,7 +642,7 @@ function handleBannerAction() {
 }
 .start-hero-card {
   width: 100%;
-  box-shadow: none !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
 }
 .start-hero-title {
   font-size: 1.05rem;
@@ -647,14 +656,50 @@ function handleBannerAction() {
   margin-top: 18px;
 }
 .hero-monthly-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.94rem;
   font-weight: 700;
   color: var(--p-ink);
-  margin: 0 0 6px;
+  margin: 0 0 8px;
 }
 .hero-monthly-title.is-unassigned {
   color: var(--p-ink-faint);
   font-weight: 600;
+}
+.group-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.group-dot.is-rose {
+  background: var(--p-rose);
+}
+.group-dot.is-amber {
+  background: var(--p-amber);
+}
+.group-dot.is-green {
+  background: var(--p-green);
+}
+.group-dot.is-teal {
+  background: var(--p-teal);
+}
+.group-dot.is-blue {
+  background: var(--p-blue);
+}
+.group-dot.is-lavender {
+  background: var(--p-lavender);
+}
+.group-dot.is-plum {
+  background: var(--p-plum);
+}
+.group-dot.is-slate {
+  background: var(--p-slate);
+}
+.hero-monthly-progress {
+  margin-bottom: 10px;
 }
 .hero-weekly-list {
   list-style: disc;
@@ -684,6 +729,7 @@ function handleBannerAction() {
   display: flex;
   align-items: stretch;
   padding: 0;
+  overflow: hidden;
 }
 .hero-quicklink {
   flex: 1;
@@ -698,6 +744,29 @@ function handleBannerAction() {
   background: transparent;
   font-family: inherit;
   text-align: left;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
+}
+.hero-quicklink:hover {
+  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-bg));
+}
+.hero-quicklink:hover .hero-quicklink-chevron {
+  color: var(--p-rose-ink);
+  transform: translateX(2px);
+}
+.hero-quicklink:active {
+  transform: scale(0.99);
+}
+.hero-quicklink-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 14px 0;
+  background: color-mix(in srgb, var(--p-ink) 10%, transparent);
+  transition: opacity 120ms ease;
+}
+.hero-quicklink-card:has(.hero-quicklink:hover) .hero-quicklink-divider {
+  opacity: 0;
 }
 .hero-quicklink-icon {
   display: flex;
@@ -733,12 +802,9 @@ function handleBannerAction() {
   display: flex;
   color: var(--p-ink-faint);
   flex-shrink: 0;
-}
-.hero-quicklink-divider {
-  width: 1px;
-  align-self: stretch;
-  margin: 14px 0;
-  background: color-mix(in srgb, var(--p-ink) 10%, transparent);
+  transition:
+    color 120ms ease,
+    transform 120ms ease;
 }
 .hero-yesterday-card {
   display: flex;
