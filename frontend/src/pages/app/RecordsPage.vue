@@ -1,19 +1,6 @@
 <template>
   <div class="records-layout">
-    <div class="journey-steps">
-      <template v-for="(step, i) in journeySteps" :key="step.key">
-        <div
-          class="journey-step"
-          :class="{ 'is-active': step.key === currentStepKey, 'is-done': step.done }"
-        >
-          <span class="step-index">{{ step.done ? '✓' : i + 1 }}</span>
-          <span class="step-label">{{ step.label }}</span>
-        </div>
-        <span v-if="i < journeySteps.length - 1" class="step-arrow" aria-hidden="true">→</span>
-      </template>
-    </div>
-
-    <div v-if="!hasDailyIntent" class="start-mode">
+    <div class="start-mode">
       <div class="start-hero">
         <div class="hero-col hero-col-primary">
           <BaseCard class="start-hero-card">
@@ -24,12 +11,6 @@
                 <span class="group-dot" :class="`is-${group.monthly.color}`" aria-hidden="true" />
                 {{ group.monthly.title }}
               </p>
-              <ProgressBar
-                class="hero-monthly-progress"
-                :value="group.monthly.progress"
-                :color="group.monthly.color"
-                show-label
-              />
               <ul class="hero-weekly-list">
                 <li v-for="goal in group.weeklyGoals" :key="goal.id">
                   {{ goal.title }}
@@ -144,7 +125,6 @@
                 <span>달성률</span>
                 <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
               </div>
-              <ProgressBar :value="yesterdaySummary.rate" :color="yesterdaySummary.rateColor" />
               <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
                 <p class="hero-weak-label">보완하면 좋을 카테고리</p>
                 <div class="hero-weak-chip-row">
@@ -184,6 +164,7 @@
           @keydown.enter.exact.prevent="handleComposerSend"
         />
         <button
+          v-if="!hasDailyIntent"
           type="button"
           class="composer-send"
           :disabled="!dailyIntentDraft.trim()"
@@ -206,7 +187,7 @@
       </div>
     </div>
 
-    <template v-else>
+    <div ref="closingSectionRef" class="closing-mode">
       <BaseCard class="column-retro">
         <div class="retro-suggest">
           <span class="ai-badge" :class="`is-${journalPhase}`">{{ bannerBadgeLabel }}</span>
@@ -223,20 +204,10 @@
             <h2>계획</h2>
             <span class="count">오늘 계획했던 것</span>
           </div>
-          <textarea
-            v-model="dailyIntentDraft"
-            class="intent-input neu-sunken"
-            rows="6"
-            placeholder="오늘 하루의 계획이나 목표를 간단히 적어보세요"
-          />
-          <BaseButton
-            variant="secondary"
-            size="sm"
-            class="intent-save-btn"
-            @click="saveDailyIntent"
-          >
-            계획 수정하기
-          </BaseButton>
+          <p v-if="hasDailyIntent" class="plan-preview-text">
+            {{ retrospectiveStore.dailyIntentByDate[dateISO] }}
+          </p>
+          <p v-else class="empty">위에서 오늘의 계획을 적어보세요.</p>
         </BaseCard>
 
         <BaseCard class="column">
@@ -291,7 +262,7 @@
           </div>
         </BaseCard>
       </div>
-    </template>
+    </div>
 
     <ReflectionModal v-model="showReflectionModal" :dateISO="dateISO" />
     <GoalFormModal
@@ -308,7 +279,6 @@ import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import ProgressBar from '@/components/ui/ProgressBar.vue'
 import ScheduleCard from '@/components/daily-plan/ScheduleCard.vue'
 import ReflectionModal from '@/components/retrospective/ReflectionModal.vue'
 import GoalFormModal from '@/components/goals/GoalFormModal.vue'
@@ -398,6 +368,7 @@ const yesterdaySummary = computed(() => {
 })
 
 const composerRef = ref(null)
+const closingSectionRef = ref(null)
 function autoGrowComposer() {
   const el = composerRef.value
   if (!el) return
@@ -408,12 +379,14 @@ function handleComposerSend() {
   if (!dailyIntentDraft.value.trim()) return
   saveDailyIntent()
   $q.notify({
-    message: '일일 계획을 저장했어요. 월간·주간 목표를 확인하고 오늘 일정을 세워보세요!',
+    message: '일일 계획을 저장했어요.',
     icon: 'check_circle',
     color: 'positive',
     position: 'top',
   })
-  router.push('/app/dashboard/monthly')
+  // 모든 섹션이 한 페이지에 항상 존재하므로, 화면을 바꿔치기하는 대신
+  // 이미 아래에 있는 회고/계획/일정 섹션으로 스크롤해서 보여준다
+  nextTick(() => closingSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
 const todos = computed(() => todoStore.list(dateISO.value))
@@ -484,30 +457,6 @@ const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[date
 
 const showGoalModal = ref(false)
 
-// 하루 여정 4단계: 계획 작성 → 목표 확인/할 일 정하기(대시보드) → 일정 실행 → 회고.
-// 저널 화면만으로는 대시보드 단계 진행 여부를 알 수 없어 일정 존재 여부로 근사한다.
-const JOURNEY_STEP_LABELS = {
-  plan: '오늘 계획 작성',
-  dashboard: '목표 확인 · 할 일 정하기',
-  execute: '일정 실행',
-  reflect: '오늘 회고',
-}
-const currentStepKey = computed(() => {
-  if (!hasDailyIntent.value) return 'plan'
-  if (schedules.value.length === 0) return 'dashboard'
-  if (!hasReflection.value) return 'execute'
-  return 'reflect'
-})
-const journeySteps = computed(() => {
-  const order = Object.keys(JOURNEY_STEP_LABELS)
-  const currentIdx = order.indexOf(currentStepKey.value)
-  return order.map((key, idx) => ({
-    key,
-    label: JOURNEY_STEP_LABELS[key],
-    done: idx < currentIdx,
-  }))
-})
-
 // 계획이 없으면 "하루 시작" 모드(계획 작성 카드만)를, 계획이 있으면 "하루 종료" 모드(계획·일정 비교 + 회고 배너)를 보여준다
 // 배너는 하루 종료 모드에서만 렌더링되므로 진행중/완료 2단계만 다루면 된다
 const journalPhase = computed(() => (hasReflection.value ? 'done' : 'in-progress'))
@@ -528,60 +477,6 @@ function handleBannerAction() {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  margin-top: 20px;
-}
-.journey-steps {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.journey-step {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px 5px 6px;
-  border-radius: 999px;
-  color: var(--p-ink-faint);
-}
-.journey-step .step-index {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--p-bg);
-  color: var(--p-ink-faint);
-  font-size: 0.68rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-.journey-step .step-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.journey-step.is-done .step-index {
-  background: var(--p-green);
-  color: #fff;
-}
-.journey-step.is-done .step-label {
-  color: var(--p-ink-faint);
-}
-.journey-step.is-active {
-  color: var(--p-lavender);
-}
-.journey-step.is-active .step-index {
-  background: var(--p-lavender);
-  color: #fff;
-}
-.journey-step.is-active .step-label {
-  color: var(--p-ink);
-}
-.step-arrow {
-  color: var(--p-ink-faint);
-  font-size: 0.78rem;
 }
 .top-row {
   display: grid;
@@ -608,11 +503,28 @@ function handleBannerAction() {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  margin-top: -28px;
+  min-height: calc(100vh - 72px);
+}
+.closing-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.plan-preview-text {
+  font-size: 0.9rem;
+  color: var(--p-ink);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
 }
 .start-hero {
+  width: calc(100% + 64px);
+  margin-left: -32px;
+  margin-right: -32px;
   background: linear-gradient(145deg, var(--p-rose), var(--p-rose-ink));
-  border-radius: var(--p-radius-lg);
-  padding: 32px 20px;
+  border-radius: 0;
+  padding: 32px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -697,9 +609,6 @@ function handleBannerAction() {
 }
 .group-dot.is-slate {
   background: var(--p-slate);
-}
-.hero-monthly-progress {
-  margin-bottom: 10px;
 }
 .hero-weekly-list {
   list-style: disc;
@@ -978,24 +887,6 @@ function handleBannerAction() {
 .count strong {
   font-weight: 700;
   color: var(--p-ink);
-}
-.intent-input {
-  width: 100%;
-  flex: 1;
-  border: none;
-  padding: 14px 16px;
-  font-size: 0.9rem;
-  font-family: inherit;
-  color: var(--p-ink);
-  resize: vertical;
-  line-height: 1.6;
-}
-.intent-input::placeholder {
-  color: var(--p-ink-faint);
-}
-.intent-save-btn {
-  margin-top: 12px;
-  align-self: flex-end;
 }
 .column-body {
   display: flex;
