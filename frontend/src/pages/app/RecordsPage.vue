@@ -129,9 +129,10 @@
           </BaseCard>
 
           <BaseCard class="start-hero-card hero-yesterday-card">
+            <p class="hero-card-title">어제 요약</p>
             <template v-if="yesterdaySummary">
               <div class="hero-yesterday-head">
-                <span>어제 달성률</span>
+                <span>달성률</span>
                 <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
               </div>
               <ProgressBar :value="yesterdaySummary.rate" :color="yesterdaySummary.rateColor" />
@@ -153,9 +154,9 @@
           </BaseCard>
 
           <BaseCard class="start-hero-card hero-reflection-card">
+            <p class="hero-card-title">지난 회고</p>
             <template v-if="previousReflection">
               <span class="hero-reflection-tag">회고 완료</span>
-              <p class="hero-reflection-label">완료율 {{ previousReflection.rate }}%</p>
               <p class="hero-reflection-text">{{ previousReflection.text }}</p>
             </template>
             <p v-else class="empty">아직 등록된 회고가 없어요.</p>
@@ -342,18 +343,15 @@ const monthlyGroups = computed(() => {
 })
 const unassignedWeeklyGoals = computed(() => goalStore.weeklyGoals.filter((g) => !g.monthlyGoalId))
 
-// 오늘 이전 날짜 중 가장 최근에 회고가 등록된 날의 완료율+회고 텍스트를 보여준다
+// 오늘 이전 날짜 중 가장 최근에 회고가 등록된 날의 회고 텍스트를 보여준다
+// (달성률은 위 "어제 달성률" 카드에서 이미 보여주므로 여기서는 중복 표시하지 않는다)
 const previousReflection = computed(() => {
   const pastDates = Object.keys(retrospectiveStore.reflectionsByDate).filter(
     (d) => d < dateISO.value,
   )
   if (pastDates.length === 0) return null
   const lastDate = pastDates.sort().at(-1)
-  const daySchedules = scheduleStore.list(lastDate)
-  const total = daySchedules.length
-  const done = daySchedules.filter((s) => s.completed).length
   return {
-    rate: total === 0 ? 0 : Math.round((done / total) * 100),
     text: retrospectiveStore.reflectionsByDate[lastDate],
   }
 })
@@ -747,6 +745,14 @@ function handleBannerAction() {
   flex-direction: column;
   gap: 8px;
 }
+.hero-card-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--p-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+}
 .hero-yesterday-head {
   display: flex;
   align-items: baseline;
@@ -828,12 +834,6 @@ function handleBannerAction() {
   background: color-mix(in srgb, var(--p-green) 16%, var(--p-bg));
   color: var(--p-green-ink);
   margin-bottom: 2px;
-}
-.hero-reflection-label {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--p-rose-ink);
-  margin: 0;
 }
 .hero-reflection-text {
   font-size: 0.86rem;
