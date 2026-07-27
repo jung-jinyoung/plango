@@ -52,42 +52,110 @@
         </div>
 
         <div class="hero-col hero-col-secondary">
-          <button type="button" class="hero-goto-btn" @click="goToMonthlyDashboard">
-            월간 대시보드 이동 &gt;
-          </button>
-
-          <BaseCard class="start-hero-card hero-nav-card hero-nav-card-wide">
-            <button type="button" class="hero-nav-link" @click="goToWeeklyDashboard">
-              주간 대시보드 이동 &gt;
+          <BaseCard class="start-hero-card hero-quicklink-card">
+            <button type="button" class="hero-quicklink" @click="goToMonthlyDashboard">
+              <span class="hero-quicklink-icon" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="5" width="18" height="16" rx="2" />
+                  <path d="M16 3v4M8 3v4M3 10h18" />
+                </svg>
+              </span>
+              <span class="hero-quicklink-text">
+                <span class="hero-quicklink-label">바로가기</span>
+                <span class="hero-quicklink-value">월간 대시보드</span>
+              </span>
+              <span class="hero-quicklink-chevron" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
             </button>
-            <div class="hero-yesterday">
-              <template v-if="yesterdaySummary">
-                <div class="hero-yesterday-head">
-                  <span>어제 달성률</span>
-                  <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
+
+            <span class="hero-quicklink-divider" aria-hidden="true" />
+
+            <button type="button" class="hero-quicklink" @click="goToWeeklyDashboard">
+              <span class="hero-quicklink-icon" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M9 4v16M15 4v16" />
+                </svg>
+              </span>
+              <span class="hero-quicklink-text">
+                <span class="hero-quicklink-label">바로가기</span>
+                <span class="hero-quicklink-value">주간 대시보드</span>
+              </span>
+              <span class="hero-quicklink-chevron" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </button>
+          </BaseCard>
+
+          <BaseCard class="start-hero-card hero-yesterday-card">
+            <template v-if="yesterdaySummary">
+              <div class="hero-yesterday-head">
+                <span>어제 달성률</span>
+                <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
+              </div>
+              <ProgressBar :value="yesterdaySummary.rate" :color="yesterdaySummary.rateColor" />
+              <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
+                <p class="hero-weak-label">보완하면 좋을 카테고리</p>
+                <div class="hero-weak-chip-row">
+                  <span
+                    v-for="c in yesterdaySummary.weakCategories"
+                    :key="c.color"
+                    class="hero-weak-chip"
+                    :class="`is-${c.color}`"
+                  >
+                    {{ c.name }} {{ c.rate }}%
+                  </span>
                 </div>
-                <ProgressBar :value="yesterdaySummary.rate" :color="yesterdaySummary.rateColor" />
-                <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
-                  <p class="hero-weak-label">보완하면 좋을 카테고리</p>
-                  <div class="hero-weak-chip-row">
-                    <span
-                      v-for="c in yesterdaySummary.weakCategories"
-                      :key="c.color"
-                      class="hero-weak-chip"
-                      :class="`is-${c.color}`"
-                    >
-                      {{ c.name }} {{ c.rate }}%
-                    </span>
-                  </div>
-                </div>
-              </template>
-              <p v-else class="empty">어제 등록된 일정이 없어요.</p>
-            </div>
+              </div>
+            </template>
+            <p v-else class="empty">어제 등록된 일정이 없어요.</p>
           </BaseCard>
 
           <BaseCard class="start-hero-card hero-reflection-card">
             <template v-if="previousReflection">
-              <p class="hero-reflection-label">지난 회고 · 완료율 {{ previousReflection.rate }}%</p>
+              <span class="hero-reflection-tag">회고 완료</span>
+              <p class="hero-reflection-label">완료율 {{ previousReflection.rate }}%</p>
               <p class="hero-reflection-text">{{ previousReflection.text }}</p>
             </template>
             <p v-else class="empty">아직 등록된 회고가 없어요.</p>
@@ -614,59 +682,70 @@ function handleBannerAction() {
   color: var(--p-ink-faint);
   font-size: 0.8rem;
 }
-.hero-goto-btn {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 999px;
-  background: var(--p-surface);
-  color: var(--p-rose-ink);
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-align: center;
-  transition: transform 120ms ease;
+.hero-quicklink-card {
+  display: flex;
+  align-items: stretch;
+  padding: 0;
 }
-.hero-goto-btn:hover {
-  transform: translateY(-1px);
-}
-.hero-goto-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-.hero-nav-card {
+.hero-quicklink {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-.hero-nav-card-wide {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 14px;
-}
-.hero-nav-link {
+  gap: 10px;
+  padding: 18px 16px;
   appearance: none;
   border: none;
   cursor: pointer;
   background: transparent;
-  padding: 0;
   font-family: inherit;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--p-rose-ink);
   text-align: left;
 }
-.hero-nav-link:hover {
-  text-decoration: underline;
+.hero-quicklink-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-bg));
+  color: var(--p-rose-ink);
+  flex-shrink: 0;
 }
-.hero-yesterday {
+.hero-quicklink-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.hero-quicklink-label {
+  font-size: 0.7rem;
+  color: var(--p-ink-faint);
+}
+.hero-quicklink-value {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--p-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hero-quicklink-chevron {
+  display: flex;
+  color: var(--p-ink-faint);
+  flex-shrink: 0;
+}
+.hero-quicklink-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 14px 0;
+  background: color-mix(in srgb, var(--p-ink) 10%, transparent);
+}
+.hero-yesterday-card {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 4px;
-  border-top: 1px solid color-mix(in srgb, var(--p-ink) 8%, transparent);
 }
 .hero-yesterday-head {
   display: flex;
@@ -739,6 +818,16 @@ function handleBannerAction() {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+.hero-reflection-tag {
+  align-self: flex-start;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--p-green) 16%, var(--p-bg));
+  color: var(--p-green-ink);
+  margin-bottom: 2px;
 }
 .hero-reflection-label {
   font-size: 0.78rem;
