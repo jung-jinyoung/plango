@@ -14,42 +14,85 @@
     </div>
 
     <div v-if="!hasDailyIntent" class="start-mode">
-      <div class="start-goals">
-        <div class="start-goals-head">
-          <h2>이번 달 · 이번 주 목표</h2>
-        </div>
-        <div
-          v-for="group in monthlyGoalGroups"
-          :key="group.monthly ? group.monthly.id : 'unassigned'"
-          class="goal-group"
-        >
-          <div
-            class="goal-mini-item is-parent"
-            :class="group.monthly ? `is-${group.monthly.color}` : ''"
-          >
-            <span class="dot" aria-hidden="true" />
-            <span class="title">{{ group.monthly ? group.monthly.title : '미분류' }}</span>
-            <span v-if="group.monthly" class="count">
-              {{ group.monthly.doneCount }}/{{ group.monthly.taskCount }}
-            </span>
-          </div>
-          <div class="goal-mini-sublist">
-            <div
-              v-for="goal in group.weeklyGoals"
-              :key="goal.id"
-              class="goal-mini-item is-child"
-              :class="`is-${goal.color}`"
-            >
-              <span class="dot" aria-hidden="true" />
-              <span class="title">{{ goal.title }}</span>
-              <span class="count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+      <div class="start-hero">
+        <div class="hero-col hero-col-primary">
+          <BaseCard class="start-hero-card">
+            <h2 class="start-hero-title">실천중인 목표</h2>
+
+            <div v-for="group in monthlyGroups" :key="group.monthly.id" class="hero-goal-group">
+              <p class="hero-monthly-title">{{ group.monthly.title }}</p>
+              <ul class="hero-weekly-list">
+                <li v-for="goal in group.weeklyGoals" :key="goal.id">
+                  {{ goal.title }}
+                  <span class="hero-weekly-count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+                </li>
+                <li v-if="group.weeklyGoals.length === 0" class="hero-weekly-empty">
+                  아직 이 목표에 속한 주간 목표가 없어요.
+                </li>
+              </ul>
             </div>
-            <p v-if="group.weeklyGoals.length === 0" class="empty sub-empty">
-              이 목표에 속한 주간 목표가 없어요.
+
+            <div v-if="unassignedWeeklyGoals.length > 0" class="hero-goal-group">
+              <p class="hero-monthly-title is-unassigned">미분류 주간 목표</p>
+              <ul class="hero-weekly-list">
+                <li v-for="goal in unassignedWeeklyGoals" :key="goal.id">
+                  {{ goal.title }}
+                  <span class="hero-weekly-count">{{ goal.doneCount }}/{{ goal.taskCount }}</span>
+                </li>
+              </ul>
+            </div>
+
+            <p
+              v-if="monthlyGroups.length === 0 && unassignedWeeklyGoals.length === 0"
+              class="empty"
+            >
+              등록된 목표가 없어요.
             </p>
-          </div>
+          </BaseCard>
         </div>
-        <p v-if="monthlyGoalGroups.length === 0" class="empty">등록된 목표가 없어요.</p>
+
+        <div class="hero-col hero-col-secondary">
+          <button type="button" class="hero-goto-btn" @click="goToMonthlyDashboard">
+            월간 대시보드 이동 &gt;
+          </button>
+
+          <BaseCard class="start-hero-card hero-nav-card hero-nav-card-wide">
+            <button type="button" class="hero-nav-link" @click="goToWeeklyDashboard">
+              주간 대시보드 이동 &gt;
+            </button>
+            <div class="hero-yesterday">
+              <template v-if="yesterdaySummary">
+                <div class="hero-yesterday-head">
+                  <span>어제 달성률</span>
+                  <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
+                </div>
+                <ProgressBar :value="yesterdaySummary.rate" :color="yesterdaySummary.rateColor" />
+                <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
+                  <p class="hero-weak-label">보완하면 좋을 카테고리</p>
+                  <div class="hero-weak-chip-row">
+                    <span
+                      v-for="c in yesterdaySummary.weakCategories"
+                      :key="c.color"
+                      class="hero-weak-chip"
+                      :class="`is-${c.color}`"
+                    >
+                      {{ c.name }} {{ c.rate }}%
+                    </span>
+                  </div>
+                </div>
+              </template>
+              <p v-else class="empty">어제 등록된 일정이 없어요.</p>
+            </div>
+          </BaseCard>
+
+          <BaseCard class="start-hero-card hero-reflection-card">
+            <template v-if="previousReflection">
+              <p class="hero-reflection-label">지난 회고 · 완료율 {{ previousReflection.rate }}%</p>
+              <p class="hero-reflection-text">{{ previousReflection.text }}</p>
+            </template>
+            <p v-else class="empty">아직 등록된 회고가 없어요.</p>
+          </BaseCard>
+        </div>
       </div>
 
       <div class="plan-composer neu-raised">
@@ -187,15 +230,18 @@ import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import ProgressBar from '@/components/ui/ProgressBar.vue'
 import ScheduleCard from '@/components/daily-plan/ScheduleCard.vue'
 import ReflectionModal from '@/components/retrospective/ReflectionModal.vue'
 import GoalFormModal from '@/components/goals/GoalFormModal.vue'
 import { useTodoStore } from '@/stores/todos'
 import { useScheduleStore } from '@/stores/schedule'
 import { useGoalStore } from '@/stores/goals'
+import { useCategoryStore } from '@/stores/categories'
 import { useRetrospectiveStore } from '@/stores/retrospective'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { suggestReflectionPrompt } from '@/services/ai/suggest-reflection-prompt'
+import { addDaysISO } from '@/utils/date'
 
 const $q = useQuasar()
 const router = useRouter()
@@ -205,6 +251,7 @@ const dateISO = computed(() => calendarNav.currentDateISO)
 const todoStore = useTodoStore()
 const scheduleStore = useScheduleStore()
 const goalStore = useGoalStore()
+const categoryStore = useCategoryStore()
 const retrospectiveStore = useRetrospectiveStore()
 
 onMounted(() => {
@@ -212,21 +259,67 @@ onMounted(() => {
   autoGrowComposer()
 })
 
-// 주간 목표를 상위 월간 목표별로 묶는다 (미분류는 마지막 그룹으로)
-const monthlyGoalGroups = computed(() => {
+// 주간 목표를 상위 월간 목표별로 묶는다 (부모 없는 주간 목표는 별도 미분류 목록으로)
+const monthlyGroups = computed(() => {
   const weeklyByMonthly = new Map()
   for (const goal of goalStore.weeklyGoals) {
     if (!goal.monthlyGoalId) continue
     if (!weeklyByMonthly.has(goal.monthlyGoalId)) weeklyByMonthly.set(goal.monthlyGoalId, [])
     weeklyByMonthly.get(goal.monthlyGoalId).push(goal)
   }
-  const groups = goalStore.monthlyGoals.map((monthly) => ({
+  return goalStore.monthlyGoals.map((monthly) => ({
     monthly,
     weeklyGoals: weeklyByMonthly.get(monthly.id) ?? [],
   }))
-  const orphans = goalStore.weeklyGoals.filter((g) => !g.monthlyGoalId)
-  if (orphans.length > 0) groups.push({ monthly: null, weeklyGoals: orphans })
-  return groups
+})
+const unassignedWeeklyGoals = computed(() => goalStore.weeklyGoals.filter((g) => !g.monthlyGoalId))
+
+// 오늘 이전 날짜 중 가장 최근에 회고가 등록된 날의 완료율+회고 텍스트를 보여준다
+const previousReflection = computed(() => {
+  const pastDates = Object.keys(retrospectiveStore.reflectionsByDate).filter(
+    (d) => d < dateISO.value,
+  )
+  if (pastDates.length === 0) return null
+  const lastDate = pastDates.sort().at(-1)
+  const daySchedules = scheduleStore.list(lastDate)
+  const total = daySchedules.length
+  const done = daySchedules.filter((s) => s.completed).length
+  return {
+    rate: total === 0 ? 0 : Math.round((done / total) * 100),
+    text: retrospectiveStore.reflectionsByDate[lastDate],
+  }
+})
+
+// 어제 일정의 달성률과, 완료율이 가장 낮았던 카테고리 2개를 보여준다
+const yesterdaySummary = computed(() => {
+  const daySchedules = scheduleStore.list(addDaysISO(dateISO.value, -1))
+  const total = daySchedules.length
+  if (total === 0) return null
+
+  const done = daySchedules.filter((s) => s.completed).length
+  const rate = Math.round((done / total) * 100)
+  const rateColor = rate >= 70 ? 'green' : rate >= 40 ? 'amber' : 'rose'
+
+  const byCategory = new Map()
+  daySchedules.forEach((s) => {
+    if (!s.categoryColor) return
+    const entry = byCategory.get(s.categoryColor) ?? { total: 0, done: 0 }
+    entry.total += 1
+    if (s.completed) entry.done += 1
+    byCategory.set(s.categoryColor, entry)
+  })
+
+  const weakCategories = [...byCategory.entries()]
+    .map(([color, { total: t, done: d }]) => ({
+      color,
+      name: categoryStore.categories.find((c) => c.color === color)?.name ?? color,
+      rate: Math.round((d / t) * 100),
+    }))
+    .filter((c) => c.rate < 100)
+    .sort((a, b) => a.rate - b.rate)
+    .slice(0, 2)
+
+  return { rate, rateColor, weakCategories }
 })
 
 const composerRef = ref(null)
@@ -294,6 +387,9 @@ function goToDaily() {
 }
 function goToMonthlyDashboard() {
   router.push('/app/dashboard/monthly')
+}
+function goToWeeklyDashboard() {
+  router.push('/app/dashboard/weekly')
 }
 
 const aiSuggestion = ref('')
@@ -438,97 +534,223 @@ function handleBannerAction() {
   flex-direction: column;
   gap: 20px;
 }
-.start-goals {
+.start-hero {
+  background: linear-gradient(145deg, var(--p-rose), var(--p-rose-ink));
+  border-radius: var(--p-radius-lg);
+  padding: 32px 20px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-}
-.start-goals-head h2 {
-  font-size: 1.02rem;
-  font-weight: 700;
-  margin: 0;
-}
-.goal-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.goal-mini-sublist {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-left: 22px;
-}
-.sub-empty {
-  padding: 4px 4px 4px 10px;
-  font-size: 0.8rem;
-}
-.goal-mini-item {
-  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--p-radius-sm);
-  border-left: 3px solid var(--dot-color, var(--p-rose));
-  background: color-mix(in srgb, var(--dot-color, var(--p-rose)) 15%, var(--p-bg));
-  font-size: 0.85rem;
+  gap: 16px;
 }
-.goal-mini-item.is-parent .title {
+@media (min-width: 880px) {
+  .start-hero {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: stretch;
+  }
+}
+.hero-col {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+@media (min-width: 880px) {
+  .hero-col {
+    max-width: none;
+  }
+  .hero-col-primary > .start-hero-card {
+    flex: 1;
+  }
+}
+.start-hero-card {
+  width: 100%;
+  box-shadow: none !important;
+}
+.start-hero-title {
+  font-size: 1.05rem;
   font-weight: 700;
+  color: var(--p-rose-ink);
+  margin: 0 0 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 12%, transparent);
 }
-.goal-mini-item .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--dot-color, var(--p-rose));
-  flex-shrink: 0;
+.hero-goal-group + .hero-goal-group {
+  margin-top: 18px;
 }
-.goal-mini-item .title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--tag-ink, var(--p-ink));
+.hero-monthly-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--p-ink);
+  margin: 0 0 6px;
+}
+.hero-monthly-title.is-unassigned {
+  color: var(--p-ink-faint);
   font-weight: 600;
 }
-.goal-mini-item .count {
+.hero-weekly-list {
+  list-style: disc;
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hero-weekly-list li {
+  font-size: 0.85rem;
+  color: var(--p-ink-muted);
+}
+.hero-weekly-count {
   font-size: 0.76rem;
   color: var(--p-ink-faint);
-  flex-shrink: 0;
+  margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
-.goal-mini-item.is-rose {
-  --dot-color: var(--p-rose);
-  --tag-ink: var(--p-rose-ink);
+.hero-weekly-empty {
+  list-style: none;
+  margin-left: -20px;
+  color: var(--p-ink-faint);
+  font-size: 0.8rem;
 }
-.goal-mini-item.is-amber {
-  --dot-color: var(--p-amber);
-  --tag-ink: var(--p-amber-ink);
+.hero-goto-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--p-surface);
+  color: var(--p-rose-ink);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  transition: transform 120ms ease;
 }
-.goal-mini-item.is-green {
-  --dot-color: var(--p-green);
-  --tag-ink: var(--p-green-ink);
+.hero-goto-btn:hover {
+  transform: translateY(-1px);
 }
-.goal-mini-item.is-teal {
-  --dot-color: var(--p-teal);
-  --tag-ink: var(--p-teal-ink);
+.hero-goto-btn:active {
+  transform: translateY(0) scale(0.98);
 }
-.goal-mini-item.is-blue {
-  --dot-color: var(--p-blue);
-  --tag-ink: var(--p-blue-ink);
+.hero-nav-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }
-.goal-mini-item.is-lavender {
-  --dot-color: var(--p-lavender);
-  --tag-ink: var(--p-lavender-ink);
+.hero-nav-card-wide {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
 }
-.goal-mini-item.is-plum {
-  --dot-color: var(--p-plum);
-  --tag-ink: var(--p-plum-ink);
+.hero-nav-link {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--p-rose-ink);
+  text-align: left;
 }
-.goal-mini-item.is-slate {
-  --dot-color: var(--p-slate);
-  --tag-ink: var(--p-slate-ink);
+.hero-nav-link:hover {
+  text-decoration: underline;
+}
+.hero-yesterday {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid color-mix(in srgb, var(--p-ink) 8%, transparent);
+}
+.hero-yesterday-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--p-ink-muted);
+}
+.hero-yesterday-pct {
+  font-weight: 700;
+  color: var(--p-ink);
+  font-variant-numeric: tabular-nums;
+}
+.hero-weak {
+  margin-top: 4px;
+}
+.hero-weak-label {
+  font-size: 0.74rem;
+  color: var(--p-ink-faint);
+  margin: 0 0 6px;
+}
+.hero-weak-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hero-weak-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--chip-color, var(--p-rose)) 16%, var(--p-bg));
+  color: var(--chip-ink, var(--p-rose-ink));
+}
+.hero-weak-chip.is-rose {
+  --chip-color: var(--p-rose);
+  --chip-ink: var(--p-rose-ink);
+}
+.hero-weak-chip.is-amber {
+  --chip-color: var(--p-amber);
+  --chip-ink: var(--p-amber-ink);
+}
+.hero-weak-chip.is-green {
+  --chip-color: var(--p-green);
+  --chip-ink: var(--p-green-ink);
+}
+.hero-weak-chip.is-teal {
+  --chip-color: var(--p-teal);
+  --chip-ink: var(--p-teal-ink);
+}
+.hero-weak-chip.is-blue {
+  --chip-color: var(--p-blue);
+  --chip-ink: var(--p-blue-ink);
+}
+.hero-weak-chip.is-lavender {
+  --chip-color: var(--p-lavender);
+  --chip-ink: var(--p-lavender-ink);
+}
+.hero-weak-chip.is-plum {
+  --chip-color: var(--p-plum);
+  --chip-ink: var(--p-plum-ink);
+}
+.hero-weak-chip.is-slate {
+  --chip-color: var(--p-slate);
+  --chip-ink: var(--p-slate-ink);
+}
+.hero-reflection-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.hero-reflection-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--p-rose-ink);
+  margin: 0;
+}
+.hero-reflection-text {
+  font-size: 0.86rem;
+  color: var(--p-ink-muted);
+  line-height: 1.5;
+  margin: 0;
 }
 .plan-composer {
   position: sticky;
