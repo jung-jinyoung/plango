@@ -2,6 +2,56 @@
   <div class="records-layout">
     <div class="start-mode">
       <div class="start-hero">
+        <div class="plan-composer-wrap">
+          <p class="hero-greeting">{{ greeting }}</p>
+
+          <button
+            v-if="!hasDailyIntent && (planSuggestionLoading || planSuggestion)"
+            type="button"
+            class="plan-suggestion-chip"
+            :disabled="planSuggestionLoading"
+            @click="applyPlanSuggestion"
+          >
+            <span class="ai-badge">AI</span>
+            <span class="plan-suggestion-text">
+              {{ planSuggestionLoading ? '오늘의 제안을 준비하고 있어요...' : planSuggestion }}
+            </span>
+          </button>
+
+          <div class="plan-composer neu-raised">
+            <textarea
+              ref="composerRef"
+              v-model="dailyIntentDraft"
+              class="plan-composer-input neu-sunken"
+              rows="1"
+              placeholder="오늘 하루의 계획을 적고 Enter로 저장하세요 (Shift+Enter 줄바꿈)"
+              @input="autoGrowComposer"
+              @keydown.enter.exact.prevent="handleComposerSend"
+            />
+            <button
+              v-if="!hasDailyIntent"
+              type="button"
+              class="composer-send"
+              :disabled="!dailyIntentDraft.trim()"
+              aria-label="계획 저장"
+              @click="handleComposerSend"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         <div class="hero-col hero-col-primary">
           <BaseCard class="start-hero-card">
             <h2 class="start-hero-title">실천중인 목표</h2>
@@ -152,39 +202,6 @@
           </BaseCard>
         </div>
       </div>
-
-      <div class="plan-composer neu-raised">
-        <textarea
-          ref="composerRef"
-          v-model="dailyIntentDraft"
-          class="plan-composer-input"
-          rows="1"
-          placeholder="오늘 하루의 계획을 적고 Enter로 저장하세요 (Shift+Enter 줄바꿈)"
-          @input="autoGrowComposer"
-          @keydown.enter.exact.prevent="handleComposerSend"
-        />
-        <button
-          v-if="!hasDailyIntent"
-          type="button"
-          class="composer-send"
-          :disabled="!dailyIntentDraft.trim()"
-          aria-label="계획 저장"
-          @click="handleComposerSend"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.4"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-        </button>
-      </div>
     </div>
 
     <div ref="closingSectionRef" class="closing-mode">
@@ -289,6 +306,7 @@ import { useCategoryStore } from '@/stores/categories'
 import { useRetrospectiveStore } from '@/stores/retrospective'
 import { useCalendarNavStore } from '@/stores/calendar-nav'
 import { suggestReflectionPrompt } from '@/services/ai/suggest-reflection-prompt'
+import { suggestDailyIntent } from '@/services/ai/suggest-daily-intent'
 import { addDaysISO } from '@/utils/date'
 
 const $q = useQuasar()
@@ -302,9 +320,19 @@ const goalStore = useGoalStore()
 const categoryStore = useCategoryStore()
 const retrospectiveStore = useRetrospectiveStore()
 
-onMounted(() => {
-  goalStore.load()
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 5) return '늦은 시간까지 고생 많아요'
+  if (hour < 12) return '좋은 아침이에요'
+  if (hour < 18) return '좋은 오후예요'
+  return '좋은 저녁이에요'
+}
+const greeting = getGreeting()
+
+onMounted(async () => {
   autoGrowComposer()
+  await goalStore.load()
+  loadPlanSuggestion()
 })
 
 // 주간 목표를 상위 월간 목표별로 묶는다 (부모 없는 주간 목표는 별도 미분류 목록으로)
@@ -366,6 +394,25 @@ const yesterdaySummary = computed(() => {
 
   return { rate, rateColor, weakCategories }
 })
+
+// 목표(월간 1순위)와 어제 실행 데이터를 반영한 계획 제안 문구
+const planSuggestion = ref('')
+const planSuggestionLoading = ref(false)
+async function loadPlanSuggestion() {
+  if (hasDailyIntent.value) return
+  planSuggestionLoading.value = true
+  planSuggestion.value = await suggestDailyIntent({
+    topGoalTitle: monthlyGroups.value[0]?.monthly.title ?? null,
+    yesterdayRate: yesterdaySummary.value?.rate ?? null,
+    weakCategoryName: yesterdaySummary.value?.weakCategories[0]?.name ?? null,
+  })
+  planSuggestionLoading.value = false
+}
+function applyPlanSuggestion() {
+  if (!planSuggestion.value) return
+  dailyIntentDraft.value = planSuggestion.value
+  nextTick(autoGrowComposer)
+}
 
 const composerRef = ref(null)
 const closingSectionRef = ref(null)
@@ -451,6 +498,7 @@ async function loadSuggestion() {
   aiSuggestionLoading.value = false
 }
 watch(dateISO, loadSuggestion, { immediate: true })
+watch(dateISO, loadPlanSuggestion, { immediate: true })
 
 const showReflectionModal = ref(false)
 const hasReflection = computed(() => !!retrospectiveStore.reflectionsByDate[dateISO.value])
@@ -816,13 +864,62 @@ function handleBannerAction() {
   line-height: 1.5;
   margin: 0;
 }
+.plan-composer-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+@media (min-width: 880px) {
+  .plan-composer-wrap {
+    grid-column: 1 / -1;
+  }
+}
+.hero-greeting {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.plan-suggestion-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.92);
+  font-family: inherit;
+  text-align: left;
+  transition:
+    transform 120ms ease,
+    background 120ms ease;
+}
+.plan-suggestion-chip:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+.plan-suggestion-chip:disabled {
+  cursor: default;
+  transform: none;
+}
+.plan-suggestion-text {
+  font-size: 0.82rem;
+  color: var(--p-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .plan-composer {
-  position: sticky;
-  bottom: 20px;
   display: flex;
   align-items: flex-end;
   gap: 10px;
   padding: 10px 12px 10px 16px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
 }
 .plan-composer-input {
   flex: 1;
@@ -830,11 +927,10 @@ function handleBannerAction() {
   max-height: 200px;
   overflow-y: auto;
   border: none;
-  background: transparent;
   font-family: inherit;
   font-size: 0.92rem;
   line-height: 1.6;
-  padding: 8px 4px;
+  padding: 10px 14px;
   color: var(--p-ink);
 }
 .plan-composer-input::placeholder {
