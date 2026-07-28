@@ -13,8 +13,9 @@
         </BaseCard>
 
         <div class="hero-col hero-col-primary">
-          <BaseCard class="start-hero-card">
-            <h2 class="start-hero-title">실천중인 목표</h2>
+          <p class="section-eyebrow">지난 기록</p>
+          <BaseCard class="start-hero-card is-quiet">
+            <h2 class="card-eyebrow">실천중인 목표</h2>
 
             <div v-for="group in monthlyGroups" :key="group.monthly.id" class="hero-goal-group">
               <p class="hero-monthly-title">
@@ -50,8 +51,8 @@
             </p>
           </BaseCard>
 
-          <BaseCard class="start-hero-card hero-yesterday-card">
-            <p class="hero-card-title">어제 요약</p>
+          <BaseCard class="start-hero-card hero-yesterday-card is-quiet">
+            <p class="card-eyebrow">어제 요약</p>
             <template v-if="yesterdaySummary">
               <div class="hero-yesterday-head">
                 <span>달성률</span>
@@ -74,8 +75,8 @@
             <p v-else class="empty">어제 등록된 일정이 없어요.</p>
           </BaseCard>
 
-          <BaseCard class="start-hero-card hero-reflection-card">
-            <p class="hero-card-title">지난 회고</p>
+          <BaseCard class="start-hero-card hero-reflection-card is-quiet">
+            <p class="card-eyebrow">지난 회고</p>
             <template v-if="previousReflection">
               <span class="hero-reflection-tag">회고 완료</span>
               <p class="hero-reflection-text">{{ previousReflection.text }}</p>
@@ -85,7 +86,8 @@
         </div>
 
         <div class="hero-col hero-col-secondary">
-          <BaseCard class="start-hero-card hero-quicklink-card">
+          <p class="section-eyebrow">오늘</p>
+          <BaseCard class="start-hero-card hero-quicklink-card is-quiet">
             <button type="button" class="hero-quicklink" @click="goToMonthlyDashboard">
               <span class="hero-quicklink-icon" aria-hidden="true">
                 <svg
@@ -512,7 +514,28 @@ function handleBannerAction() {
     display: grid;
     grid-template-columns: 0.85fr 1.15fr;
     align-items: start;
+    column-gap: 40px;
   }
+  .hero-col-secondary {
+    position: relative;
+  }
+  .hero-col-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -20px;
+    width: 1px;
+    background: color-mix(in srgb, var(--p-ink) 8%, transparent);
+  }
+}
+.section-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--p-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 -4px 4px;
 }
 .hero-full-row {
   width: 100%;
@@ -537,13 +560,17 @@ function handleBannerAction() {
 .start-hero-card {
   width: 100%;
 }
-.start-hero-title {
-  font-size: 1.05rem;
+.start-hero-card.is-quiet {
+  background: color-mix(in srgb, var(--p-surface) 65%, var(--p-bg));
+  box-shadow: var(--p-shadow-raised-sm);
+}
+.card-eyebrow {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--p-rose-ink);
-  margin: 0 0 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid color-mix(in srgb, var(--p-ink) 12%, transparent);
+  color: var(--p-ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px;
 }
 .hero-goal-group + .hero-goal-group {
   margin-top: 18px;
@@ -639,10 +666,10 @@ function handleBannerAction() {
     transform 120ms ease;
 }
 .hero-quicklink:hover {
-  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-bg));
+  background: color-mix(in srgb, var(--p-ink) 6%, var(--p-bg));
 }
 .hero-quicklink:hover .hero-quicklink-chevron {
-  color: var(--p-rose-ink);
+  color: var(--p-ink);
   transform: translateX(2px);
 }
 .hero-quicklink:active {
@@ -665,8 +692,8 @@ function handleBannerAction() {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--p-rose) 14%, var(--p-bg));
-  color: var(--p-rose-ink);
+  background: color-mix(in srgb, var(--p-ink) 7%, var(--p-bg));
+  color: var(--p-ink-muted);
   flex-shrink: 0;
 }
 .hero-quicklink-text {
@@ -700,14 +727,6 @@ function handleBannerAction() {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.hero-card-title {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--p-ink-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin: 0;
 }
 .hero-yesterday-head {
   display: flex;
@@ -866,8 +885,10 @@ function handleBannerAction() {
   margin-bottom: 8px;
 }
 .column-head h2 {
-  font-size: 1.02rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--p-ink);
   margin: 0;
 }
 .count {
