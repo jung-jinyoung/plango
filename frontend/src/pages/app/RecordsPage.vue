@@ -2,55 +2,15 @@
   <div class="records-layout">
     <div class="start-mode">
       <div class="start-hero">
-        <div class="plan-composer-wrap">
-          <p class="hero-greeting">{{ greeting }}</p>
-
-          <button
-            v-if="!hasDailyIntent && (planSuggestionLoading || planSuggestion)"
-            type="button"
-            class="plan-suggestion-chip"
-            :disabled="planSuggestionLoading"
-            @click="applyPlanSuggestion"
-          >
-            <span class="ai-badge">AI</span>
-            <span class="plan-suggestion-text">
-              {{ planSuggestionLoading ? '오늘의 제안을 준비하고 있어요...' : planSuggestion }}
-            </span>
-          </button>
-
-          <div class="plan-composer neu-raised">
-            <textarea
-              ref="composerRef"
-              v-model="dailyIntentDraft"
-              class="plan-composer-input neu-sunken"
-              rows="1"
-              placeholder="오늘 하루의 계획을 적고 Enter로 저장하세요 (Shift+Enter 줄바꿈)"
-              @input="autoGrowComposer"
-              @keydown.enter.exact.prevent="handleComposerSend"
-            />
-            <button
-              v-if="!hasDailyIntent"
-              type="button"
-              class="composer-send"
-              :disabled="!dailyIntentDraft.trim()"
-              aria-label="계획 저장"
-              @click="handleComposerSend"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.4"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
+        <BaseCard class="column-retro hero-full-row">
+          <div class="retro-suggest">
+            <span class="ai-badge" :class="`is-${journalPhase}`">{{ bannerBadgeLabel }}</span>
+            <p class="suggest-text">{{ bannerText }}</p>
           </div>
-        </div>
+          <BaseButton variant="primary" @click="handleBannerAction">
+            {{ bannerButtonLabel }}
+          </BaseButton>
+        </BaseCard>
 
         <div class="hero-col hero-col-primary">
           <BaseCard class="start-hero-card">
@@ -88,6 +48,39 @@
             >
               등록된 목표가 없어요.
             </p>
+          </BaseCard>
+
+          <BaseCard class="start-hero-card hero-yesterday-card">
+            <p class="hero-card-title">어제 요약</p>
+            <template v-if="yesterdaySummary">
+              <div class="hero-yesterday-head">
+                <span>달성률</span>
+                <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
+              </div>
+              <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
+                <p class="hero-weak-label">보완하면 좋을 카테고리</p>
+                <div class="hero-weak-chip-row">
+                  <span
+                    v-for="c in yesterdaySummary.weakCategories"
+                    :key="c.color"
+                    class="hero-weak-chip"
+                    :class="`is-${c.color}`"
+                  >
+                    {{ c.name }} {{ c.rate }}%
+                  </span>
+                </div>
+              </div>
+            </template>
+            <p v-else class="empty">어제 등록된 일정이 없어요.</p>
+          </BaseCard>
+
+          <BaseCard class="start-hero-card hero-reflection-card">
+            <p class="hero-card-title">지난 회고</p>
+            <template v-if="previousReflection">
+              <span class="hero-reflection-tag">회고 완료</span>
+              <p class="hero-reflection-text">{{ previousReflection.text }}</p>
+            </template>
+            <p v-else class="empty">아직 등록된 회고가 없어요.</p>
           </BaseCard>
         </div>
 
@@ -168,116 +161,99 @@
             </button>
           </BaseCard>
 
-          <BaseCard class="start-hero-card hero-yesterday-card">
-            <p class="hero-card-title">어제 요약</p>
-            <template v-if="yesterdaySummary">
-              <div class="hero-yesterday-head">
-                <span>달성률</span>
-                <span class="hero-yesterday-pct">{{ yesterdaySummary.rate }}%</span>
-              </div>
-              <div v-if="yesterdaySummary.weakCategories.length > 0" class="hero-weak">
-                <p class="hero-weak-label">보완하면 좋을 카테고리</p>
-                <div class="hero-weak-chip-row">
-                  <span
-                    v-for="c in yesterdaySummary.weakCategories"
-                    :key="c.color"
-                    class="hero-weak-chip"
-                    :class="`is-${c.color}`"
-                  >
-                    {{ c.name }} {{ c.rate }}%
-                  </span>
-                </div>
-              </div>
-            </template>
-            <p v-else class="empty">어제 등록된 일정이 없어요.</p>
-          </BaseCard>
-
-          <BaseCard class="start-hero-card hero-reflection-card">
-            <p class="hero-card-title">지난 회고</p>
-            <template v-if="previousReflection">
-              <span class="hero-reflection-tag">회고 완료</span>
-              <p class="hero-reflection-text">{{ previousReflection.text }}</p>
-            </template>
-            <p v-else class="empty">아직 등록된 회고가 없어요.</p>
-          </BaseCard>
-        </div>
-      </div>
-    </div>
-
-    <div ref="closingSectionRef" class="closing-mode">
-      <BaseCard class="column-retro">
-        <div class="retro-suggest">
-          <span class="ai-badge" :class="`is-${journalPhase}`">{{ bannerBadgeLabel }}</span>
-          <p class="suggest-text">{{ bannerText }}</p>
-        </div>
-        <BaseButton variant="primary" @click="handleBannerAction">
-          {{ bannerButtonLabel }}
-        </BaseButton>
-      </BaseCard>
-
-      <div class="top-row">
-        <BaseCard class="column">
-          <div class="column-head">
-            <h2>계획</h2>
-            <span class="count">오늘 계획했던 것</span>
-          </div>
-          <p v-if="hasDailyIntent" class="plan-preview-text">
-            {{ retrospectiveStore.dailyIntentByDate[dateISO] }}
-          </p>
-          <p v-else class="empty">위에서 오늘의 계획을 적어보세요.</p>
-        </BaseCard>
-
-        <BaseCard class="column">
-          <div class="column-head">
-            <h2>일정</h2>
-            <span class="count"
-              >실제로 한 일 · <strong>{{ doneCount }}</strong
-              >/{{ schedules.length }} 완료</span
-            >
-          </div>
-          <div class="column-body">
-            <div
-              v-for="schedule in schedules"
-              :key="schedule.id"
-              class="record-item"
-              @click="handleItemClick($event, goToDaily)"
-            >
-              <ScheduleCard
-                :schedule="schedule"
-                :draggable="false"
-                compact
-                @toggle-complete="handleToggleComplete"
-              />
-              <select
-                v-if="schedule.todoId && goalStore.weeklyGoals.length > 0"
-                class="goal-select neu-sunken"
-                :value="todoGoalId(schedule.todoId) || ''"
-                @change="
-                  handleAssignGoal({
-                    todoId: schedule.todoId,
-                    goalId: $event.target.value || null,
-                  })
-                "
-              >
-                <option value="">목표 미태그</option>
-                <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">
-                  {{ goal.title }}
-                </option>
-              </select>
-              <button
-                v-else-if="schedule.todoId"
-                type="button"
-                class="goal-add-link"
-                @click="showGoalModal = true"
-              >
-                주간 목표 추가
-              </button>
+          <BaseCard class="start-hero-card plan-input-card">
+            <div class="column-head">
+              <h2>계획</h2>
             </div>
-            <p v-if="schedules.length === 0" class="empty empty-link" @click="goToMonthlyDashboard">
-              오늘 기록된 일정이 없어요. 대시보드에서 계획을 세워보세요 →
-            </p>
-          </div>
-        </BaseCard>
+            <button
+              v-if="!hasDailyIntent && (planSuggestionLoading || planSuggestion)"
+              type="button"
+              class="plan-suggestion-chip"
+              :disabled="planSuggestionLoading"
+              @click="applyPlanSuggestion"
+            >
+              <span class="ai-badge">AI</span>
+              <span class="plan-suggestion-text">
+                {{ planSuggestionLoading ? '오늘의 제안을 준비하고 있어요...' : planSuggestion }}
+              </span>
+            </button>
+            <textarea
+              ref="composerRef"
+              v-model="dailyIntentDraft"
+              class="plan-composer-input neu-sunken"
+              rows="4"
+              placeholder="오늘 하루의 계획을 적고 Enter로 저장하세요 (Shift+Enter 줄바꿈)"
+              @input="autoGrowComposer"
+              @keydown.enter.exact.prevent="handleComposerSend"
+            />
+            <BaseButton
+              v-if="!hasDailyIntent"
+              variant="primary"
+              size="sm"
+              class="plan-save-btn"
+              :disabled="!dailyIntentDraft.trim()"
+              @click="handleComposerSend"
+            >
+              계획 저장하기
+            </BaseButton>
+          </BaseCard>
+
+          <BaseCard class="start-hero-card">
+            <div class="column-head">
+              <h2>일정</h2>
+              <span class="count"
+                >실제로 한 일 · <strong>{{ doneCount }}</strong
+                >/{{ schedules.length }} 완료</span
+              >
+            </div>
+            <div class="column-body">
+              <div
+                v-for="schedule in schedules"
+                :key="schedule.id"
+                class="record-item"
+                @click="handleItemClick($event, goToDaily)"
+              >
+                <ScheduleCard
+                  :schedule="schedule"
+                  :draggable="false"
+                  compact
+                  @toggle-complete="handleToggleComplete"
+                />
+                <select
+                  v-if="schedule.todoId && goalStore.weeklyGoals.length > 0"
+                  class="goal-select neu-sunken"
+                  :value="todoGoalId(schedule.todoId) || ''"
+                  @change="
+                    handleAssignGoal({
+                      todoId: schedule.todoId,
+                      goalId: $event.target.value || null,
+                    })
+                  "
+                >
+                  <option value="">목표 미태그</option>
+                  <option v-for="goal in goalStore.weeklyGoals" :key="goal.id" :value="goal.id">
+                    {{ goal.title }}
+                  </option>
+                </select>
+                <button
+                  v-else-if="schedule.todoId"
+                  type="button"
+                  class="goal-add-link"
+                  @click="showGoalModal = true"
+                >
+                  주간 목표 추가
+                </button>
+              </div>
+              <p
+                v-if="schedules.length === 0"
+                class="empty empty-link"
+                @click="goToMonthlyDashboard"
+              >
+                오늘 기록된 일정이 없어요. 대시보드에서 계획을 세워보세요 →
+              </p>
+            </div>
+          </BaseCard>
+        </div>
       </div>
     </div>
 
@@ -319,15 +295,6 @@ const scheduleStore = useScheduleStore()
 const goalStore = useGoalStore()
 const categoryStore = useCategoryStore()
 const retrospectiveStore = useRetrospectiveStore()
-
-function getGreeting() {
-  const hour = new Date().getHours()
-  if (hour < 5) return '늦은 시간까지 고생 많아요'
-  if (hour < 12) return '좋은 아침이에요'
-  if (hour < 18) return '좋은 오후예요'
-  return '좋은 저녁이에요'
-}
-const greeting = getGreeting()
 
 onMounted(async () => {
   autoGrowComposer()
@@ -415,7 +382,6 @@ function applyPlanSuggestion() {
 }
 
 const composerRef = ref(null)
-const closingSectionRef = ref(null)
 function autoGrowComposer() {
   const el = composerRef.value
   if (!el) return
@@ -431,9 +397,6 @@ function handleComposerSend() {
     color: 'positive',
     position: 'top',
   })
-  // 모든 섹션이 한 페이지에 항상 존재하므로, 화면을 바꿔치기하는 대신
-  // 이미 아래에 있는 회고/계획/일정 섹션으로 스크롤해서 보여준다
-  nextTick(() => closingSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
 const todos = computed(() => todoStore.list(dateISO.value))
@@ -526,53 +489,19 @@ function handleBannerAction() {
   flex-direction: column;
   gap: 24px;
 }
-.top-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 24px;
-  align-items: stretch;
-}
 @media (max-width: 640px) {
-  .top-row {
-    grid-template-columns: 1fr;
-  }
   .column-retro {
     flex-direction: column;
     align-items: stretch;
   }
 }
-.column {
-  padding: 20px;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
 .start-mode {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-top: -28px;
-  min-height: calc(100vh - 72px);
-}
-.closing-mode {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.plan-preview-text {
-  font-size: 0.9rem;
-  color: var(--p-ink);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin: 0;
+  min-height: calc(100vh - 100px);
 }
 .start-hero {
-  width: calc(100% + 64px);
-  margin-left: -32px;
-  margin-right: -32px;
-  background: linear-gradient(145deg, var(--p-rose), var(--p-rose-ink));
-  border-radius: 0;
-  padding: 32px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -581,8 +510,16 @@ function handleBannerAction() {
 @media (min-width: 880px) {
   .start-hero {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    align-items: stretch;
+    grid-template-columns: 0.85fr 1.15fr;
+    align-items: start;
+  }
+}
+.hero-full-row {
+  width: 100%;
+}
+@media (min-width: 880px) {
+  .hero-full-row {
+    grid-column: 1 / -1;
   }
 }
 .hero-col {
@@ -596,13 +533,9 @@ function handleBannerAction() {
   .hero-col {
     max-width: none;
   }
-  .hero-col-primary > .start-hero-card {
-    flex: 1;
-  }
 }
 .start-hero-card {
   width: 100%;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
 }
 .start-hero-title {
   font-size: 1.05rem;
@@ -864,23 +797,10 @@ function handleBannerAction() {
   line-height: 1.5;
   margin: 0;
 }
-.plan-composer-wrap {
-  width: 100%;
+.plan-input-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 8px;
-}
-@media (min-width: 880px) {
-  .plan-composer-wrap {
-    grid-column: 1 / -1;
-  }
-}
-.hero-greeting {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
 }
 .plan-suggestion-chip {
   display: flex;
@@ -892,7 +812,7 @@ function handleBannerAction() {
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.92);
+  background: color-mix(in srgb, var(--p-lavender) 12%, var(--p-bg));
   font-family: inherit;
   text-align: left;
   transition:
@@ -900,7 +820,7 @@ function handleBannerAction() {
     background 120ms ease;
 }
 .plan-suggestion-chip:hover {
-  background: #fff;
+  background: color-mix(in srgb, var(--p-lavender) 20%, var(--p-bg));
   transform: translateY(-1px);
 }
 .plan-suggestion-chip:disabled {
@@ -914,46 +834,21 @@ function handleBannerAction() {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.plan-composer {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  padding: 10px 12px 10px 16px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
-}
 .plan-composer-input {
-  flex: 1;
-  resize: none;
-  max-height: 200px;
-  overflow-y: auto;
+  width: 100%;
+  resize: vertical;
   border: none;
   font-family: inherit;
   font-size: 0.92rem;
   line-height: 1.6;
-  padding: 10px 14px;
+  padding: 12px 14px;
   color: var(--p-ink);
 }
 .plan-composer-input::placeholder {
   color: var(--p-ink-faint);
 }
-.composer-send {
-  appearance: none;
-  border: none;
-  cursor: pointer;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--p-lavender);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 120ms ease;
-}
-.composer-send:disabled {
-  opacity: 0.35;
-  cursor: default;
+.plan-save-btn {
+  align-self: flex-end;
 }
 .column-retro {
   padding: 20px 24px;
