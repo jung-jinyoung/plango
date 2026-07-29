@@ -35,6 +35,35 @@
         <ProgressBar :percent="50" color="mint" />
       </div>
     </section>
+
+    <section>
+      <h2>BaseStepper (step=15, 예상 시간용)</h2>
+      <div class="row">
+        <BaseStepper v-model="minutes" :min="0" :max="180" :step="15" unit="분" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Chip</h2>
+      <div class="row">
+        <Chip>결과 파트 작성</Chip>
+        <Chip variant="category" color="blue">결과 파트 작성</Chip>
+        <Chip variant="category" color="blue" dot>8월 목표 · 연구</Chip>
+        <Chip variant="time">90분</Chip>
+      </div>
+    </section>
+
+    <section>
+      <h2>Dot</h2>
+      <div class="row">
+        <Dot color="blue" />
+        <Dot color="mint" />
+        <Dot color="amber" />
+        <Dot color="purple" />
+        <Dot color="green" />
+        <Dot color="gray" />
+      </div>
+    </section>
   </div>
 </template>
 
@@ -44,8 +73,11 @@ import BaseButton from './shared/ui/BaseButton.vue'
 import BaseCard from './shared/ui/BaseCard.vue'
 import BaseStepper from './shared/ui/BaseStepper.vue'
 import ProgressBar from './shared/ui/ProgressBar.vue'
+import Chip from './shared/ui/Chip.vue'
+import Dot from './shared/ui/Dot.vue'
 
 const hours = ref(6)
+const minutes = ref(90)
 </script>
 
 <style scoped>

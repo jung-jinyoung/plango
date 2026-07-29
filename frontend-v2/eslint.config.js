@@ -33,5 +33,13 @@ export default defineConfigWithVueTs(
     },
   },
 
+  {
+    // shared/ui는 디자인 시스템 컴포넌트 — Chip, Dot처럼 한 단어 이름을 허용한다 (네이티브 엘리먼트와 충돌 없음)
+    files: ['src/shared/ui/**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
   prettierSkipFormatting,
 )
