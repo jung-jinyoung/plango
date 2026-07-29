@@ -16,9 +16,9 @@
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git add *)",
-      "Bash(git commit -m *)",
-      "Bash(git push *)",
       "Bash(git reset *)",
+      "Bash(git checkout -b *)",
+      "Bash(git switch -c *)",
       "Bash(npx --yes playwright *)",
       "Bash(lsof -nP -iTCP* -sTCP:LISTEN*)",
       "Bash(pkill -f \"quasar dev\")",
@@ -27,6 +27,12 @@
       "Bash(curl -s -o /dev/null -w * http://localhost:*)",
       "Skill(run)",
       "Artifact"
+    ],
+    "ask": [
+      "Bash(git commit -m *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(gh pr create *)"
     ],
     "deny": [
       "Bash(git push --force*)",
@@ -46,6 +52,20 @@
       "Edit(**/.env)",
       "Edit(**/.env.*)",
       "Bash(rm -rf*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "branch=$(git branch --show-current 2>/dev/null); case \"$branch\" in frontend|master|backend) printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"현재 브랜치(%s)는 보호 브랜치입니다. 작업 전 새 브랜치를 먼저 만드세요 (예: git checkout -b feat/설명).\"}}' \"$branch\" ;; esac",
+            "statusMessage": "브랜치 확인 중..."
+          }
+        ]
+      }
     ]
   }
 }
