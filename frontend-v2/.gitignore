@@ -31,3 +31,8 @@ docs/
 # 로컬 캐시
 .cache/
 tmp/
+
+# Quasar
+.quasar/
+/quasar.config.*.temporary.compiled*
+.thumbs.db

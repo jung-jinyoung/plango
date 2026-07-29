@@ -1,0 +1,20 @@
+// app global css
+@import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+@import '../shared/styles/tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html body {
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family:
+    'Pretendard Variable',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Apple SD Gothic Neo',
+    sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
