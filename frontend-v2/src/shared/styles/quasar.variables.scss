@@ -1,0 +1,3 @@
+// Quasar 내부 컴포넌트가 참조하는 값만 최소한으로.
+// 실제 색 판단의 단일 출처는 tokens.css (CLAUDE.md 7절). 여기서 새 값을 만들지 않는다.
+$primary: #FF4E7E; // --rose-500

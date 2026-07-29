@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# 환경 변수
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+dist/
+build/
+npm-debug.log
+yarn-error.log
+
+# 에디터
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Claude Code (개인 로컬 권한/설정, 설치형 플러그인 스킬 번들은 제외 — settings.json 등 공통 설정만 커밋)
+.claude/settings.local.json
+.claude/skills/
+.claude/worktrees/
+
+# 로컬 캐시
+.cache/
+tmp/

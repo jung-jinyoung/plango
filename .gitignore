@@ -26,8 +26,8 @@ tmp/
 EOF
 
 
-# 개인 기획 문서 (git에 올리지 않음)
-docs/
+# 개인 기획 문서 (git에 올리지 않음) — frontend/ 한정, frontend-v2/docs는 커밋 대상
+/frontend/docs/
 
 # 병렬 백그라운드 에이전트용 로컬 git worktree
 .claude/worktrees/

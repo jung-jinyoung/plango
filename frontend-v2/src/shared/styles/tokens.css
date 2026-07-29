@@ -1,0 +1,34 @@
+/*
+ * 디자인 토큰 — 색 판단의 단일 출처.
+ * 컴포넌트에서 hex를 직접 쓰지 않는다 (CLAUDE.md R10, 7절).
+ * 프레임워크 무관 CSS 커스텀 프로퍼티. quasar.variables.scss는 이 값을 최소한만 미러링한다.
+ */
+:root {
+  --surface-page:   #F7F8FA;
+  --surface-card:   #FFFFFF;
+  --surface-sunken: #F2F4F6;
+  --border:         #E5E8EB;
+
+  --text-primary:   #191F28;
+  --text-secondary: #6B7684;
+  --text-muted:     #8B95A1;
+
+  --rose-50:  #FFF0F4;
+  --rose-500: #FF4E7E;
+  --rose-600: #F5326A;
+  --rose-700: #C81E52;
+
+  --cat-blue:   #3182F6;  --cat-blue-tint:   #DEEBFE;  --cat-blue-deep:   #1B5FBF;
+  --cat-mint:   #00BFA5;  --cat-mint-tint:   #D6F5F1;  --cat-mint-deep:   #00806E;
+  --cat-amber:  #FFA218;  --cat-amber-tint:  #FFEFD6;  --cat-amber-deep:  #96590A;
+  --cat-purple: #7C5CFF;  --cat-purple-tint: #E7E1FF;  --cat-purple-deep: #4A32C0;
+  --cat-green:  #4ECB71;  --cat-green-tint:  #DFF6E4;  --cat-green-deep:  #22803D;
+  --cat-gray:   #8B95A1;  --cat-gray-tint:   #EDEFF2;  --cat-gray-deep:   #4E5968;
+
+  --elev-hover: 0 1px 3px rgba(0,0,0,.06);
+  --elev-drag:  0 8px 20px rgba(0,0,0,.12);
+
+  --radius-card:  16px;
+  --radius-ctrl:  8px;
+  --radius-block: 6px;
+}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plango · 지금</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --page:#F7F8FA; --card:#FFF; --sunken:#F2F4F6; --border:#E5E8EB;
+  --tx:#191F28; --tx2:#6B7684; --tx3:#8B95A1;
+  --rose-50:#FFF0F4; --rose:#FF4E7E; --rose-d:#F5326A; --rose-700:#C81E52;
+  --blue:#3182F6; --blue-50:#EBF3FE; --blue-700:#1B5FBF;
+  --mint:#00BFA5; --mint-50:#E6F8F5; --mint-700:#00806E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Pretendard Variable',Pretendard,-apple-system,sans-serif;
+  background:#E9ECF0; color:var(--tx); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:32px 16px;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- phone ---------- */
+.phone{
+  width:390px; height:800px; background:var(--page); border-radius:44px;
+  border:9px solid #16181C; overflow:hidden; position:relative;
+  box-shadow:0 24px 60px rgba(16,20,28,.22);
+  display:flex; flex-direction:column;
+}
+.status{
+  height:48px; display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 26px 6px; font-size:13px; font-weight:600; flex:none;
+}
+.status .r{display:flex;gap:5px;align-items:center;color:var(--tx)}
+
+/* ---------- top summary ---------- */
+.sum{padding:8px 22px 20px;flex:none}
+.sum-top{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.sum-top h1{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.sum-top span{font-size:13px;color:var(--tx3);margin-left:auto}
+.pips{display:flex;gap:4px}
+.pips i{flex:1;height:5px;border-radius:99px;background:var(--border)}
+.pips i.done{background:var(--blue)}
+.pips i.now{background:var(--rose)}
+
+/* ---------- hero: 지금 하는 일 ---------- */
+.scroll{flex:1;overflow-y:auto;padding:0 22px 24px}
+.now-card{
+  background:var(--card); border-radius:22px; padding:24px 22px;
+}
+.now-tag{
+  display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+  color:var(--rose-700);background:var(--rose-50);padding:5px 11px;border-radius:99px;
+}
+.now-tag .pulse{width:6px;height:6px;border-radius:99px;background:var(--rose);animation:p 1.6s ease-in-out infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.35}}
+.now-card h2{font-size:24px;font-weight:700;letter-spacing:-.035em;line-height:1.32;margin:14px 0 6px}
+.now-goal{
+  display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;
+  color:var(--blue-700);background:var(--blue-50);padding:6px 12px;border-radius:99px;
+}
+.now-goal .dot{width:6px;height:6px;border-radius:99px;background:var(--blue)}
+
+.timer{display:flex;align-items:flex-end;gap:10px;margin:22px 0 4px}
+.timer .big{font-size:40px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.timer .of{font-size:15px;color:var(--tx3);font-weight:500;padding-bottom:4px}
+.timer-bar{height:6px;background:var(--sunken);border-radius:99px;overflow:hidden;margin-top:14px}
+.timer-bar i{display:block;height:100%;width:78%;background:var(--blue);border-radius:99px}
+.timer-note{font-size:12.5px;color:var(--tx3);margin-top:9px}
+
+.acts{display:flex;gap:8px;margin-top:22px}
+.acts .done-btn{
+  flex:1;background:var(--rose);color:#fff;font-weight:700;font-size:16px;
+  padding:16px;border-radius:14px;
+}
+.acts .done-btn:hover{background:var(--rose-d)}
+.acts .sub-btn{
+  padding:16px 0;border-radius:14px;background:var(--sunken);
+  font-weight:600;font-size:14px;color:var(--tx2);width:88px;
+}
+.acts .sub-btn:hover{background:#E8EBEF}
+
+/* ---------- next ---------- */
+.sec-h{font-size:12.5px;font-weight:600;color:var(--tx3);margin:26px 0 10px;padding-left:2px}
+.item{
+  background:var(--card);border-radius:14px;padding:15px 16px;
+  display:flex;align-items:center;gap:11px;margin-bottom:8px;
+}
+.item .tm{font-size:12.5px;color:var(--tx3);font-weight:600;width:42px;flex:none}
+.item .dot{width:7px;height:7px;border-radius:99px;flex:none;background:var(--blue)}
+.item .tt{flex:1;font-weight:600;font-size:14.5px;letter-spacing:-.01em}
+.item .mn{font-size:12.5px;color:var(--tx3)}
+.item.appt .dot{background:#D8DDE3}
+.item.appt .tt{color:var(--tx2);font-weight:500}
+
+.item.finished{background:transparent;padding:13px 16px}
+.item.finished .tt{color:var(--tx3);font-weight:500;text-decoration:line-through;text-decoration-color:#C9CED6}
+.item.finished .check{
+  width:19px;height:19px;border-radius:99px;background:#D8DDE3;
+  display:flex;align-items:center;justify-content:center;flex:none;
+}
+
+.tail{text-align:center;color:var(--tx3);font-size:12.5px;padding:22px 0 6px}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="status">
+    <span class="num">14:33</span>
+    <span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="none" aria-hidden="true">
+        <rect x="0" y="7" width="3" height="4" rx="1" fill="#191F28"/>
+        <rect x="4.5" y="5" width="3" height="6" rx="1" fill="#191F28"/>
+        <rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#191F28"/>
+        <rect x="13.5" y="0" width="3" height="11" rx="1" fill="#191F28"/>
+      </svg>
+      <svg width="22" height="11" viewBox="0 0 24 12" fill="none" aria-hidden="true">
+        <rect x="0.6" y="0.6" width="19" height="10.8" rx="3" stroke="#191F28" stroke-opacity=".4" stroke-width="1.2"/>
+        <rect x="2.4" y="2.4" width="13" height="7.2" rx="1.6" fill="#191F28"/>
+        <path d="M21.4 4.2v3.6c1-.3 1.6-.9 1.6-1.8s-.6-1.5-1.6-1.8Z" fill="#191F28" fill-opacity=".4"/>
+      </svg>
+    </span>
+  </div>
+
+  <div class="sum">
+    <div class="sum-top">
+      <h1>오늘</h1>
+      <span class="num">6개 중 3개 했어요</span>
+    </div>
+    <div class="pips">
+      <i class="done"></i><i class="done"></i><i class="done"></i>
+      <i class="now"></i><i></i><i></i>
+    </div>
+  </div>
+
+  <div class="scroll">
+
+    <!-- 지금 하는 일 -->
+    <div class="now-card">
+      <span class="now-tag"><span class="pulse"></span>지금 하는 일</span>
+      <h2>그래프 3개 다듬기</h2>
+      <div class="now-goal"><span class="dot"></span>결과 파트 작성</div>
+
+      <div class="timer">
+        <span class="big num">1:23</span>
+        <span class="of num">/ 1시간 예상</span>
+      </div>
+      <div class="timer-bar"><i></i></div>
+      <div class="timer-note num">13:09부터 하고 있어요</div>
+
+      <div class="acts">
+        <button class="done-btn">다 했어요</button>
+        <button class="sub-btn">더 할래요</button>
+      </div>
+    </div>
+
+    <!-- 다음 -->
+    <div class="sec-h">이따 할 일</div>
+
+    <div class="item">
+      <span class="tm num">15:00</span>
+      <span class="dot"></span>
+      <span class="tt">논문 서론 초안</span>
+      <span class="mn num">90분</span>
+    </div>
+    <div class="item">
+      <span class="tm num">17:00</span>
+      <span class="dot" style="background:var(--mint)"></span>
+      <span class="tt">헬스장 운동</span>
+      <span class="mn num">60분</span>
+    </div>
+    <div class="item appt">
+      <span class="tm num">19:00</span>
+      <span class="dot"></span>
+      <span class="tt">저녁 약속</span>
+      <span class="mn num">90분</span>
+    </div>
+
+    <!-- 끝낸 일 -->
+    <div class="sec-h">끝낸 일</div>
+
+    <div class="item finished">
+      <span class="check">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
+          <path d="M1 4.2L3.6 6.7L9 1.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="tt">논문 결과표 초안</span>
+      <span class="mn num">1시간 45분</span>
+    </div>
+    <div class="item finished">
+      <span class="check">
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none" aria-hidden="true">
+          <path d="M1 4.2L3.6 6.7L9 1.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="tt">팀 회의</span>
+      <span class="mn num">51분</span>
+    </div>
+
+    <div class="tail">저녁에 오늘 기록을 정리해요</div>
+
+  </div>
+</div>
+
+</body>
+</html>
