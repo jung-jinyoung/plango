@@ -19,6 +19,7 @@ withDefaults(
 /* 카드는 전면 배경 대비로만 분리한다 — 한쪽 면 보더 금지 (CLAUDE.md 7절) */
 .base-card {
   background: var(--surface-card);
+  color: var(--text-primary);
   border-radius: var(--radius-card);
   padding: 20px;
 }
