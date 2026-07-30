@@ -64,6 +64,11 @@
         <Dot color="gray" />
       </div>
     </section>
+
+    <section>
+      <h2>입력 파서 미리보기 (4단계) — "헬스장 운동 45분 #운동" 처럼 쳐보기</h2>
+      <TaskInputPreview :candidate-goals="candidateGoals" />
+    </section>
   </div>
 </template>
 
@@ -75,9 +80,12 @@ import BaseStepper from './shared/ui/BaseStepper.vue'
 import ProgressBar from './shared/ui/ProgressBar.vue'
 import Chip from './shared/ui/Chip.vue'
 import Dot from './shared/ui/Dot.vue'
+import TaskInputPreview from './features/task/components/TaskInputPreview.vue'
+import { getSeedWeeklyGoals } from './features/goal/lib/goalRepository'
 
 const hours = ref(6)
 const minutes = ref(90)
+const candidateGoals = getSeedWeeklyGoals().filter((g) => g.status === 'active')
 </script>
 
 <style scoped>
