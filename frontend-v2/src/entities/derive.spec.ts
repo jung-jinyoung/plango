@@ -5,6 +5,9 @@ import {
   categoryColorOf,
   monthlyCurrentHours,
   resolveCategory,
+  resolveCategoryForMonthlyGoal,
+  resolveCategoryForWeeklyGoal,
+  shouldShowGhost,
   weeklyProgress,
 } from './derive'
 import type { Category, MonthlyGoal, Task, WeeklyGoal } from './types'
@@ -173,5 +176,56 @@ describe('accuracyRatio', () => {
 
   it('예상 합이 0이면 0을 반환한다', () => {
     expect(accuracyRatio([])).toBe(0)
+  })
+})
+
+describe('resolveCategoryForMonthlyGoal', () => {
+  it('categoryId로 카테고리를 찾는다', () => {
+    expect(resolveCategoryForMonthlyGoal(monthlyGoal, categories)).toEqual(catBlue)
+  })
+})
+
+describe('resolveCategoryForWeeklyGoal', () => {
+  it('월간 목표를 거쳐 카테고리를 찾는다', () => {
+    expect(resolveCategoryForWeeklyGoal(weeklyGoalActive, monthlyGoals, categories)).toEqual(catBlue)
+  })
+
+  it('monthlyGoalId가 없으면 null', () => {
+    const orphan: WeeklyGoal = { ...weeklyGoalActive, monthlyGoalId: null }
+    expect(resolveCategoryForWeeklyGoal(orphan, monthlyGoals, categories)).toBeNull()
+  })
+})
+
+describe('shouldShowGhost', () => {
+  it('계획·실제 길이 차이가 15분 미만이면 false(병합)', () => {
+    const task = makeTask({
+      plannedBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' }, // 60분
+      actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:10:00+09:00' }, // 70분, 차이 10분
+    })
+    expect(shouldShowGhost(task)).toBe(false)
+  })
+
+  it('계획·실제 길이 차이가 15분 이상이면 true(고스트 병기)', () => {
+    const task = makeTask({
+      plannedBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' }, // 60분
+      actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:45:00+09:00' }, // 105분, 차이 45분
+    })
+    expect(shouldShowGhost(task)).toBe(true)
+  })
+
+  it('actualBlock이 없으면 false', () => {
+    const task = makeTask({
+      plannedBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' },
+      actualBlock: null,
+    })
+    expect(shouldShowGhost(task)).toBe(false)
+  })
+
+  it('plannedBlock이 없으면 false', () => {
+    const task = makeTask({
+      plannedBlock: null,
+      actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' },
+    })
+    expect(shouldShowGhost(task)).toBe(false)
   })
 })

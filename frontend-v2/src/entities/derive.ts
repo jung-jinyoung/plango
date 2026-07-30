@@ -28,6 +28,26 @@ export function resolveCategory(
   return task.categoryId ? (categories.get(task.categoryId) ?? null) : null
 }
 
+/** 월간 목표의 카테고리를 찾는다 */
+export function resolveCategoryForMonthlyGoal(
+  goal: MonthlyGoal,
+  categories: Map<string, Category>,
+): Category | null {
+  return categories.get(goal.categoryId) ?? null
+}
+
+/** 주간 목표의 카테고리를 찾는다 — 주간 목표 자체엔 카테고리가 없어서 월간 목표를 거친다 */
+export function resolveCategoryForWeeklyGoal(
+  goal: WeeklyGoal,
+  monthlyGoals: Map<string, MonthlyGoal>,
+  categories: Map<string, Category>,
+): Category | null {
+  if (!goal.monthlyGoalId) return null
+  const monthlyGoal = monthlyGoals.get(goal.monthlyGoalId)
+  if (!monthlyGoal) return null
+  return categories.get(monthlyGoal.categoryId) ?? null
+}
+
 /** actualBlock에서 계산한 실제 소요 분. 기록 전이면 0 */
 export function actualMin(task: Task): number {
   if (!task.actualBlock) return 0
@@ -75,4 +95,16 @@ export function accuracyRatio(tasks: Task[]): number {
   if (totalEstimatedMin <= 0) return 0
   const totalActualMin = tasks.reduce((sum, task) => sum + actualMin(task), 0)
   return totalActualMin / totalEstimatedMin
+}
+
+/**
+ * 계획과 실제 길이 차이가 15분 이상이면 계획 고스트를 병기해야 한다는 뜻으로
+ * true (CLAUDE.md 5절 "차이가 15분 이상일 때만 계획 고스트를 병기"). 이 판정을
+ * 타임라인 컴포넌트에서 다시 구현하지 않는다 — 여기 한 곳에만 둔다.
+ * 계획이나 실제 중 하나라도 없으면 비교할 게 없으니 false.
+ */
+export function shouldShowGhost(task: Task): boolean {
+  if (!task.plannedBlock || !task.actualBlock) return false
+  const plannedMin = minutesBetween(task.plannedBlock.start, task.plannedBlock.end)
+  return Math.abs(actualMin(task) - plannedMin) >= 15
 }
