@@ -252,6 +252,51 @@ tasks.push({
   status: 'todo',
 })
 
+// --- 인박스(아직 시간 미배정): 목업 01-today.html 그대로 ---
+tasks.push({
+  id: nextId('inbox'),
+  title: '참고문헌 정리',
+  weeklyGoalId: weeklyGoalCurrent.id,
+  categoryId: null,
+  estimatedMin: 40,
+  plannedBlock: null,
+  actualBlock: null,
+  status: 'todo',
+})
+tasks.push({
+  id: nextId('inbox'),
+  title: '택배 부치기',
+  weeklyGoalId: null,
+  categoryId: 'cat-etc',
+  estimatedMin: 20,
+  plannedBlock: null,
+  actualBlock: null,
+  status: 'todo',
+})
+
+// --- 어제(이월 배너 재현용): 계획은 있었지만 실행 안 됨 → carried, 목업 "어제 못 한 일 2개" ---
+const YESTERDAY = addDays(TODAY, -1)
+tasks.push({
+  id: nextId('carried'),
+  title: '레퍼런스 정리',
+  weeklyGoalId: weeklyGoalCurrent.id,
+  categoryId: null,
+  estimatedMin: 45,
+  plannedBlock: block(YESTERDAY, 10 * 60, 45),
+  actualBlock: null,
+  status: 'carried',
+})
+tasks.push({
+  id: nextId('carried'),
+  title: '그래프 초안 검토',
+  weeklyGoalId: weeklyGoalCurrent.id,
+  categoryId: null,
+  estimatedMin: 30,
+  plannedBlock: block(YESTERDAY, 16 * 60, 30),
+  actualBlock: null,
+  status: 'carried',
+})
+
 // --- 나머지 27일: 하루 2~3개 약속(오늘·이번 주 월요일 제외 — 이미 위에서 채움) ---
 const APPT_TITLES = ['점심 약속', '병원 예약', '스터디 모임', '가족 통화', '동아리 모임']
 let apptSeq = 0
@@ -292,4 +337,6 @@ writeFileSync(OUT_PATH, JSON.stringify(seedData, null, 2) + '\n', 'utf-8')
 console.log(`시드 데이터 생성 완료: ${OUT_PATH}`)
 console.log(`  오늘 = ${TODAY}, 이번 주 월요일 = ${CURRENT_MONDAY}`)
 console.log(`  categories: ${categories.length}, monthlyGoals: 2, weeklyGoals: ${weeklyGoals.length}`)
-console.log(`  tasks: ${tasks.length} (오늘 6개 + 월요일 필러 2개 + 목표연결 8개 + 약속 ${apptSeq}개)`)
+console.log(
+  `  tasks: ${tasks.length} (오늘 6개 + 월요일 필러 2개 + 목표연결 8개 + 인박스 2개 + 이월 2개 + 약속 ${apptSeq}개)`,
+)
