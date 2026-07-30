@@ -16,7 +16,7 @@ defineProps<{
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   flex: none;
 }
 </style>

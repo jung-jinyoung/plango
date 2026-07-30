@@ -31,14 +31,14 @@ const clamped = computed(() => Math.min(100, Math.max(0, props.percent)))
 .progress-bar {
   height: 6px;
   background: var(--surface-sunken);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .fill {
   display: block;
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: width 0.2s;
 }
 

@@ -43,7 +43,7 @@ const tintStyle = computed(() => {
   font-size: 12px;
   font-weight: 500;
   padding: 4px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
 }
 
