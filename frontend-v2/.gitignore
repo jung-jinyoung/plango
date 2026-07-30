@@ -24,10 +24,13 @@ yarn-error.log
 .claude/skills/
 .claude/worktrees/
 
-# 제품/기획 문서 — 로컬 전용, git에 올리지 않음 (product-spec.md는 예외로 커밋)
+# 제품/기획 문서 — 로컬 전용, git에 올리지 않음
+# 예외: product-spec.md(기획 근거), seed-data.json — 코드(taskRepository)와
+# 테스트가 실제로 읽는 실행 의존성이라 커밋 대상. mockups는 참고용이라 로컬 전용 유지.
 CLAUDE.md
 docs/*
 !docs/product-spec.md
+!docs/seed-data.json
 
 # 로컬 캐시
 .cache/
