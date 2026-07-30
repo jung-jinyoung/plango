@@ -11,33 +11,50 @@
     </aside>
 
     <main class="col-main">
+      <CarryOverBanner
+        v-if="!bannerDismissed && carriedYesterdayCount > 0"
+        :count="carriedYesterdayCount"
+        @dismiss="bannerDismissed = true"
+        @accept="bannerDismissed = true"
+      />
       <BaseCard class="timeline-card">
         <ScheduleTimeline :tasks="timelineTasks" :start-hour="8" :end-hour="21" :px-per-hour="64" />
       </BaseCard>
     </main>
+
+    <aside class="col-inbox">
+      <InboxPanel :candidate-goals="candidateGoals" :unplaced-tasks="unplacedTasks" />
+    </aside>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { categoryColorOf, resolveCategory } from '../entities/derive'
+import CarryOverBanner from '../features/task/components/CarryOverBanner.vue'
 import GoalSidebar from '../features/goal/components/GoalSidebar.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
+import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { useTaskStore } from '../features/task/stores/taskStore'
+import { addDays } from '../shared/lib/time'
 import BaseCard from '../shared/ui/BaseCard.vue'
 
 // 시드 데이터가 설계된 "오늘" 날짜로 고정 — 실제 진입 라우팅(CLAUDE.md 14절
 // 10단계)에서 useNow() 기반 실제 날짜로 교체한다. 지금은 seed-data.json이
 // 이 날짜를 중심으로 만들어져 있어서(scripts/generate-seed.mjs) 고정값을 쓴다.
 const TODAY = '2026-07-29'
+const YESTERDAY = addDays(TODAY, -1)
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
 
+const bannerDismissed = ref(false)
+
 const allTasks = computed(() => taskStore.tasks)
 const weeklyGoals = computed(() => goalStore.weeklyGoals)
+const candidateGoals = computed(() => goalStore.weeklyGoals.filter((g) => g.status === 'active'))
 // 사이드바에 보여줄 월간 목표 — 지금은 시드의 논문 목표 하나로 고정.
 // 여러 월간 목표 중 "표시할 것"을 고르는 로직은 아직 없다(향후 과제).
 const monthlyGoal = computed(() => goalStore.monthlyGoalsById.get('mg-thesis') ?? null)
@@ -46,25 +63,40 @@ const todayTasks = computed(() =>
   allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(TODAY)),
 )
 
+const carriedYesterdayCount = computed(
+  () =>
+    allTasks.value.filter((t) => t.status === 'carried' && t.plannedBlock?.start.startsWith(YESTERDAY))
+      .length,
+)
+
+function resolveColor(task: (typeof allTasks.value)[number]) {
+  const category = resolveCategory(
+    task,
+    goalStore.weeklyGoalsById,
+    goalStore.monthlyGoalsById,
+    goalStore.categoriesById,
+  )
+  return categoryColorOf(category)
+}
+
 // resolveCategory를 여기서 실제로 호출한다(pages 레벨) — features/schedule의
-// Timeline은 이미 정해진 색만 받아서 쓰고 다시 조회하지 않는다.
+// ScheduleTimeline, features/task의 InboxPanel은 이미 정해진 색만 받아서 쓰고
+// 다시 조회하지 않는다.
 const timelineTasks = computed<TimelineTaskInput[]>(() =>
-  todayTasks.value.map((task) => {
-    const category = resolveCategory(
-      task,
-      goalStore.weeklyGoalsById,
-      goalStore.monthlyGoalsById,
-      goalStore.categoriesById,
-    )
-    return { task, color: categoryColorOf(category) }
-  }),
+  todayTasks.value.map((task) => ({ task, color: resolveColor(task) })),
+)
+
+const unplacedTasks = computed(() =>
+  allTasks.value
+    .filter((t) => t.plannedBlock === null)
+    .map((task) => ({ task, color: resolveColor(task) })),
 )
 </script>
 
 <style scoped>
 .today-page {
   display: grid;
-  grid-template-columns: 264px 1fr;
+  grid-template-columns: 264px 1fr 312px;
   gap: 16px;
   padding: 16px 24px;
   align-items: start;
