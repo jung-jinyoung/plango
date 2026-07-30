@@ -10,17 +10,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Chip from '../../../shared/ui/Chip.vue'
-import { parseTaskInput } from '../lib/parse'
+import { parseTaskInput, type ParsedTaskInput } from '../lib/parse'
 import type { WeeklyGoal } from '../../../entities/types'
 
 const props = defineProps<{
   candidateGoals: WeeklyGoal[]
 }>()
 
+// 카테고리 색 해석(resolveCategory)은 여기서 하지 않는다 — pages/ 레벨에서
+// goalStore+taskStore를 조합해 처리한다. 이 컴포넌트는 weeklyGoalId까지만
+// 알려주고 색은 모른다(features/task가 features/goal을 import하지 않도록).
+const emit = defineEmits<{
+  'update:parsed': [value: ParsedTaskInput]
+}>()
+
 const text = ref('')
 const parsed = computed(() => parseTaskInput(text.value, props.candidateGoals))
+
+watch(parsed, (value) => emit('update:parsed', value), { immediate: true })
 </script>
 
 <style scoped>
