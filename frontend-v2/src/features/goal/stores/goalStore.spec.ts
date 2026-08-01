@@ -1,5 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { getSeedWeeklyGoals } from '../lib/goalRepository'
 import { useGoalStore } from './goalStore'
 
 describe('useGoalStore', () => {
@@ -17,5 +18,27 @@ describe('useGoalStore', () => {
 
     expect(store.weeklyGoalsById.size).toBe(store.weeklyGoals.length)
     expect(store.weeklyGoalsById.get('wg-carrying')?.title).toBe('실험 데이터 분석 마무리')
+  })
+
+  it('updateWeeklyGoal이 로컬 상태를 patch로 갱신하고, 캐싱된 Map도 새 값으로 반영된다', () => {
+    const store = useGoalStore()
+    const before = store.weeklyGoalsById.get('wg-carrying')
+    const originalEstimatedHours = before?.estimatedHours
+
+    store.updateWeeklyGoal('wg-carrying', { estimatedHours: 12 })
+
+    expect(store.weeklyGoalsById.get('wg-carrying')?.estimatedHours).toBe(12)
+    // repository에서 다시 읽은 원본(별도 배열)은 영향을 받지 않아야 한다
+    const fromRepository = getSeedWeeklyGoals().find((g) => g.id === 'wg-carrying')
+    expect(fromRepository?.estimatedHours).toBe(originalEstimatedHours)
+  })
+
+  it('존재하지 않는 id면 아무 것도 바뀌지 않는다', () => {
+    const store = useGoalStore()
+    const before = [...store.weeklyGoals]
+
+    store.updateWeeklyGoal('no-such-id', { estimatedHours: 99 })
+
+    expect(store.weeklyGoals).toEqual(before)
   })
 })

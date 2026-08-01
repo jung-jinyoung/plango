@@ -23,3 +23,11 @@ export function getSeedMonthlyGoals(): MonthlyGoal[] {
 export function getSeedWeeklyGoals(): WeeklyGoal[] {
   return data.weeklyGoals
 }
+
+/**
+ * 주간 목표 하나를 patch로 갱신한다. taskRepository.updateTask와 같은 이유로
+ * 지금은 호출 경로만 확립해둔다 — 실제 저장은 Supabase 전환 후.
+ */
+export function updateWeeklyGoal(_id: string, _patch: Partial<WeeklyGoal>): void {
+  // TODO: Supabase 연동 후 실제 저장 호출로 교체
+}

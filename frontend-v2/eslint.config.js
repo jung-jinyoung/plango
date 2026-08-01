@@ -30,6 +30,9 @@ export default defineConfigWithVueTs(
     rules: {
       'prefer-promise-reject-errors': 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+      // 아직 안 쓰는 인자를 밑줄 접두어로 표시할 수 있게 — repository 스텁 함수처럼
+      // "지금은 안 쓰지만 시그니처는 확정" 케이스에 씀 (taskRepository.updateTask 등)
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
 
