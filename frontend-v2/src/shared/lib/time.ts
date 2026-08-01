@@ -87,3 +87,10 @@ export const weekOfKey = startOfWeek
 export function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10)
 }
+
+/** 분(minute)을 "8h 20m" 형태로. 정각이면 분은 생략("6h") */
+export function formatMinutesAsHours(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
+}
