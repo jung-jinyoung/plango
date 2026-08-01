@@ -73,7 +73,9 @@ describe('taskRepository — 시드 규격 검증', () => {
   })
 
   it('약속(weeklyGoalId 없음)이 날짜별로 하루 2~3개씩, 28일 전체에 섞여 있다', () => {
-    const appointments = tasks.filter((t) => t.weeklyGoalId === null)
+    // 시간 미배정 인박스 항목(예: 택배 부치기)은 plannedBlock이 없어 특정 날짜에
+    // 속하지 않는다 — 날짜별 개수 집계에서는 제외한다.
+    const appointments = tasks.filter((t) => t.weeklyGoalId === null && t.plannedBlock !== null)
     const countsByDate = new Map<string, number>()
     for (const appt of appointments) {
       const date = appt.plannedBlock!.start.slice(0, 10)
@@ -83,6 +85,29 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(countsByDate.size).toBe(28) // 4주 × 7일
     for (const count of countsByDate.values()) {
       expect(count === 2 || count === 3).toBe(true)
+    }
+  })
+
+  it('"아직 안 놓은 일"(인박스) — plannedBlock 없는 할 일이 목업 그대로 2개 있다', () => {
+    const inbox = tasks.filter((t) => t.plannedBlock === null)
+    expect(inbox).toHaveLength(2)
+
+    const reference = inbox.find((t) => t.title === '참고문헌 정리')
+    expect(reference?.estimatedMin).toBe(40)
+    expect(reference?.weeklyGoalId).not.toBeNull() // 목표 연결(파란 점)
+
+    const parcel = inbox.find((t) => t.title === '택배 부치기')
+    expect(parcel?.estimatedMin).toBe(20)
+    expect(parcel?.weeklyGoalId).toBeNull() // 약속(회색 점)
+  })
+
+  it('이월 배너 — 어제 날짜에 carried 상태 할 일이 목업 그대로 2개 있다', () => {
+    const yesterdayCarried = tasks.filter(
+      (t) => t.status === 'carried' && t.plannedBlock?.start.startsWith('2026-07-28'),
+    )
+    expect(yesterdayCarried).toHaveLength(2)
+    for (const t of yesterdayCarried) {
+      expect(t.actualBlock).toBeNull()
     }
   })
 
