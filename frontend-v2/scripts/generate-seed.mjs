@@ -4,11 +4,11 @@
 //
 // 규격 체크리스트:
 //   - "오늘" = 2026-07-29(수), 목업 6개 태스크 제목·시간 그대로
-//   - 3주치 완료된 주(accuracyRatio 1.8 → 1.6 → 1.4) + 진행 중인 이번 주
-//   - carryCount = 2인 주간 목표 1개 = "실험 데이터 분석 마무리" (3주째 경고 직전)
+//   - 4주치 완료된 주(accuracyRatio 2.0 → 1.8 → 1.6 → 1.4) + 진행 중인 이번 주
+//   - carryCount = 2인 주간 목표 1개 = "실험 데이터 분석 마무리" (3주째 경고 직전, 실측 연결된 task 有)
 //   - achieved 주간 목표 1개 = "선행연구 정리 완료"
 //   - 월간 목표 baseline(40h) 초과 — 목업 사이드바 45%와는 별개 스냅샷으로 유지
-//   - 약속이 하루 2~3개, 4주(28일) 전체에 분산
+//   - 약속이 하루 2~3개, achieved 4주 + 진행 중 1주 = 5주(35일) 전체에 분산
 
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -65,8 +65,16 @@ const monthlyGoalFitness = {
   status: 'active',
 }
 
-// --- 3주치 완료(achieved) 주간 목표: accuracyRatio 1.8 → 1.6 → 1.4로 개선 ---
+// --- 4주치 완료(achieved) 주간 목표: accuracyRatio 2.0 → 1.8 → 1.6 → 1.4로 개선 ---
 const achievedPlans = [
+  {
+    id: 'wg-achieved-0',
+    title: '연구 주제 확정', // 논문 진행 단계상 가장 이른 산출물
+    weekOf: addDays(CURRENT_MONDAY, -28),
+    estimatedHours: 5,
+    accuracyRatio: 2.0,
+    taskEstMin: [150, 150], // 합 300min=5h → actual 300*2.0=600min=10h
+  },
   {
     id: 'wg-achieved-1',
     title: '선행연구 정리 완료', // 목업 사이드바 "선행연구 정리" 6/6h(완료)와 매칭
@@ -144,7 +152,7 @@ const tasks = []
 let seq = 0
 const nextId = (prefix) => `${prefix}-${(seq += 1)}`
 
-// --- achieved 3주: 목표 연결 할 일 (화/목처럼 주 초반에 분산 배치) ---
+// --- achieved 4주: 목표 연결 할 일 (화/목처럼 주 초반에 분산 배치) ---
 for (const w of achievedPlans) {
   w.taskEstMin.forEach((est, i) => {
     const date = addDays(w.weekOf, i * 2) // 월,수,금 순
@@ -182,6 +190,29 @@ tasks.push({
   plannedBlock: block(CURRENT_MONDAY, 18 * 60, 60),
   actualBlock: block(CURRENT_MONDAY, 18 * 60, 90), // 90분 실측
   status: 'done',
+})
+
+// --- 이월 중(wg-carrying)인 목표에도 실제 연결된 할 일: 완료 1개 + 아직 안 한 1개 ---
+// (기존엔 wg-carrying에 task가 하나도 없어서 "지금까지 0h를 썼는데"로 나왔다)
+tasks.push({
+  id: nextId('wg-carrying'),
+  title: '실험 데이터 정리 초안',
+  weeklyGoalId: weeklyGoalCarrying.id,
+  categoryId: null,
+  estimatedMin: 90,
+  plannedBlock: block(CURRENT_MONDAY, 13 * 60, 90),
+  actualBlock: block(CURRENT_MONDAY, 13 * 60, 110), // 110분 실측
+  status: 'done',
+})
+tasks.push({
+  id: nextId('wg-carrying'),
+  title: '통계 분석 스크립트 작성',
+  weeklyGoalId: weeklyGoalCarrying.id,
+  categoryId: null,
+  estimatedMin: 120,
+  plannedBlock: block(CURRENT_MONDAY, 20 * 60, 120),
+  actualBlock: null, // 아직 진행 전
+  status: 'todo',
 })
 
 // --- "오늘"(2026-07-29) 목업 그대로: 6개 태스크 ---
@@ -338,5 +369,5 @@ console.log(`시드 데이터 생성 완료: ${OUT_PATH}`)
 console.log(`  오늘 = ${TODAY}, 이번 주 월요일 = ${CURRENT_MONDAY}`)
 console.log(`  categories: ${categories.length}, monthlyGoals: 2, weeklyGoals: ${weeklyGoals.length}`)
 console.log(
-  `  tasks: ${tasks.length} (오늘 6개 + 월요일 필러 2개 + 목표연결 8개 + 인박스 2개 + 이월 2개 + 약속 ${apptSeq}개)`,
+  `  tasks: ${tasks.length} (오늘 6개 + 월요일 필러 2개 + 이월목표 2개 + 목표연결 10개 + 인박스 2개 + 이월 2개 + 약속 ${apptSeq}개)`,
 )

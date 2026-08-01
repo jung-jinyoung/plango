@@ -41,7 +41,7 @@
 
       <BaseCard v-if="overallRatio !== null" class="section">
         <h2>예상은 얼마나 맞았나요</h2>
-        <AccuracySummary :ratio="overallRatio" :trend="accuracyTrend" :trend-labels="['3주 전', '2주 전', '지난주']">
+        <AccuracySummary :ratio="overallRatio" :trend="accuracyTrend" :trend-labels="accuracyTrendLabels">
           적어둔 시간보다 실제로 <b>{{ overrunPercent }}% 더 길게</b> 걸렸어요.<br />
           3주 전보다는 가까워지고 있어요.
         </AccuracySummary>
@@ -122,6 +122,16 @@ const accuracyByGoalId = computed(() => {
 const accuracyTrend = computed(() =>
   achievedGoalsInOrder.value.map((g) => accuracyByGoalId.value.get(g.id) ?? 0),
 )
+// achieved 주 개수가 바뀌어도 라벨이 안 깨지게 동적으로 만든다 — 예전엔
+// ['3주 전','2주 전','지난주']로 3개 고정이었는데, achieved 주가 4개로 늘자
+// 막대 4개에 라벨 3개가 붙는 불일치가 났었다.
+const accuracyTrendLabels = computed(() => {
+  const n = accuracyTrend.value.length
+  return Array.from({ length: n }, (_, i) => {
+    const weeksAgo = n - i
+    return weeksAgo === 1 ? '지난주' : `${weeksAgo}주 전`
+  })
+})
 const overallRatio = computed(() => {
   const trend = accuracyTrend.value
   return trend.length > 0 ? trend[trend.length - 1]! : null

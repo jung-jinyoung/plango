@@ -4,7 +4,7 @@ import { getSeedTasks } from '../../task/lib/taskRepository'
 import { computeWeeklyAccuracy } from './computeWeeklyAccuracy'
 
 describe('computeWeeklyAccuracy', () => {
-  it('achieved 3주의 예상 정확도가 1.8 → 1.6 → 1.4로 나온다', () => {
+  it('achieved 4주의 예상 정확도가 2.0 → 1.8 → 1.6 → 1.4로 나온다', () => {
     const weeklyGoals = getSeedWeeklyGoals()
     const tasks = getSeedTasks()
     const results = computeWeeklyAccuracy(weeklyGoals, tasks)
@@ -17,6 +17,6 @@ describe('computeWeeklyAccuracy', () => {
       (goal) => results.find((r) => r.weeklyGoalId === goal.id)!.ratio,
     )
 
-    expect(ratios).toEqual([1.8, 1.6, 1.4])
+    expect(ratios).toEqual([2.0, 1.8, 1.6, 1.4])
   })
 })
