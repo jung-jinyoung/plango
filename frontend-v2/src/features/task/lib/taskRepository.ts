@@ -28,3 +28,12 @@ export function getSeedWeeklyGoals(): WeeklyGoal[] {
 export function getSeedTasks(): Task[] {
   return data.tasks
 }
+
+/**
+ * task 하나를 patch로 갱신한다. 지금은 seed-data.json 기반이라 실제 저장소에
+ * 반영되진 않는다(Supabase 전환 예정, CLAUDE.md 17절) — 호출 경로(스토어 액션 →
+ * 이 함수)만 지금 확립해둔다. 실제 로컬 상태 반영은 taskStore.updateTask가 한다.
+ */
+export function updateTask(_id: string, _patch: Partial<Task>): void {
+  // TODO: Supabase 연동 후 실제 저장 호출로 교체
+}

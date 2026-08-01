@@ -25,14 +25,14 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(weeklyGoals.length).toBeGreaterThan(0)
   })
 
-  it('3주 완료(achieved) + 진행 중(active) 주간 목표가 섞여 있다', () => {
+  it('4주 완료(achieved) + 진행 중(active) 주간 목표가 섞여 있다', () => {
     const achieved = weeklyGoals.filter((g) => g.status === 'achieved')
     const active = weeklyGoals.filter((g) => g.status === 'active')
-    expect(achieved).toHaveLength(3)
+    expect(achieved).toHaveLength(4)
     expect(active.length).toBeGreaterThan(0)
   })
 
-  it('완료된 3주의 accuracyRatio가 1.8 → 1.6 → 1.4로 개선된다', () => {
+  it('완료된 4주의 accuracyRatio가 2.0 → 1.8 → 1.6 → 1.4로 개선된다', () => {
     const achievedInOrder = weeklyGoals
       .filter((g) => g.status === 'achieved')
       .sort((a, b) => a.weekOf.localeCompare(b.weekOf))
@@ -42,7 +42,7 @@ describe('taskRepository — 시드 규격 검증', () => {
       return accuracyRatio(goalTasks)
     })
 
-    expect(ratios).toEqual([1.8, 1.6, 1.4])
+    expect(ratios).toEqual([2.0, 1.8, 1.6, 1.4])
   })
 
   it('achieved 주간 목표 중 하나는 "선행연구 정리 완료"다', () => {
@@ -55,6 +55,21 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(nearWarning).toHaveLength(1)
     expect(nearWarning[0]?.title).toBe('실험 데이터 분석 마무리')
     expect(nearWarning[0]?.status).toBe('active')
+  })
+
+  it('이월 중(carryCount=2)인 목표에도 완료 1개 + 진행 전 1개의 실측 연결이 있다', () => {
+    const goal = weeklyGoals.find((g) => g.title === '실험 데이터 분석 마무리')!
+    const goalTasks = tasks.filter((t) => t.weeklyGoalId === goal.id)
+    expect(goalTasks).toHaveLength(2)
+
+    const done = goalTasks.find((t) => t.status === 'done')
+    expect(done?.actualBlock).not.toBeNull()
+
+    const todo = goalTasks.find((t) => t.status === 'todo')
+    expect(todo?.actualBlock).toBeNull()
+
+    const totalActual = goalTasks.reduce((sum, t) => sum + actualMin(t), 0)
+    expect(totalActual).toBeGreaterThan(0)
   })
 
   it('같은 제목이 서로 다른 상태로 겹치지 않는다', () => {
@@ -72,7 +87,7 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(current).toBeGreaterThan(thesisGoal.baselineHours)
   })
 
-  it('약속(weeklyGoalId 없음)이 날짜별로 하루 2~3개씩, 28일 전체에 섞여 있다', () => {
+  it('약속(weeklyGoalId 없음)이 날짜별로 하루 2~3개씩, 35일 전체에 섞여 있다', () => {
     // 시간 미배정 인박스 항목(예: 택배 부치기)은 plannedBlock이 없어 특정 날짜에
     // 속하지 않는다 — 날짜별 개수 집계에서는 제외한다.
     const appointments = tasks.filter((t) => t.weeklyGoalId === null && t.plannedBlock !== null)
@@ -82,7 +97,7 @@ describe('taskRepository — 시드 규격 검증', () => {
       countsByDate.set(date, (countsByDate.get(date) ?? 0) + 1)
     }
 
-    expect(countsByDate.size).toBe(28) // 4주 × 7일
+    expect(countsByDate.size).toBe(35) // achieved 4주 + 진행 중 1주 = 5주 × 7일
     for (const count of countsByDate.values()) {
       expect(count === 2 || count === 3).toBe(true)
     }

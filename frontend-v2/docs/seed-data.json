@@ -36,6 +36,15 @@
   ],
   "weeklyGoals": [
     {
+      "id": "wg-achieved-0",
+      "title": "연구 주제 확정",
+      "weekOf": "2026-06-29",
+      "monthlyGoalId": "mg-thesis",
+      "estimatedHours": 5,
+      "carryCount": 0,
+      "status": "achieved"
+    },
+    {
       "id": "wg-achieved-1",
       "title": "선행연구 정리 완료",
       "weekOf": "2026-07-06",
@@ -92,7 +101,39 @@
   ],
   "tasks": [
     {
-      "id": "wg-achieved-1-1",
+      "id": "wg-achieved-0-1",
+      "title": "연구 주제 확정 관련 작업 1",
+      "weeklyGoalId": "wg-achieved-0",
+      "categoryId": null,
+      "estimatedMin": 150,
+      "plannedBlock": {
+        "start": "2026-06-29T09:00:00+09:00",
+        "end": "2026-06-29T11:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-29T09:00:00+09:00",
+        "end": "2026-06-29T14:00:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "wg-achieved-0-2",
+      "title": "연구 주제 확정 관련 작업 2",
+      "weeklyGoalId": "wg-achieved-0",
+      "categoryId": null,
+      "estimatedMin": 150,
+      "plannedBlock": {
+        "start": "2026-07-01T09:00:00+09:00",
+        "end": "2026-07-01T11:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-01T09:00:00+09:00",
+        "end": "2026-07-01T14:00:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "wg-achieved-1-3",
       "title": "선행연구 정리 완료 관련 작업 1",
       "weeklyGoalId": "wg-achieved-1",
       "categoryId": null,
@@ -108,7 +149,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-1-2",
+      "id": "wg-achieved-1-4",
       "title": "선행연구 정리 완료 관련 작업 2",
       "weeklyGoalId": "wg-achieved-1",
       "categoryId": null,
@@ -124,7 +165,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-2-3",
+      "id": "wg-achieved-2-5",
       "title": "선행 자료 스크리닝 관련 작업 1",
       "weeklyGoalId": "wg-achieved-2",
       "categoryId": null,
@@ -140,7 +181,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-2-4",
+      "id": "wg-achieved-2-6",
       "title": "선행 자료 스크리닝 관련 작업 2",
       "weeklyGoalId": "wg-achieved-2",
       "categoryId": null,
@@ -156,7 +197,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-2-5",
+      "id": "wg-achieved-2-7",
       "title": "선행 자료 스크리닝 관련 작업 3",
       "weeklyGoalId": "wg-achieved-2",
       "categoryId": null,
@@ -172,7 +213,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-3-6",
+      "id": "wg-achieved-3-8",
       "title": "실험 설계 확정 관련 작업 1",
       "weeklyGoalId": "wg-achieved-3",
       "categoryId": null,
@@ -188,7 +229,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-3-7",
+      "id": "wg-achieved-3-9",
       "title": "실험 설계 확정 관련 작업 2",
       "weeklyGoalId": "wg-achieved-3",
       "categoryId": null,
@@ -204,7 +245,7 @@
       "status": "done"
     },
     {
-      "id": "wg-achieved-3-8",
+      "id": "wg-achieved-3-10",
       "title": "실험 설계 확정 관련 작업 3",
       "weeklyGoalId": "wg-achieved-3",
       "categoryId": null,
@@ -220,7 +261,7 @@
       "status": "done"
     },
     {
-      "id": "wg-current-9",
+      "id": "wg-current-11",
       "title": "결과 파트 자료 정리",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -236,7 +277,7 @@
       "status": "done"
     },
     {
-      "id": "wg-fitness-10",
+      "id": "wg-fitness-12",
       "title": "헬스장 운동",
       "weeklyGoalId": "wg-fitness",
       "categoryId": null,
@@ -252,7 +293,36 @@
       "status": "done"
     },
     {
-      "id": "today-11",
+      "id": "wg-carrying-13",
+      "title": "실험 데이터 정리 초안",
+      "weeklyGoalId": "wg-carrying",
+      "categoryId": null,
+      "estimatedMin": 90,
+      "plannedBlock": {
+        "start": "2026-07-27T13:00:00+09:00",
+        "end": "2026-07-27T14:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T13:00:00+09:00",
+        "end": "2026-07-27T14:50:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "wg-carrying-14",
+      "title": "통계 분석 스크립트 작성",
+      "weeklyGoalId": "wg-carrying",
+      "categoryId": null,
+      "estimatedMin": 120,
+      "plannedBlock": {
+        "start": "2026-07-27T20:00:00+09:00",
+        "end": "2026-07-27T22:00:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo"
+    },
+    {
+      "id": "today-15",
       "title": "논문 결과표 초안",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -268,7 +338,7 @@
       "status": "done"
     },
     {
-      "id": "today-12",
+      "id": "today-16",
       "title": "팀 회의",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
@@ -284,7 +354,7 @@
       "status": "done"
     },
     {
-      "id": "today-13",
+      "id": "today-17",
       "title": "그래프 3개 다듬기",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -297,7 +367,7 @@
       "status": "todo"
     },
     {
-      "id": "today-14",
+      "id": "today-18",
       "title": "논문 서론 초안",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -310,7 +380,7 @@
       "status": "todo"
     },
     {
-      "id": "today-15",
+      "id": "today-19",
       "title": "헬스장 운동",
       "weeklyGoalId": "wg-fitness",
       "categoryId": null,
@@ -323,7 +393,7 @@
       "status": "todo"
     },
     {
-      "id": "today-16",
+      "id": "today-20",
       "title": "저녁 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
@@ -336,7 +406,7 @@
       "status": "todo"
     },
     {
-      "id": "inbox-17",
+      "id": "inbox-21",
       "title": "참고문헌 정리",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -346,7 +416,7 @@
       "status": "todo"
     },
     {
-      "id": "inbox-18",
+      "id": "inbox-22",
       "title": "택배 부치기",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
@@ -356,7 +426,7 @@
       "status": "todo"
     },
     {
-      "id": "carried-19",
+      "id": "carried-23",
       "title": "레퍼런스 정리",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -369,7 +439,7 @@
       "status": "carried"
     },
     {
-      "id": "carried-20",
+      "id": "carried-24",
       "title": "그래프 초안 검토",
       "weeklyGoalId": "wg-current",
       "categoryId": null,
@@ -382,876 +452,1148 @@
       "status": "carried"
     },
     {
-      "id": "appt-21",
+      "id": "appt-25",
       "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-06T12:00:00+09:00",
-        "end": "2026-07-06T12:30:00+09:00"
+        "start": "2026-06-29T12:00:00+09:00",
+        "end": "2026-06-29T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-06T12:00:00+09:00",
-        "end": "2026-07-06T12:30:00+09:00"
-      },
-      "status": "done"
-    },
-    {
-      "id": "appt-22",
-      "title": "병원 예약",
-      "weeklyGoalId": null,
-      "categoryId": "cat-etc",
-      "estimatedMin": 30,
-      "plannedBlock": {
-        "start": "2026-07-06T15:00:00+09:00",
-        "end": "2026-07-06T15:30:00+09:00"
-      },
-      "actualBlock": {
-        "start": "2026-07-06T15:00:00+09:00",
-        "end": "2026-07-06T15:30:00+09:00"
-      },
-      "status": "done"
-    },
-    {
-      "id": "appt-23",
-      "title": "스터디 모임",
-      "weeklyGoalId": null,
-      "categoryId": "cat-etc",
-      "estimatedMin": 30,
-      "plannedBlock": {
-        "start": "2026-07-07T12:00:00+09:00",
-        "end": "2026-07-07T12:30:00+09:00"
-      },
-      "actualBlock": {
-        "start": "2026-07-07T12:00:00+09:00",
-        "end": "2026-07-07T12:30:00+09:00"
-      },
-      "status": "done"
-    },
-    {
-      "id": "appt-24",
-      "title": "가족 통화",
-      "weeklyGoalId": null,
-      "categoryId": "cat-etc",
-      "estimatedMin": 30,
-      "plannedBlock": {
-        "start": "2026-07-07T15:00:00+09:00",
-        "end": "2026-07-07T15:30:00+09:00"
-      },
-      "actualBlock": {
-        "start": "2026-07-07T15:00:00+09:00",
-        "end": "2026-07-07T15:30:00+09:00"
-      },
-      "status": "done"
-    },
-    {
-      "id": "appt-25",
-      "title": "동아리 모임",
-      "weeklyGoalId": null,
-      "categoryId": "cat-etc",
-      "estimatedMin": 30,
-      "plannedBlock": {
-        "start": "2026-07-07T18:00:00+09:00",
-        "end": "2026-07-07T18:30:00+09:00"
-      },
-      "actualBlock": {
-        "start": "2026-07-07T18:00:00+09:00",
-        "end": "2026-07-07T18:30:00+09:00"
+        "start": "2026-06-29T12:00:00+09:00",
+        "end": "2026-06-29T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-26",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-08T12:00:00+09:00",
-        "end": "2026-07-08T12:30:00+09:00"
+        "start": "2026-06-29T15:00:00+09:00",
+        "end": "2026-06-29T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-08T12:00:00+09:00",
-        "end": "2026-07-08T12:30:00+09:00"
+        "start": "2026-06-29T15:00:00+09:00",
+        "end": "2026-06-29T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-27",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-08T15:00:00+09:00",
-        "end": "2026-07-08T15:30:00+09:00"
+        "start": "2026-06-30T12:00:00+09:00",
+        "end": "2026-06-30T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-08T15:00:00+09:00",
-        "end": "2026-07-08T15:30:00+09:00"
+        "start": "2026-06-30T12:00:00+09:00",
+        "end": "2026-06-30T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-28",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-09T12:00:00+09:00",
-        "end": "2026-07-09T12:30:00+09:00"
+        "start": "2026-06-30T15:00:00+09:00",
+        "end": "2026-06-30T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-09T12:00:00+09:00",
-        "end": "2026-07-09T12:30:00+09:00"
+        "start": "2026-06-30T15:00:00+09:00",
+        "end": "2026-06-30T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-29",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-09T15:00:00+09:00",
-        "end": "2026-07-09T15:30:00+09:00"
+        "start": "2026-06-30T18:00:00+09:00",
+        "end": "2026-06-30T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-09T15:00:00+09:00",
-        "end": "2026-07-09T15:30:00+09:00"
+        "start": "2026-06-30T18:00:00+09:00",
+        "end": "2026-06-30T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-30",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-09T18:00:00+09:00",
-        "end": "2026-07-09T18:30:00+09:00"
+        "start": "2026-07-01T12:00:00+09:00",
+        "end": "2026-07-01T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-09T18:00:00+09:00",
-        "end": "2026-07-09T18:30:00+09:00"
+        "start": "2026-07-01T12:00:00+09:00",
+        "end": "2026-07-01T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-31",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-10T12:00:00+09:00",
-        "end": "2026-07-10T12:30:00+09:00"
+        "start": "2026-07-01T15:00:00+09:00",
+        "end": "2026-07-01T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-10T12:00:00+09:00",
-        "end": "2026-07-10T12:30:00+09:00"
+        "start": "2026-07-01T15:00:00+09:00",
+        "end": "2026-07-01T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-32",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-10T15:00:00+09:00",
-        "end": "2026-07-10T15:30:00+09:00"
+        "start": "2026-07-02T12:00:00+09:00",
+        "end": "2026-07-02T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-10T15:00:00+09:00",
-        "end": "2026-07-10T15:30:00+09:00"
+        "start": "2026-07-02T12:00:00+09:00",
+        "end": "2026-07-02T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-33",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-11T12:00:00+09:00",
-        "end": "2026-07-11T12:30:00+09:00"
+        "start": "2026-07-02T15:00:00+09:00",
+        "end": "2026-07-02T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-11T12:00:00+09:00",
-        "end": "2026-07-11T12:30:00+09:00"
+        "start": "2026-07-02T15:00:00+09:00",
+        "end": "2026-07-02T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-34",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-11T15:00:00+09:00",
-        "end": "2026-07-11T15:30:00+09:00"
+        "start": "2026-07-02T18:00:00+09:00",
+        "end": "2026-07-02T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-11T15:00:00+09:00",
-        "end": "2026-07-11T15:30:00+09:00"
+        "start": "2026-07-02T18:00:00+09:00",
+        "end": "2026-07-02T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-35",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-11T18:00:00+09:00",
-        "end": "2026-07-11T18:30:00+09:00"
+        "start": "2026-07-03T12:00:00+09:00",
+        "end": "2026-07-03T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-11T18:00:00+09:00",
-        "end": "2026-07-11T18:30:00+09:00"
+        "start": "2026-07-03T12:00:00+09:00",
+        "end": "2026-07-03T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-36",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-12T12:00:00+09:00",
-        "end": "2026-07-12T12:30:00+09:00"
+        "start": "2026-07-03T15:00:00+09:00",
+        "end": "2026-07-03T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-12T12:00:00+09:00",
-        "end": "2026-07-12T12:30:00+09:00"
+        "start": "2026-07-03T15:00:00+09:00",
+        "end": "2026-07-03T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-37",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-12T15:00:00+09:00",
-        "end": "2026-07-12T15:30:00+09:00"
+        "start": "2026-07-04T12:00:00+09:00",
+        "end": "2026-07-04T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-12T15:00:00+09:00",
-        "end": "2026-07-12T15:30:00+09:00"
+        "start": "2026-07-04T12:00:00+09:00",
+        "end": "2026-07-04T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-38",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-13T12:00:00+09:00",
-        "end": "2026-07-13T12:30:00+09:00"
+        "start": "2026-07-04T15:00:00+09:00",
+        "end": "2026-07-04T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-13T12:00:00+09:00",
-        "end": "2026-07-13T12:30:00+09:00"
+        "start": "2026-07-04T15:00:00+09:00",
+        "end": "2026-07-04T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-39",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-13T15:00:00+09:00",
-        "end": "2026-07-13T15:30:00+09:00"
+        "start": "2026-07-04T18:00:00+09:00",
+        "end": "2026-07-04T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-13T15:00:00+09:00",
-        "end": "2026-07-13T15:30:00+09:00"
+        "start": "2026-07-04T18:00:00+09:00",
+        "end": "2026-07-04T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-40",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-14T12:00:00+09:00",
-        "end": "2026-07-14T12:30:00+09:00"
+        "start": "2026-07-05T12:00:00+09:00",
+        "end": "2026-07-05T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-14T12:00:00+09:00",
-        "end": "2026-07-14T12:30:00+09:00"
+        "start": "2026-07-05T12:00:00+09:00",
+        "end": "2026-07-05T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-41",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-14T15:00:00+09:00",
-        "end": "2026-07-14T15:30:00+09:00"
+        "start": "2026-07-05T15:00:00+09:00",
+        "end": "2026-07-05T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-14T15:00:00+09:00",
-        "end": "2026-07-14T15:30:00+09:00"
+        "start": "2026-07-05T15:00:00+09:00",
+        "end": "2026-07-05T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-42",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-14T18:00:00+09:00",
-        "end": "2026-07-14T18:30:00+09:00"
+        "start": "2026-07-06T12:00:00+09:00",
+        "end": "2026-07-06T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-14T18:00:00+09:00",
-        "end": "2026-07-14T18:30:00+09:00"
+        "start": "2026-07-06T12:00:00+09:00",
+        "end": "2026-07-06T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-43",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-15T12:00:00+09:00",
-        "end": "2026-07-15T12:30:00+09:00"
+        "start": "2026-07-06T15:00:00+09:00",
+        "end": "2026-07-06T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-15T12:00:00+09:00",
-        "end": "2026-07-15T12:30:00+09:00"
+        "start": "2026-07-06T15:00:00+09:00",
+        "end": "2026-07-06T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-44",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-15T15:00:00+09:00",
-        "end": "2026-07-15T15:30:00+09:00"
+        "start": "2026-07-07T12:00:00+09:00",
+        "end": "2026-07-07T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-15T15:00:00+09:00",
-        "end": "2026-07-15T15:30:00+09:00"
+        "start": "2026-07-07T12:00:00+09:00",
+        "end": "2026-07-07T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-45",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-16T12:00:00+09:00",
-        "end": "2026-07-16T12:30:00+09:00"
+        "start": "2026-07-07T15:00:00+09:00",
+        "end": "2026-07-07T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-16T12:00:00+09:00",
-        "end": "2026-07-16T12:30:00+09:00"
+        "start": "2026-07-07T15:00:00+09:00",
+        "end": "2026-07-07T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-46",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-16T15:00:00+09:00",
-        "end": "2026-07-16T15:30:00+09:00"
+        "start": "2026-07-07T18:00:00+09:00",
+        "end": "2026-07-07T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-16T15:00:00+09:00",
-        "end": "2026-07-16T15:30:00+09:00"
+        "start": "2026-07-07T18:00:00+09:00",
+        "end": "2026-07-07T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-47",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-16T18:00:00+09:00",
-        "end": "2026-07-16T18:30:00+09:00"
+        "start": "2026-07-08T12:00:00+09:00",
+        "end": "2026-07-08T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-16T18:00:00+09:00",
-        "end": "2026-07-16T18:30:00+09:00"
+        "start": "2026-07-08T12:00:00+09:00",
+        "end": "2026-07-08T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-48",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-17T12:00:00+09:00",
-        "end": "2026-07-17T12:30:00+09:00"
+        "start": "2026-07-08T15:00:00+09:00",
+        "end": "2026-07-08T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-17T12:00:00+09:00",
-        "end": "2026-07-17T12:30:00+09:00"
+        "start": "2026-07-08T15:00:00+09:00",
+        "end": "2026-07-08T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-49",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-17T15:00:00+09:00",
-        "end": "2026-07-17T15:30:00+09:00"
+        "start": "2026-07-09T12:00:00+09:00",
+        "end": "2026-07-09T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-17T15:00:00+09:00",
-        "end": "2026-07-17T15:30:00+09:00"
+        "start": "2026-07-09T12:00:00+09:00",
+        "end": "2026-07-09T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-50",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-18T12:00:00+09:00",
-        "end": "2026-07-18T12:30:00+09:00"
+        "start": "2026-07-09T15:00:00+09:00",
+        "end": "2026-07-09T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-18T12:00:00+09:00",
-        "end": "2026-07-18T12:30:00+09:00"
+        "start": "2026-07-09T15:00:00+09:00",
+        "end": "2026-07-09T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-51",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-18T15:00:00+09:00",
-        "end": "2026-07-18T15:30:00+09:00"
+        "start": "2026-07-09T18:00:00+09:00",
+        "end": "2026-07-09T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-18T15:00:00+09:00",
-        "end": "2026-07-18T15:30:00+09:00"
+        "start": "2026-07-09T18:00:00+09:00",
+        "end": "2026-07-09T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-52",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-18T18:00:00+09:00",
-        "end": "2026-07-18T18:30:00+09:00"
+        "start": "2026-07-10T12:00:00+09:00",
+        "end": "2026-07-10T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-18T18:00:00+09:00",
-        "end": "2026-07-18T18:30:00+09:00"
+        "start": "2026-07-10T12:00:00+09:00",
+        "end": "2026-07-10T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-53",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-19T12:00:00+09:00",
-        "end": "2026-07-19T12:30:00+09:00"
+        "start": "2026-07-10T15:00:00+09:00",
+        "end": "2026-07-10T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-19T12:00:00+09:00",
-        "end": "2026-07-19T12:30:00+09:00"
+        "start": "2026-07-10T15:00:00+09:00",
+        "end": "2026-07-10T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-54",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-19T15:00:00+09:00",
-        "end": "2026-07-19T15:30:00+09:00"
+        "start": "2026-07-11T12:00:00+09:00",
+        "end": "2026-07-11T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-19T15:00:00+09:00",
-        "end": "2026-07-19T15:30:00+09:00"
+        "start": "2026-07-11T12:00:00+09:00",
+        "end": "2026-07-11T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-55",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-20T12:00:00+09:00",
-        "end": "2026-07-20T12:30:00+09:00"
+        "start": "2026-07-11T15:00:00+09:00",
+        "end": "2026-07-11T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-20T12:00:00+09:00",
-        "end": "2026-07-20T12:30:00+09:00"
+        "start": "2026-07-11T15:00:00+09:00",
+        "end": "2026-07-11T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-56",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-20T15:00:00+09:00",
-        "end": "2026-07-20T15:30:00+09:00"
+        "start": "2026-07-11T18:00:00+09:00",
+        "end": "2026-07-11T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-20T15:00:00+09:00",
-        "end": "2026-07-20T15:30:00+09:00"
+        "start": "2026-07-11T18:00:00+09:00",
+        "end": "2026-07-11T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-57",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-21T12:00:00+09:00",
-        "end": "2026-07-21T12:30:00+09:00"
+        "start": "2026-07-12T12:00:00+09:00",
+        "end": "2026-07-12T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-21T12:00:00+09:00",
-        "end": "2026-07-21T12:30:00+09:00"
+        "start": "2026-07-12T12:00:00+09:00",
+        "end": "2026-07-12T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-58",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-21T15:00:00+09:00",
-        "end": "2026-07-21T15:30:00+09:00"
+        "start": "2026-07-12T15:00:00+09:00",
+        "end": "2026-07-12T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-21T15:00:00+09:00",
-        "end": "2026-07-21T15:30:00+09:00"
+        "start": "2026-07-12T15:00:00+09:00",
+        "end": "2026-07-12T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-59",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-21T18:00:00+09:00",
-        "end": "2026-07-21T18:30:00+09:00"
+        "start": "2026-07-13T12:00:00+09:00",
+        "end": "2026-07-13T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-21T18:00:00+09:00",
-        "end": "2026-07-21T18:30:00+09:00"
+        "start": "2026-07-13T12:00:00+09:00",
+        "end": "2026-07-13T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-60",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-22T12:00:00+09:00",
-        "end": "2026-07-22T12:30:00+09:00"
+        "start": "2026-07-13T15:00:00+09:00",
+        "end": "2026-07-13T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-22T12:00:00+09:00",
-        "end": "2026-07-22T12:30:00+09:00"
+        "start": "2026-07-13T15:00:00+09:00",
+        "end": "2026-07-13T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-61",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-22T15:00:00+09:00",
-        "end": "2026-07-22T15:30:00+09:00"
+        "start": "2026-07-14T12:00:00+09:00",
+        "end": "2026-07-14T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-22T15:00:00+09:00",
-        "end": "2026-07-22T15:30:00+09:00"
+        "start": "2026-07-14T12:00:00+09:00",
+        "end": "2026-07-14T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-62",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-23T12:00:00+09:00",
-        "end": "2026-07-23T12:30:00+09:00"
+        "start": "2026-07-14T15:00:00+09:00",
+        "end": "2026-07-14T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-23T12:00:00+09:00",
-        "end": "2026-07-23T12:30:00+09:00"
+        "start": "2026-07-14T15:00:00+09:00",
+        "end": "2026-07-14T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-63",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-23T15:00:00+09:00",
-        "end": "2026-07-23T15:30:00+09:00"
+        "start": "2026-07-14T18:00:00+09:00",
+        "end": "2026-07-14T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-23T15:00:00+09:00",
-        "end": "2026-07-23T15:30:00+09:00"
+        "start": "2026-07-14T18:00:00+09:00",
+        "end": "2026-07-14T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-64",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-23T18:00:00+09:00",
-        "end": "2026-07-23T18:30:00+09:00"
+        "start": "2026-07-15T12:00:00+09:00",
+        "end": "2026-07-15T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-23T18:00:00+09:00",
-        "end": "2026-07-23T18:30:00+09:00"
+        "start": "2026-07-15T12:00:00+09:00",
+        "end": "2026-07-15T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-65",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-24T12:00:00+09:00",
-        "end": "2026-07-24T12:30:00+09:00"
+        "start": "2026-07-15T15:00:00+09:00",
+        "end": "2026-07-15T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-24T12:00:00+09:00",
-        "end": "2026-07-24T12:30:00+09:00"
+        "start": "2026-07-15T15:00:00+09:00",
+        "end": "2026-07-15T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-66",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-24T15:00:00+09:00",
-        "end": "2026-07-24T15:30:00+09:00"
+        "start": "2026-07-16T12:00:00+09:00",
+        "end": "2026-07-16T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-24T15:00:00+09:00",
-        "end": "2026-07-24T15:30:00+09:00"
+        "start": "2026-07-16T12:00:00+09:00",
+        "end": "2026-07-16T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-67",
-      "title": "병원 예약",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-25T12:00:00+09:00",
-        "end": "2026-07-25T12:30:00+09:00"
+        "start": "2026-07-16T15:00:00+09:00",
+        "end": "2026-07-16T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-25T12:00:00+09:00",
-        "end": "2026-07-25T12:30:00+09:00"
+        "start": "2026-07-16T15:00:00+09:00",
+        "end": "2026-07-16T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-68",
-      "title": "스터디 모임",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-25T15:00:00+09:00",
-        "end": "2026-07-25T15:30:00+09:00"
+        "start": "2026-07-16T18:00:00+09:00",
+        "end": "2026-07-16T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-25T15:00:00+09:00",
-        "end": "2026-07-25T15:30:00+09:00"
+        "start": "2026-07-16T18:00:00+09:00",
+        "end": "2026-07-16T18:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-69",
-      "title": "가족 통화",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-25T18:00:00+09:00",
-        "end": "2026-07-25T18:30:00+09:00"
+        "start": "2026-07-17T12:00:00+09:00",
+        "end": "2026-07-17T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-25T18:00:00+09:00",
-        "end": "2026-07-25T18:30:00+09:00"
+        "start": "2026-07-17T12:00:00+09:00",
+        "end": "2026-07-17T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-70",
-      "title": "동아리 모임",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-26T12:00:00+09:00",
-        "end": "2026-07-26T12:30:00+09:00"
+        "start": "2026-07-17T15:00:00+09:00",
+        "end": "2026-07-17T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-26T12:00:00+09:00",
-        "end": "2026-07-26T12:30:00+09:00"
+        "start": "2026-07-17T15:00:00+09:00",
+        "end": "2026-07-17T15:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-71",
-      "title": "점심 약속",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-26T15:00:00+09:00",
-        "end": "2026-07-26T15:30:00+09:00"
+        "start": "2026-07-18T12:00:00+09:00",
+        "end": "2026-07-18T12:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-26T15:00:00+09:00",
-        "end": "2026-07-26T15:30:00+09:00"
+        "start": "2026-07-18T12:00:00+09:00",
+        "end": "2026-07-18T12:30:00+09:00"
       },
       "status": "done"
     },
     {
       "id": "appt-72",
-      "title": "병원 예약",
-      "weeklyGoalId": null,
-      "categoryId": "cat-etc",
-      "estimatedMin": 30,
-      "plannedBlock": {
-        "start": "2026-07-27T12:00:00+09:00",
-        "end": "2026-07-27T12:30:00+09:00"
-      },
-      "actualBlock": {
-        "start": "2026-07-27T12:00:00+09:00",
-        "end": "2026-07-27T12:30:00+09:00"
-      },
-      "status": "done"
-    },
-    {
-      "id": "appt-73",
       "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-27T15:00:00+09:00",
-        "end": "2026-07-27T15:30:00+09:00"
+        "start": "2026-07-18T15:00:00+09:00",
+        "end": "2026-07-18T15:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-27T15:00:00+09:00",
-        "end": "2026-07-27T15:30:00+09:00"
+        "start": "2026-07-18T15:00:00+09:00",
+        "end": "2026-07-18T15:30:00+09:00"
       },
       "status": "done"
     },
     {
-      "id": "appt-74",
+      "id": "appt-73",
       "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
-        "start": "2026-07-28T12:00:00+09:00",
-        "end": "2026-07-28T12:30:00+09:00"
+        "start": "2026-07-18T18:00:00+09:00",
+        "end": "2026-07-18T18:30:00+09:00"
       },
       "actualBlock": {
-        "start": "2026-07-28T12:00:00+09:00",
-        "end": "2026-07-28T12:30:00+09:00"
+        "start": "2026-07-18T18:00:00+09:00",
+        "end": "2026-07-18T18:30:00+09:00"
       },
       "status": "done"
     },
     {
-      "id": "appt-75",
+      "id": "appt-74",
       "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
       "plannedBlock": {
+        "start": "2026-07-19T12:00:00+09:00",
+        "end": "2026-07-19T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-19T12:00:00+09:00",
+        "end": "2026-07-19T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-75",
+      "title": "점심 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-19T15:00:00+09:00",
+        "end": "2026-07-19T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-19T15:00:00+09:00",
+        "end": "2026-07-19T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-76",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-20T12:00:00+09:00",
+        "end": "2026-07-20T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-20T12:00:00+09:00",
+        "end": "2026-07-20T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-77",
+      "title": "스터디 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-20T15:00:00+09:00",
+        "end": "2026-07-20T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-20T15:00:00+09:00",
+        "end": "2026-07-20T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-78",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T12:00:00+09:00",
+        "end": "2026-07-21T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T12:00:00+09:00",
+        "end": "2026-07-21T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-79",
+      "title": "동아리 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T15:00:00+09:00",
+        "end": "2026-07-21T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T15:00:00+09:00",
+        "end": "2026-07-21T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-80",
+      "title": "점심 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T18:00:00+09:00",
+        "end": "2026-07-21T18:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T18:00:00+09:00",
+        "end": "2026-07-21T18:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-81",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-22T12:00:00+09:00",
+        "end": "2026-07-22T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-22T12:00:00+09:00",
+        "end": "2026-07-22T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-82",
+      "title": "스터디 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-22T15:00:00+09:00",
+        "end": "2026-07-22T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-22T15:00:00+09:00",
+        "end": "2026-07-22T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-83",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T12:00:00+09:00",
+        "end": "2026-07-23T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T12:00:00+09:00",
+        "end": "2026-07-23T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-84",
+      "title": "동아리 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T15:00:00+09:00",
+        "end": "2026-07-23T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T15:00:00+09:00",
+        "end": "2026-07-23T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-85",
+      "title": "점심 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T18:00:00+09:00",
+        "end": "2026-07-23T18:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T18:00:00+09:00",
+        "end": "2026-07-23T18:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-86",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-24T12:00:00+09:00",
+        "end": "2026-07-24T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-24T12:00:00+09:00",
+        "end": "2026-07-24T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-87",
+      "title": "스터디 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-24T15:00:00+09:00",
+        "end": "2026-07-24T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-24T15:00:00+09:00",
+        "end": "2026-07-24T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-88",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T12:00:00+09:00",
+        "end": "2026-07-25T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T12:00:00+09:00",
+        "end": "2026-07-25T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-89",
+      "title": "동아리 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T15:00:00+09:00",
+        "end": "2026-07-25T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T15:00:00+09:00",
+        "end": "2026-07-25T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-90",
+      "title": "점심 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T18:00:00+09:00",
+        "end": "2026-07-25T18:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T18:00:00+09:00",
+        "end": "2026-07-25T18:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-91",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-26T12:00:00+09:00",
+        "end": "2026-07-26T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-26T12:00:00+09:00",
+        "end": "2026-07-26T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-92",
+      "title": "스터디 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-26T15:00:00+09:00",
+        "end": "2026-07-26T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-26T15:00:00+09:00",
+        "end": "2026-07-26T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-93",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-27T12:00:00+09:00",
+        "end": "2026-07-27T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T12:00:00+09:00",
+        "end": "2026-07-27T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-94",
+      "title": "동아리 모임",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-27T15:00:00+09:00",
+        "end": "2026-07-27T15:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T15:00:00+09:00",
+        "end": "2026-07-27T15:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-95",
+      "title": "점심 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T12:00:00+09:00",
+        "end": "2026-07-28T12:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-28T12:00:00+09:00",
+        "end": "2026-07-28T12:30:00+09:00"
+      },
+      "status": "done"
+    },
+    {
+      "id": "appt-96",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
         "start": "2026-07-28T15:00:00+09:00",
         "end": "2026-07-28T15:30:00+09:00"
       },
@@ -1262,8 +1604,8 @@
       "status": "done"
     },
     {
-      "id": "appt-76",
-      "title": "점심 약속",
+      "id": "appt-97",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1278,8 +1620,8 @@
       "status": "done"
     },
     {
-      "id": "appt-77",
-      "title": "병원 예약",
+      "id": "appt-98",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1291,8 +1633,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-78",
-      "title": "스터디 모임",
+      "id": "appt-99",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1304,8 +1646,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-79",
-      "title": "가족 통화",
+      "id": "appt-100",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1317,8 +1659,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-80",
-      "title": "동아리 모임",
+      "id": "appt-101",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1330,8 +1672,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-81",
-      "title": "점심 약속",
+      "id": "appt-102",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1343,8 +1685,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-82",
-      "title": "병원 예약",
+      "id": "appt-103",
+      "title": "가족 통화",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1356,8 +1698,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-83",
-      "title": "스터디 모임",
+      "id": "appt-104",
+      "title": "동아리 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1369,8 +1711,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-84",
-      "title": "가족 통화",
+      "id": "appt-105",
+      "title": "점심 약속",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1382,8 +1724,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-85",
-      "title": "동아리 모임",
+      "id": "appt-106",
+      "title": "병원 예약",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,
@@ -1395,8 +1737,8 @@
       "status": "todo"
     },
     {
-      "id": "appt-86",
-      "title": "점심 약속",
+      "id": "appt-107",
+      "title": "스터디 모임",
       "weeklyGoalId": null,
       "categoryId": "cat-etc",
       "estimatedMin": 30,

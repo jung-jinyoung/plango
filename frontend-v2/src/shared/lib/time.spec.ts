@@ -1,5 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
-import { addDays, minutesBetween, minutesOfDay, nowIso, startOfWeek, useNow } from './time'
+import {
+  addDays,
+  formatMinutesAsHours,
+  minutesBetween,
+  minutesOfDay,
+  nowIso,
+  startOfWeek,
+  useNow,
+} from './time'
 
 describe('minutesBetween', () => {
   it('같은 시간대 내 차이를 분 단위로 계산한다', () => {
@@ -42,6 +50,20 @@ describe('startOfWeek', () => {
 
   it('일요일은 그 전주 월요일을 반환한다', () => {
     expect(startOfWeek('2026-08-02')).toBe('2026-07-27')
+  })
+})
+
+describe('formatMinutesAsHours', () => {
+  it('정각이면 분을 생략한다', () => {
+    expect(formatMinutesAsHours(360)).toBe('6h')
+  })
+
+  it('분이 남으면 같이 표시한다', () => {
+    expect(formatMinutesAsHours(500)).toBe('8h 20m')
+  })
+
+  it('0분은 0h', () => {
+    expect(formatMinutesAsHours(0)).toBe('0h')
   })
 })
 
