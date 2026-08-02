@@ -4,6 +4,7 @@ import {
   actualMin,
   categoryColorOf,
   monthlyCurrentHours,
+  projectedExtraWeeks,
   resolveCategory,
   resolveCategoryForMonthlyGoal,
   resolveCategoryForWeeklyGoal,
@@ -284,5 +285,57 @@ describe('weeklyMedianActualHours', () => {
 
   it('지난 주간 목표가 하나도 없으면 0을 반환한다', () => {
     expect(weeklyMedianActualHours([], [], '2026-07-28')).toBe(0)
+  })
+})
+
+describe('projectedExtraWeeks', () => {
+  it('remainingHours(achieved·dropped 제외 합) / 페이스를 반올림한다', () => {
+    // active(10h, weekOf=currentMonday라 이번 주 — remainingHours에는 포함되지만
+    // 과거 주 취급은 안 됨) + achieved(6h, remainingHours에서 제외)
+    const goals = [weeklyGoalActive, weeklyGoalAchieved]
+    const tasks = [
+      // achieved의 weekOf(2026-08-04)만 currentMonday(2026-08-18)보다 과거라
+      // 유일한 "지난 주"로 잡히고, 그 주 실측(8h)이 그대로 페이스가 된다.
+      makeTask({
+        weeklyGoalId: weeklyGoalAchieved.id,
+        actualBlock: { start: '2026-08-04T09:00:00+09:00', end: '2026-08-04T17:00:00+09:00' },
+      }),
+    ]
+    // remainingHours(active만, 10) / pace(8) = 1.25 → 반올림 1
+    expect(projectedExtraWeeks(monthlyGoal, goals, tasks, '2026-08-18')).toBe(1)
+  })
+
+  it('achieved·dropped·다른 월간 목표는 제외하고 active·carried만 remainingHours에 합산한다', () => {
+    const carrying: WeeklyGoal = { ...weeklyGoalActive, id: 'w-carrying', status: 'carried', estimatedHours: 4 }
+    // dropped를 achieved와 같은 weekOf에 둬서 페이스 계산용 "지난 주" 집합에
+    // 새 주를 추가하지 않게 한다(순수하게 remainingHours 쪽 제외만 검증하기 위함).
+    const dropped: WeeklyGoal = { ...weeklyGoalDropped, weekOf: weeklyGoalAchieved.weekOf }
+    const goals = [weeklyGoalActive, weeklyGoalAchieved, dropped, carrying]
+    const tasks = [
+      makeTask({
+        weeklyGoalId: weeklyGoalAchieved.id,
+        actualBlock: { start: '2026-08-04T09:00:00+09:00', end: '2026-08-04T17:00:00+09:00' }, // 8h
+      }),
+    ]
+    // remainingHours = active(10) + carried(4) = 14, pace = 8(위 테스트와 동일 이유) → 14/8=1.75 → 2
+    expect(projectedExtraWeeks(monthlyGoal, goals, tasks, '2026-08-18')).toBe(2)
+  })
+
+  it('다른 월간 목표의 주간 목표는 remainingHours에 안 섞인다', () => {
+    const otherMonthly: MonthlyGoal = { ...monthlyGoal, id: 'mg-other' }
+    const otherWeekly: WeeklyGoal = { ...weeklyGoalActive, id: 'w-other', monthlyGoalId: otherMonthly.id }
+    const tasks = [
+      makeTask({
+        weeklyGoalId: weeklyGoalAchieved.id,
+        actualBlock: { start: '2026-08-04T09:00:00+09:00', end: '2026-08-04T13:00:00+09:00' }, // 4h
+      }),
+    ]
+    // otherWeekly(10h)는 mg1이 아니라 mg-other 소속이라 remainingHours에서 빠지고,
+    // mg1엔 achieved(제외)뿐이라 remainingHours=0 → extraWeeks=0
+    expect(projectedExtraWeeks(monthlyGoal, [weeklyGoalAchieved, otherWeekly], tasks, '2026-08-18')).toBe(0)
+  })
+
+  it('페이스가 0이면(지난주 실측이 없으면) null을 반환한다(나눗셈 불가)', () => {
+    expect(projectedExtraWeeks(monthlyGoal, [weeklyGoalActive], [], '2026-08-18')).toBeNull()
   })
 })
