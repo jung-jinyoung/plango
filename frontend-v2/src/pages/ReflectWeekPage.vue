@@ -105,12 +105,15 @@ const heroEstimatedMin = computed(() =>
 const heroActualLabel = computed(() => formatMinutesAsHours(heroActualMin.value))
 const heroEstimatedLabel = computed(() => formatMinutesAsHours(heroEstimatedMin.value))
 
-// 정확도 — achieved 3주(선행연구 정리 완료 1.8 → 선행 자료 스크리닝 1.6 →
-// 실험 설계 확정 1.4, 시간순) 전체를 computeWeeklyAccuracy로 구해서, 그중
-// "지난주"(실험 설계 확정) 값을 대표값으로 쓴다.
+// 정확도 — 연구 계열(mg-thesis) achieved 주간 목표(선행연구 정리 완료 1.8 →
+// 선행 자료 스크리닝 1.6 → 실험 설계 확정 1.4, 시간순) 전체를 computeWeeklyAccuracy로
+// 구해서, 그중 "지난주" 값을 대표값으로 쓴다. monthlyGoalId로 스코프하는 이유:
+// 스코프 없이 achieved 전체를 모으면, 다른 계열(습관 등)의 achieved 목표가 같은
+// weekOf를 가질 때 "지난주" 대표값이 조용히 그쪽으로 넘어가버릴 수 있다
+// (taskRepository.spec.ts에 이미 적용한 monthlyGoalId 스코핑과 같은 이유).
 const achievedGoalsInOrder = computed(() =>
   goalStore.weeklyGoals
-    .filter((g) => g.status === 'achieved')
+    .filter((g) => g.status === 'achieved' && g.monthlyGoalId === 'mg-thesis')
     .slice()
     .sort((a, b) => a.weekOf.localeCompare(b.weekOf)),
 )
