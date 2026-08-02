@@ -31,3 +31,11 @@ export function getSeedWeeklyGoals(): WeeklyGoal[] {
 export function updateWeeklyGoal(_id: string, _patch: Partial<WeeklyGoal>): void {
   // TODO: Supabase 연동 후 실제 저장 호출로 교체
 }
+
+/**
+ * 주간 목표를 새로 만든다 — "다음 주 목표 제안" 확정 시 호출된다(CLAUDE.md 6-3절:
+ * 이월은 새 항목 생성). updateWeeklyGoal과 같은 이유로 지금은 호출 경로만 확립.
+ */
+export function addWeeklyGoal(_goal: WeeklyGoal): void {
+  // TODO: Supabase 연동 후 실제 저장 호출로 교체
+}

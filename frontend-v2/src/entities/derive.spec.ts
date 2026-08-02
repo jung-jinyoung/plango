@@ -8,6 +8,7 @@ import {
   resolveCategoryForMonthlyGoal,
   resolveCategoryForWeeklyGoal,
   shouldShowGhost,
+  weeklyMedianActualHours,
   weeklyProgress,
 } from './derive'
 import type { Category, MonthlyGoal, Task, WeeklyGoal } from './types'
@@ -227,5 +228,61 @@ describe('shouldShowGhost', () => {
       actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' },
     })
     expect(shouldShowGhost(task)).toBe(false)
+  })
+})
+
+describe('weeklyMedianActualHours', () => {
+  it('주가 홀수 개면 가운데 값을 그대로 쓴다(평균 아님)', () => {
+    const goals: WeeklyGoal[] = [
+      { ...weeklyGoalAchieved, id: 'w1', weekOf: '2026-07-07' },
+      { ...weeklyGoalAchieved, id: 'w2', weekOf: '2026-07-14' },
+      { ...weeklyGoalAchieved, id: 'w3', weekOf: '2026-07-21' },
+    ]
+    const tasks = [
+      makeTask({
+        weeklyGoalId: 'w1',
+        actualBlock: { start: '2026-07-07T09:00:00+09:00', end: '2026-07-07T11:00:00+09:00' }, // 2h
+      }),
+      makeTask({
+        weeklyGoalId: 'w2',
+        actualBlock: { start: '2026-07-14T09:00:00+09:00', end: '2026-07-14T14:00:00+09:00' }, // 5h
+      }),
+      makeTask({
+        weeklyGoalId: 'w3',
+        actualBlock: { start: '2026-07-21T09:00:00+09:00', end: '2026-07-21T18:00:00+09:00' }, // 9h
+      }),
+    ]
+    // 정렬 [2,5,9] → 가운데(홀수) = 5
+    expect(weeklyMedianActualHours(goals, tasks, '2026-07-28')).toBe(5)
+  })
+
+  it('약속(weeklyGoalId 없음)은 포함하지 않는다', () => {
+    const goals: WeeklyGoal[] = [{ ...weeklyGoalAchieved, id: 'w1', weekOf: '2026-07-21' }]
+    const tasks = [
+      makeTask({
+        weeklyGoalId: 'w1',
+        actualBlock: { start: '2026-07-21T09:00:00+09:00', end: '2026-07-21T11:00:00+09:00' }, // 2h, 목표 연결
+      }),
+      makeTask({
+        weeklyGoalId: null,
+        actualBlock: { start: '2026-07-21T13:00:00+09:00', end: '2026-07-21T20:00:00+09:00' }, // 7h, 약속 — 제외 대상
+      }),
+    ]
+    expect(weeklyMedianActualHours(goals, tasks, '2026-07-28')).toBe(2)
+  })
+
+  it('beforeWeekOf 이후(진행 중인 주)는 세지 않는다', () => {
+    const goals: WeeklyGoal[] = [{ ...weeklyGoalAchieved, id: 'w1', weekOf: '2026-07-28' }]
+    const tasks = [
+      makeTask({
+        weeklyGoalId: 'w1',
+        actualBlock: { start: '2026-07-28T09:00:00+09:00', end: '2026-07-28T15:00:00+09:00' }, // 6h
+      }),
+    ]
+    expect(weeklyMedianActualHours(goals, tasks, '2026-07-28')).toBe(0)
+  })
+
+  it('지난 주간 목표가 하나도 없으면 0을 반환한다', () => {
+    expect(weeklyMedianActualHours([], [], '2026-07-28')).toBe(0)
   })
 })
