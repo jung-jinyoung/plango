@@ -41,4 +41,40 @@ describe('useGoalStore', () => {
 
     expect(store.weeklyGoals).toEqual(before)
   })
+
+  it('addWeeklyGoal이 새 주간 목표를 추가한다', () => {
+    const store = useGoalStore()
+    const before = store.weeklyGoals.length
+
+    store.addWeeklyGoal({
+      id: 'wg-next-test',
+      title: '테스트 목표',
+      weekOf: '2026-08-03',
+      monthlyGoalId: 'mg-thesis',
+      estimatedHours: 5,
+      carryCount: 0,
+      status: 'active',
+    })
+
+    expect(store.weeklyGoals.length).toBe(before + 1)
+    expect(store.weeklyGoalsById.get('wg-next-test')?.title).toBe('테스트 목표')
+  })
+
+  it('addWeeklyGoal은 이미 있는 id면 중복 추가하지 않는다', () => {
+    const store = useGoalStore()
+    const before = store.weeklyGoals.length
+
+    store.addWeeklyGoal({
+      id: 'wg-carrying', // 이미 존재
+      title: '중복 시도',
+      weekOf: '2026-08-03',
+      monthlyGoalId: 'mg-thesis',
+      estimatedHours: 5,
+      carryCount: 0,
+      status: 'active',
+    })
+
+    expect(store.weeklyGoals.length).toBe(before)
+    expect(store.weeklyGoalsById.get('wg-carrying')?.title).toBe('실험 데이터 분석 마무리')
+  })
 })

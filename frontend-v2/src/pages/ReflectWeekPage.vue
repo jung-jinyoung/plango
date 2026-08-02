@@ -58,17 +58,34 @@
           @confirm="onConfirmReestimate"
         />
       </BaseCard>
+
+      <BaseCard v-if="nextWeekSuggestions.length > 0" class="section">
+        <h2>다음 주엔 이렇게 해볼까요</h2>
+        <NextWeekSuggestions
+          :suggestions="nextWeekSuggestions"
+          :available-hours="availableHours"
+          @confirm="onConfirmNextWeekGoals"
+        />
+      </BaseCard>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { actualMin, categoryColorOf, resolveCategoryForWeeklyGoal, weeklyProgress } from '../entities/derive'
+import {
+  actualMin,
+  categoryColorOf,
+  resolveCategoryForWeeklyGoal,
+  weeklyMedianActualHours,
+  weeklyProgress,
+} from '../entities/derive'
 import AccuracySummary from '../features/reflect/components/AccuracySummary.vue'
 import { computeWeeklyAccuracy } from '../features/reflect/lib/computeWeeklyAccuracy'
 import GoalBreakdownRow from '../features/reflect/components/GoalBreakdownRow.vue'
+import NextWeekSuggestions from '../features/reflect/components/NextWeekSuggestions.vue'
 import ReestimateCard from '../features/reflect/components/ReestimateCard.vue'
+import { suggestNextWeekGoals, type NextWeekSuggestion } from '../features/reflect/lib/suggestNextWeekGoals'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addDays, formatMinutesAsHours, startOfWeek } from '../shared/lib/time'
@@ -78,6 +95,7 @@ import BaseCard from '../shared/ui/BaseCard.vue'
 const TODAY = '2026-07-29'
 const CURRENT_MONDAY = startOfWeek(TODAY)
 const LAST_MONDAY = addDays(CURRENT_MONDAY, -7)
+const NEXT_MONDAY = addDays(CURRENT_MONDAY, 7)
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
@@ -105,12 +123,16 @@ const heroEstimatedMin = computed(() =>
 const heroActualLabel = computed(() => formatMinutesAsHours(heroActualMin.value))
 const heroEstimatedLabel = computed(() => formatMinutesAsHours(heroEstimatedMin.value))
 
-// 정확도 — achieved 3주(선행연구 정리 완료 1.8 → 선행 자료 스크리닝 1.6 →
-// 실험 설계 확정 1.4, 시간순) 전체를 computeWeeklyAccuracy로 구해서, 그중
-// "지난주"(실험 설계 확정) 값을 대표값으로 쓴다.
+// 정확도 — 연구 계열(mg-thesis) achieved 4주(연구 주제 확정 2.0 → 선행연구
+// 정리 완료 1.8 → 선행 자료 스크리닝 1.6 → 실험 설계 확정 1.4, 시간순) 전체를
+// computeWeeklyAccuracy로 구해서, 그중 "지난주"(실험 설계 확정) 값을 대표값으로
+// 쓴다. 습관 계열(mg-fitness) achieved는 별개 트랙이라 여기 안 섞는다 — 안 섞으면
+// wg-ex-3(습관, LAST_MONDAY)가 실험 설계 확정과 같은 주에 겹칠 때 "지난주" 대표값이
+// 조용히 습관 목표 쪽으로 넘어가버리는 문제가 있었다(taskRepository.spec.ts의
+// monthlyGoalId 스코핑과 동일한 이유).
 const achievedGoalsInOrder = computed(() =>
   goalStore.weeklyGoals
-    .filter((g) => g.status === 'achieved')
+    .filter((g) => g.status === 'achieved' && g.monthlyGoalId === 'mg-thesis')
     .slice()
     .sort((a, b) => a.weekOf.localeCompare(b.weekOf)),
 )
@@ -150,6 +172,72 @@ const carrying = computed(() => {
 function onConfirmReestimate(newHours: number) {
   if (!carrying.value) return
   goalStore.updateWeeklyGoal(carrying.value.goal.id, { estimatedHours: newHours })
+}
+
+// 다음 주 목표 제안 + 가용 시간 검사 (6-5절: 지난 4주 실제 투입 중앙값 − 이미 잡힌 약속)
+const medianActualHours = computed(() =>
+  weeklyMedianActualHours(goalStore.weeklyGoals, taskStore.tasks, CURRENT_MONDAY),
+)
+const nextWeekAppointmentHours = computed(() => {
+  const NEXT_SUNDAY = addDays(NEXT_MONDAY, 6)
+  const totalMin = taskStore.tasks
+    .filter((t) => {
+      if (t.weeklyGoalId !== null || !t.plannedBlock) return false
+      const date = t.plannedBlock.start.slice(0, 10)
+      return date >= NEXT_MONDAY && date <= NEXT_SUNDAY
+    })
+    .reduce((sum, t) => sum + t.estimatedMin, 0)
+  return totalMin / 60
+})
+const availableHours = computed(() => Math.max(0, medianActualHours.value - nextWeekAppointmentHours.value))
+
+const nextWeekSuggestions = computed(() =>
+  suggestNextWeekGoals(
+    goalStore.weeklyGoals,
+    goalStore.monthlyGoals,
+    goalStore.categoriesById,
+    taskStore.tasks,
+    LAST_MONDAY,
+    availableHours.value,
+  ),
+)
+
+// NextWeekSuggestions가 emit('confirm', ...)을 보낼 때만 실행 — 후보를 보여주고
+// ✕로 빼는 동안엔 이 함수가 절대 호출되지 않는다(R6). 이월 이어짐 후보는
+// CLAUDE.md 6-3절(이월은 새 항목 생성)대로, 지난 레코드는 carried로 얼리고
+// 다음 주 레코드를 새로 만든다.
+function onConfirmNextWeekGoals(accepted: NextWeekSuggestion[]) {
+  // carrying은 goalStore.weeklyGoals에 의존하는 computed라, 루프 안에서
+  // updateWeeklyGoal로 그 배열을 건드리면 다음 접근 때 재계산되어 값이
+  // 바뀐다(원본은 이미 carried, 새 레코드는 아직 안 생긴 틈에 null이 되는
+  // 버그를 실제로 겪었다) — 함수 시작 시점 값을 로컬에 고정해두고 그것만 쓴다.
+  const carryingGoal = carrying.value?.goal ?? null
+
+  for (const s of accepted) {
+    const isCarryingSuggestion = carryingGoal && s.key === `carry-${carryingGoal.id}`
+    if (isCarryingSuggestion && carryingGoal) {
+      goalStore.updateWeeklyGoal(carryingGoal.id, { status: 'carried' })
+      goalStore.addWeeklyGoal({
+        id: `${carryingGoal.id}-next`,
+        title: s.title,
+        weekOf: NEXT_MONDAY,
+        monthlyGoalId: s.monthlyGoalId,
+        estimatedHours: s.hours,
+        carryCount: carryingGoal.carryCount + 1,
+        status: 'active',
+      })
+    } else {
+      goalStore.addWeeklyGoal({
+        id: `wg-next-${s.key}`,
+        title: s.title,
+        weekOf: NEXT_MONDAY,
+        monthlyGoalId: s.monthlyGoalId,
+        estimatedHours: s.hours,
+        carryCount: 0,
+        status: 'active',
+      })
+    }
+  }
 }
 </script>
 

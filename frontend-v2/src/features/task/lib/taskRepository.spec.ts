@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { accuracyRatio, actualMin, monthlyCurrentHours, weeklyProgress } from '../../../entities/derive'
+import {
+  accuracyRatio,
+  actualMin,
+  monthlyCurrentHours,
+  weeklyMedianActualHours,
+  weeklyProgress,
+} from '../../../entities/derive'
 import {
   getSeedCategories,
   getSeedMonthlyGoals,
@@ -25,16 +31,20 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(weeklyGoals.length).toBeGreaterThan(0)
   })
 
-  it('4주 완료(achieved) + 진행 중(active) 주간 목표가 섞여 있다', () => {
+  it('연구 계열(mg-thesis) achieved 4주 + 습관 계열(mg-fitness) achieved 1주 + 진행 중(active) 주간 목표가 섞여 있다', () => {
     const achieved = weeklyGoals.filter((g) => g.status === 'achieved')
+    const thesisAchieved = achieved.filter((g) => g.monthlyGoalId === 'mg-thesis')
+    const fitnessAchieved = achieved.filter((g) => g.monthlyGoalId === 'mg-fitness')
     const active = weeklyGoals.filter((g) => g.status === 'active')
-    expect(achieved).toHaveLength(4)
+    expect(thesisAchieved).toHaveLength(4)
+    expect(fitnessAchieved).toHaveLength(1)
     expect(active.length).toBeGreaterThan(0)
   })
 
-  it('완료된 4주의 accuracyRatio가 2.0 → 1.8 → 1.6 → 1.4로 개선된다', () => {
+  it('연구 계열(mg-thesis) achieved 4주의 accuracyRatio가 2.0 → 1.8 → 1.6 → 1.4로 개선된다', () => {
+    // 습관 계열(mg-fitness) achieved는 별개 트랙이라 이 진행·순서 검증에서 제외한다.
     const achievedInOrder = weeklyGoals
-      .filter((g) => g.status === 'achieved')
+      .filter((g) => g.status === 'achieved' && g.monthlyGoalId === 'mg-thesis')
       .sort((a, b) => a.weekOf.localeCompare(b.weekOf))
 
     const ratios = achievedInOrder.map((goal) => {
@@ -43,6 +53,23 @@ describe('taskRepository — 시드 규격 검증', () => {
     })
 
     expect(ratios).toEqual([2.0, 1.8, 1.6, 1.4])
+  })
+
+  it('습관 목표(mg-fitness)는 지난주 achieved 레코드가 있고 accuracyRatio가 1.0대다("다음 주 제안"의 근거)', () => {
+    const goal = weeklyGoals.find((g) => g.title === '운동 습관 잡기' && g.status === 'achieved')
+    expect(goal).toBeDefined()
+    const goalTasks = tasks.filter((t) => t.weeklyGoalId === goal!.id)
+    const ratio = accuracyRatio(goalTasks)
+    expect(ratio).toBeGreaterThanOrEqual(1.0)
+    expect(ratio).toBeLessThan(1.1)
+  })
+
+  it('golden: 지난 4주(2026-07-27 이전) 실제 투입 중앙값이 16시간이다(목표 종류 안 가림)', () => {
+    // 주별 합계 [11, 16, 16, 18](2026-07-20 주는 연구+습관 achieved가 겹쳐 있다) →
+    // 정렬 [11, 16, 16, 18] → 중앙값(짝수 개) = (16+16)/2 = 16.
+    // "다음 주 제안" 가용 시간(median − 다음 주 약속 4.5h = 11.5h)이 이월(8h)+
+    // 습관(3h) 후보와 얼추 맞아떨어지도록 절대값을 역산해서 맞췄다(ratio는 불변).
+    expect(weeklyMedianActualHours(weeklyGoals, tasks, '2026-07-27')).toBeCloseTo(16, 10)
   })
 
   it('achieved 주간 목표 중 하나는 "선행연구 정리 완료"다', () => {
@@ -72,9 +99,9 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(totalActual).toBeGreaterThan(0)
   })
 
-  it('같은 제목이 서로 다른 상태로 겹치지 않는다', () => {
-    const titles = weeklyGoals.map((g) => g.title)
-    expect(new Set(titles).size).toBe(titles.length)
+  it('같은 주(weekOf)에 같은 제목이 겹치지 않는다(습관 목표는 다른 주라면 제목이 반복돼도 된다)', () => {
+    const keys = weeklyGoals.map((g) => `${g.title}__${g.weekOf}`)
+    expect(new Set(keys).size).toBe(keys.length)
   })
 
   it('월간 목표(논문 초고 완성) 현재 소요 시간이 baselineHours를 초과한다(경고 배너 재현용)', () => {
@@ -87,7 +114,7 @@ describe('taskRepository — 시드 규격 검증', () => {
     expect(current).toBeGreaterThan(thesisGoal.baselineHours)
   })
 
-  it('약속(weeklyGoalId 없음)이 날짜별로 하루 2~3개씩, 35일 전체에 섞여 있다', () => {
+  it('약속(weeklyGoalId 없음)이 날짜별로 하루 2~3개씩, 35일(과거+이번 주) + 다음 주 2일에 섞여 있다', () => {
     // 시간 미배정 인박스 항목(예: 택배 부치기)은 plannedBlock이 없어 특정 날짜에
     // 속하지 않는다 — 날짜별 개수 집계에서는 제외한다.
     const appointments = tasks.filter((t) => t.weeklyGoalId === null && t.plannedBlock !== null)
@@ -97,7 +124,7 @@ describe('taskRepository — 시드 규격 검증', () => {
       countsByDate.set(date, (countsByDate.get(date) ?? 0) + 1)
     }
 
-    expect(countsByDate.size).toBe(35) // achieved 4주 + 진행 중 1주 = 5주 × 7일
+    expect(countsByDate.size).toBe(37) // 5주 × 7일(35) + 다음 주 화/목(2일)
     for (const count of countsByDate.values()) {
       expect(count === 2 || count === 3).toBe(true)
     }
@@ -203,7 +230,7 @@ describe('taskRepository — 시드 규격 검증', () => {
       expect(weeklyProgress(goal, goalTasks)).toBe(50)
     })
 
-    it('사이드바 — "선행연구 정리 완료" 6/6h(완료)', () => {
+    it('사이드바 — "선행연구 정리 완료" 18/18h(완료)', () => {
       const goal = weeklyGoals.find((g) => g.title === '선행연구 정리 완료')!
       const goalTasks = tasks.filter((t) => t.weeklyGoalId === goal.id)
       expect(weeklyProgress(goal, goalTasks)).toBe(100)

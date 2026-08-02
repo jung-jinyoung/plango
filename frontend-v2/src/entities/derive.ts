@@ -98,6 +98,44 @@ export function accuracyRatio(tasks: Task[]): number {
 }
 
 /**
+ * 지난 N주(기본 4)의 "주간 총 실제 투입 시간" 중앙값(시간 단위) — product-spec
+ * 6-5절 "주간 가용 시간 = 지난 4주 실제 투입 중앙값 − 이미 잡힌 약속"의 분자.
+ *
+ * 목표 종류(연구/습관 등)를 가리지 않는다 — 개별 목표의 accuracyRatio(예상
+ * 대비 배율)와는 다른 값으로, 그 주 목표-연결 할 일(weeklyGoalId 있는 Task)에
+ * 실제로 쓴 시간의 총합을 weekOf 단위로 모아서 중앙값을 낸다. 약속
+ * (weeklyGoalId === null)은 포함하지 않는다 — 약속은 공식 반대편(이미 잡힌
+ * 약속)에서 별도로 빠지기 때문이다.
+ *
+ * beforeWeekOf 그 이전 주만 센다 — 진행 중인 주는 아직 끝나지 않아
+ * 실적으로 볼 수 없다.
+ */
+export function weeklyMedianActualHours(
+  weeklyGoals: WeeklyGoal[],
+  tasks: Task[],
+  beforeWeekOf: string,
+  weeks = 4,
+): number {
+  const pastWeeks = [...new Set(weeklyGoals.map((g) => g.weekOf))]
+    .filter((weekOf) => weekOf < beforeWeekOf)
+    .sort((a, b) => b.localeCompare(a))
+    .slice(0, weeks)
+
+  const hoursByWeek = pastWeeks.map((weekOf) => {
+    const goalIds = new Set(weeklyGoals.filter((g) => g.weekOf === weekOf).map((g) => g.id))
+    const totalMin = tasks
+      .filter((t) => t.weeklyGoalId !== null && goalIds.has(t.weeklyGoalId))
+      .reduce((sum, t) => sum + actualMin(t), 0)
+    return totalMin / 60
+  })
+
+  if (hoursByWeek.length === 0) return 0
+  const sorted = [...hoursByWeek].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 === 0 ? (sorted[mid - 1]! + sorted[mid]!) / 2 : sorted[mid]!
+}
+
+/**
  * 계획과 실제 길이 차이가 15분 이상이면 계획 고스트를 병기해야 한다는 뜻으로
  * true (CLAUDE.md 5절 "차이가 15분 이상일 때만 계획 고스트를 병기"). 이 판정을
  * 타임라인 컴포넌트에서 다시 구현하지 않는다 — 여기 한 곳에만 둔다.

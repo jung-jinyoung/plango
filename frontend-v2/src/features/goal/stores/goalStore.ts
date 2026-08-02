@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import {
+  addWeeklyGoal as addWeeklyGoalInRepository,
   getSeedCategories,
   getSeedMonthlyGoals,
   getSeedWeeklyGoals,
@@ -30,6 +31,14 @@ export const useGoalStore = defineStore('goal', () => {
     updateWeeklyGoalInRepository(id, patch)
   }
 
+  // "다음 주 목표 제안" 확정 시 호출 — CLAUDE.md 6-3절(이월은 새 항목 생성).
+  // 같은 id가 이미 있으면(중복 확정 등) 아무 것도 안 한다.
+  function addWeeklyGoal(goal: WeeklyGoal) {
+    if (weeklyGoalsById.value.has(goal.id)) return
+    weeklyGoals.value.push(goal)
+    addWeeklyGoalInRepository(goal)
+  }
+
   return {
     categories,
     monthlyGoals,
@@ -38,5 +47,6 @@ export const useGoalStore = defineStore('goal', () => {
     monthlyGoalsById,
     weeklyGoalsById,
     updateWeeklyGoal,
+    addWeeklyGoal,
   }
 })
