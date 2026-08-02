@@ -67,6 +67,13 @@
           @confirm="onConfirmNextWeekGoals"
         />
       </BaseCard>
+
+      <MonthlyWarningBanner
+        v-for="warning in monthlyWarnings"
+        :key="warning.monthlyGoalId"
+        :warning="warning"
+        class="section"
+      />
     </div>
   </div>
 </template>
@@ -76,13 +83,17 @@ import { computed } from 'vue'
 import {
   actualMin,
   categoryColorOf,
+  monthlyCurrentHours,
+  projectedExtraWeeks,
   resolveCategoryForWeeklyGoal,
   weeklyMedianActualHours,
   weeklyProgress,
 } from '../entities/derive'
 import AccuracySummary from '../features/reflect/components/AccuracySummary.vue'
+import { buildMonthlyWarning, type MonthlyWarning } from '../features/reflect/lib/buildMonthlyWarning'
 import { computeWeeklyAccuracy } from '../features/reflect/lib/computeWeeklyAccuracy'
 import GoalBreakdownRow from '../features/reflect/components/GoalBreakdownRow.vue'
+import MonthlyWarningBanner from '../features/reflect/components/MonthlyWarningBanner.vue'
 import NextWeekSuggestions from '../features/reflect/components/NextWeekSuggestions.vue'
 import ReestimateCard from '../features/reflect/components/ReestimateCard.vue'
 import { suggestNextWeekGoals, type NextWeekSuggestion } from '../features/reflect/lib/suggestNextWeekGoals'
@@ -239,6 +250,24 @@ function onConfirmNextWeekGoals(accepted: NextWeekSuggestion[]) {
     }
   }
 }
+
+// 월간 경고 (④ 월간 진도 재계산, 6-4절) — active 월간 목표마다 경고 조건을
+// 확인해서 해당하는 것만 배너로 보여준다. 경고 조건 자체(baseline 초과 OR
+// extraWeeks>=1.5)는 buildMonthlyWarning 안에서 판정한다.
+const monthlyWarnings = computed<MonthlyWarning[]>(() => {
+  const weeklyEntries = goalStore.weeklyGoals.map((goal) => ({
+    goal,
+    tasks: taskStore.tasks.filter((t) => t.weeklyGoalId === goal.id),
+  }))
+  return goalStore.monthlyGoals
+    .filter((m) => m.status === 'active')
+    .map((m) => {
+      const current = monthlyCurrentHours(m, weeklyEntries)
+      const extraWeeks = projectedExtraWeeks(m, goalStore.weeklyGoals, taskStore.tasks, CURRENT_MONDAY)
+      return buildMonthlyWarning(m, current, extraWeeks)
+    })
+    .filter((w): w is MonthlyWarning => w !== null)
+})
 </script>
 
 <style scoped>
