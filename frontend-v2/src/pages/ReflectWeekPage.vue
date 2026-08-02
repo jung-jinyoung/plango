@@ -48,16 +48,15 @@
       </BaseCard>
 
       <BaseCard v-if="carrying" class="section">
-        <h2>이월 중인 목표</h2>
-        <div class="carry-row">
-          <div class="carry-top">
-            <b>{{ carrying.goal.title }}</b>
-            <Chip variant="category" color="blue">{{ carrying.goal.carryCount + 1 }}주째</Chip>
-          </div>
-          <p class="carry-desc">
-            지금까지 {{ formatMinutesAsHours(carrying.actualMin) }}를 썼는데 아직 안 끝났어요.
-          </p>
-        </div>
+        <h2>아직 안 끝난 일, 얼마나 남았나요</h2>
+        <ReestimateCard
+          :title="carrying.goal.title"
+          :carry-count="carrying.goal.carryCount"
+          :spent-min="carrying.actualMin"
+          :ratio="overallRatio ?? 1"
+          :initial-hours="carrying.goal.estimatedHours"
+          @confirm="onConfirmReestimate"
+        />
       </BaseCard>
     </div>
   </div>
@@ -69,11 +68,11 @@ import { actualMin, categoryColorOf, resolveCategoryForWeeklyGoal, weeklyProgres
 import AccuracySummary from '../features/reflect/components/AccuracySummary.vue'
 import { computeWeeklyAccuracy } from '../features/reflect/lib/computeWeeklyAccuracy'
 import GoalBreakdownRow from '../features/reflect/components/GoalBreakdownRow.vue'
+import ReestimateCard from '../features/reflect/components/ReestimateCard.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addDays, formatMinutesAsHours, startOfWeek } from '../shared/lib/time'
 import BaseCard from '../shared/ui/BaseCard.vue'
-import Chip from '../shared/ui/Chip.vue'
 
 // 시드 데이터의 "오늘" 날짜로 고정 — TodayPage.vue와 같은 이유(10단계에서 교체).
 const TODAY = '2026-07-29'
@@ -138,13 +137,20 @@ const overallRatio = computed(() => {
 })
 const overrunPercent = computed(() => Math.round(((overallRatio.value ?? 1) - 1) * 100))
 
-// 이월 중(carryCount로 판정) — 재추정 스테퍼는 다음 브랜치, 여기선 배지만.
+// 이월 중(carryCount로 판정)
 const carrying = computed(() => {
   const goal = goalStore.weeklyGoals.find((g) => g.carryCount > 0 && g.status === 'active')
   if (!goal) return null
   const tasks = taskStore.tasks.filter((t) => t.weeklyGoalId === goal.id)
   return { goal, actualMin: tasks.reduce((sum, t) => sum + actualMin(t), 0) }
 })
+
+// ReestimateCard가 emit('confirm', ...)을 보낼 때만 실행 — 힌트를 보여주는
+// 동안엔(ReestimateCard 내부) 이 함수가 절대 호출되지 않는다(R6).
+function onConfirmReestimate(newHours: number) {
+  if (!carrying.value) return
+  goalStore.updateWeeklyGoal(carrying.value.goal.id, { estimatedHours: newHours })
+}
 </script>
 
 <style scoped>
@@ -194,19 +200,5 @@ const carrying = computed(() => {
 .empty {
   font-size: 13.5px;
   color: var(--text-muted);
-}
-.carry-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.carry-top b {
-  font-weight: 600;
-  font-size: 15px;
-}
-.carry-desc {
-  color: var(--text-secondary);
-  font-size: 13.5px;
 }
 </style>
