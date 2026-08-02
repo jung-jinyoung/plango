@@ -3,6 +3,7 @@ import {
   accuracyRatio,
   actualMin,
   monthlyCurrentHours,
+  projectedExtraWeeks,
   weeklyMedianActualHours,
   weeklyProgress,
 } from '../../../entities/derive'
@@ -70,6 +71,25 @@ describe('taskRepository — 시드 규격 검증', () => {
     // "다음 주 제안" 가용 시간(median − 다음 주 약속 4.5h = 11.5h)이 이월(8h)+
     // 습관(3h) 후보와 얼추 맞아떨어지도록 절대값을 역산해서 맞췄다(ratio는 불변).
     expect(weeklyMedianActualHours(weeklyGoals, tasks, '2026-07-27')).toBeCloseTo(16, 10)
+  })
+
+  it('golden: mg-thesis의 projectedExtraWeeks가 1이다(remainingHours 18h / pace 16h)', () => {
+    const mgThesis = monthlyGoals.find((m) => m.title === '논문 초고 완성')!
+    // remainingHours = wg-carrying(8h) + wg-current(10h) = 18. pace=16(위 golden과 동일).
+    // 18/16=1.125 → 반올림 1.
+    expect(projectedExtraWeeks(mgThesis, weeklyGoals, tasks, '2026-07-27')).toBe(1)
+  })
+
+  it('golden: mg-thesis의 monthlyCurrentHours(75.83h)가 baselineHours(60h)를 넘는다(월간 경고 조건)', () => {
+    const mgThesis = monthlyGoals.find((m) => m.title === '논문 초고 완성')!
+    const weeklyEntries = weeklyGoals.map((goal) => ({
+      goal,
+      tasks: tasks.filter((t) => t.weeklyGoalId === goal.id),
+    }))
+    const current = monthlyCurrentHours(mgThesis, weeklyEntries)
+    expect(current).toBeCloseTo(75.8333333333, 8)
+    expect(mgThesis.baselineHours).toBe(60)
+    expect(current).toBeGreaterThan(mgThesis.baselineHours)
   })
 
   it('achieved 주간 목표 중 하나는 "선행연구 정리 완료"다', () => {

@@ -136,6 +136,33 @@ export function weeklyMedianActualHours(
 }
 
 /**
+ * 지금 페이스대로면 이 월간 목표를 끝내는 데 몇 주가 더 걸릴지(반올림) —
+ * 월간 경고 배너의 두 조건 중 하나(product-spec 6-4절, CLAUDE.md 15절).
+ *
+ * remainingHours = 이 월간 목표에 연결된 주간 목표 중 achieved·dropped가
+ * 아닌 것들(active·carried)의 estimatedHours 합 — "아직 안 끝난 만큼".
+ * 페이스는 weeklyMedianActualHours(목표 종류를 안 가리는 전체 실측 중앙값)를
+ * 그대로 재사용한다. 페이스가 0이면 나눌 수 없으니 null.
+ */
+export function projectedExtraWeeks(
+  monthlyGoal: MonthlyGoal,
+  weeklyGoals: WeeklyGoal[],
+  tasks: Task[],
+  currentMonday: string,
+): number | null {
+  const remainingHours = weeklyGoals
+    .filter(
+      (g) => g.monthlyGoalId === monthlyGoal.id && g.status !== 'achieved' && g.status !== 'dropped',
+    )
+    .reduce((sum, g) => sum + g.estimatedHours, 0)
+
+  const pace = weeklyMedianActualHours(weeklyGoals, tasks, currentMonday)
+  if (pace <= 0) return null
+
+  return Math.round(remainingHours / pace)
+}
+
+/**
  * 계획과 실제 길이 차이가 15분 이상이면 계획 고스트를 병기해야 한다는 뜻으로
  * true (CLAUDE.md 5절 "차이가 15분 이상일 때만 계획 고스트를 병기"). 이 판정을
  * 타임라인 컴포넌트에서 다시 구현하지 않는다 — 여기 한 곳에만 둔다.
