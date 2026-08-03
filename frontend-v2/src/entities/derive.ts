@@ -1,6 +1,6 @@
 // 파생 함수 — 저장하지 않는다 (CLAUDE.md 4절)
 
-import { minutesBetween, minutesOfDay } from '../shared/lib/time'
+import { daysSince, minutesBetween, minutesOfDay } from '../shared/lib/time'
 import type { Category, CategoryColor, MonthlyGoal, Task, TimeBlock, WeeklyGoal } from './types'
 
 /** Dot/Chip 등에 색을 넘길 때 이 함수를 거친다 — 컴포넌트마다 `?? 'gray'`를 반복하지 않는다 */
@@ -257,4 +257,35 @@ export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
       return nowMin >= startMin && nowMin < endMin
     }) ?? null
   )
+}
+
+/**
+ * "마지막 활동 날짜"('YYYY-MM-DD') — 진입 라우팅(CLAUDE.md 12절) "마지막 활동
+ * 3일 이상 전" 판정의 근거. plannedBlock은 "매일 아침" JIT로만 생성되므로
+ * (CLAUDE.md 11절) 그 존재 자체가 실제 사용 신호다 — plannedBlock이 있는
+ * task 중 today 이하(오늘 포함, 과거)인 것만 골라 가장 최근 날짜를 쓴다.
+ * today보다 미래인 plannedBlock(예: 다음 주 약속 placeholder)은 아직 벌어지지
+ * 않은 일이라 "활동"이 아니므로 제외한다 — 안 걸러내면 미래 일정이 있다는
+ * 이유만으로 공백이 없는 것처럼 잘못 판정된다. task가 하나도 없으면(=판정
+ * 불가) null.
+ */
+export function lastActiveDate(tasks: Task[], today: string): string | null {
+  const dateKeys = tasks
+    .filter((t) => t.plannedBlock && t.plannedBlock.start.slice(0, 10) <= today)
+    .map((t) => t.plannedBlock!.start.slice(0, 10))
+  if (dateKeys.length === 0) return null
+  return dateKeys.reduce((max, d) => (d > max ? d : max))
+}
+
+/**
+ * carried task 중 staleDays(기본 3일) 이상 지난 것을 걸러낸다 — 오늘 화면의
+ * 이월 배너/리스트에 "보여줄 것"만 추리는 화면 표시 필터다. status는 건드리지
+ * 않는다(R4) — "조용히 아카이브"는 데이터 변경이 아니라 필터일 뿐이다
+ * (진입 라우팅 12절 "복귀 리셋").
+ */
+export function filterStaleCarried(tasks: Task[], today: string, staleDays = 3): Task[] {
+  return tasks.filter((t) => {
+    if (t.status !== 'carried' || !t.plannedBlock) return false
+    return daysSince(t.plannedBlock.start.slice(0, 10), today) < staleDays
+  })
 }

@@ -130,3 +130,18 @@ export function isoAt(dateKey: string, minutesOfDay: number): string {
   const mm = minutesOfDay % 60
   return `${dateKey}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+09:00`
 }
+
+/** 그 ISO 시각이 18:00 이후인지 — 진입 라우팅(CLAUDE.md 12절) "18시 이후/이전" 분기 판정 */
+export function isAfter18(iso: string): boolean {
+  return minutesOfDay(iso) >= 18 * 60
+}
+
+/**
+ * 'YYYY-MM-DD' 두 날짜 키 사이의 일수 차이(todayKey - dateKey). dateKey가
+ * 과거면 양수 — 진입 라우팅(CLAUDE.md 12절) "마지막 활동 3일 이상 전" 판정에 쓴다.
+ * addDays와 같은 이유로 UTC Date로만 계산한다(로컬 타임존 자정 밀림 방지).
+ */
+export function daysSince(dateKey: string, todayKey: string): number {
+  const diffMs = parseDateKey(todayKey).getTime() - parseDateKey(dateKey).getTime()
+  return Math.round(diffMs / (24 * 60 * 60 * 1000))
+}

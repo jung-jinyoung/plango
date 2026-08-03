@@ -2,8 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   addDays,
   addMinutes,
+  daysSince,
   formatHHMM,
   formatMinutesAsHours,
+  isAfter18,
   isoAt,
   minutesBetween,
   minutesOfDay,
@@ -105,6 +107,31 @@ describe('isoAt', () => {
   it('minutesOfDay와 왕복(round-trip)한다', () => {
     const original = '2026-07-29T09:15:00+09:00'
     expect(isoAt('2026-07-29', minutesOfDay(original))).toBe(original)
+  })
+})
+
+describe('isAfter18', () => {
+  it('18:00 이후면 true', () => {
+    expect(isAfter18('2026-07-29T18:00:00+09:00')).toBe(true)
+    expect(isAfter18('2026-07-29T21:30:00+09:00')).toBe(true)
+  })
+
+  it('18:00 이전이면 false', () => {
+    expect(isAfter18('2026-07-29T17:59:00+09:00')).toBe(false)
+  })
+})
+
+describe('daysSince', () => {
+  it('과거 날짜면 양수 일수를 반환한다', () => {
+    expect(daysSince('2026-07-26', '2026-07-29')).toBe(3)
+  })
+
+  it('같은 날이면 0', () => {
+    expect(daysSince('2026-07-29', '2026-07-29')).toBe(0)
+  })
+
+  it('월 경계를 넘어도 정상 계산한다', () => {
+    expect(daysSince('2026-07-30', '2026-08-02')).toBe(3)
   })
 })
 
