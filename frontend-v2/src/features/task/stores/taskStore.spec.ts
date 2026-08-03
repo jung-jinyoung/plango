@@ -40,4 +40,34 @@ describe('useTaskStore', () => {
     const fromRepository = getSeedTasks().find((t) => t.id === target.id)
     expect(fromRepository?.title).toBe(originalTitle)
   })
+
+  it('addTask가 새 task를 추가한다', () => {
+    const store = useTaskStore()
+    const before = store.tasks.length
+
+    store.addTask({
+      id: 'task-test',
+      title: '테스트 할 일',
+      weeklyGoalId: null,
+      categoryId: null,
+      estimatedMin: 30,
+      plannedBlock: null,
+      actualBlock: null,
+      status: 'todo',
+    })
+
+    expect(store.tasks.length).toBe(before + 1)
+    expect(store.tasksById.get('task-test')?.title).toBe('테스트 할 일')
+  })
+
+  it('addTask는 이미 있는 id면 중복 추가하지 않는다', () => {
+    const store = useTaskStore()
+    const existing = store.tasks[0]!
+    const before = store.tasks.length
+
+    store.addTask({ ...existing, id: existing.id, title: '중복 시도' })
+
+    expect(store.tasks.length).toBe(before)
+    expect(store.tasksById.get(existing.id)?.title).toBe(existing.title)
+  })
 })

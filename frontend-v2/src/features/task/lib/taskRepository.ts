@@ -37,3 +37,10 @@ export function getSeedTasks(): Task[] {
 export function updateTask(_id: string, _patch: Partial<Task>): void {
   // TODO: Supabase 연동 후 실제 저장 호출로 교체
 }
+
+/**
+ * task를 새로 만든다. updateTask와 같은 이유로 지금은 호출 경로만 확립해둔다.
+ */
+export function addTask(_task: Task): void {
+  // TODO: Supabase 연동 후 실제 저장 호출로 교체
+}
