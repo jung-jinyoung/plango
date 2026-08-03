@@ -77,4 +77,38 @@ describe('useGoalStore', () => {
     expect(store.weeklyGoals.length).toBe(before)
     expect(store.weeklyGoalsById.get('wg-carrying')?.title).toBe('실험 데이터 분석 마무리')
   })
+
+  it('addMonthlyGoal이 새 월간 목표를 추가한다', () => {
+    const store = useGoalStore()
+    const before = store.monthlyGoals.length
+
+    store.addMonthlyGoal({
+      id: 'mg-test',
+      title: '테스트 월간 목표',
+      month: '2026-08',
+      categoryId: 'cat-research',
+      baselineHours: 20,
+      status: 'active',
+    })
+
+    expect(store.monthlyGoals.length).toBe(before + 1)
+    expect(store.monthlyGoalsById.get('mg-test')?.title).toBe('테스트 월간 목표')
+  })
+
+  it('addMonthlyGoal은 이미 있는 id면 중복 추가하지 않는다', () => {
+    const store = useGoalStore()
+    const before = store.monthlyGoals.length
+
+    store.addMonthlyGoal({
+      id: 'mg-thesis', // 이미 존재
+      title: '중복 시도',
+      month: '2026-08',
+      categoryId: 'cat-research',
+      baselineHours: 20,
+      status: 'active',
+    })
+
+    expect(store.monthlyGoals.length).toBe(before)
+    expect(store.monthlyGoalsById.get('mg-thesis')?.title).toBe('논문 초고 완성')
+  })
 })

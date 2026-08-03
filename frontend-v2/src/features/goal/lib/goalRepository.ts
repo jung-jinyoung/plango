@@ -39,3 +39,11 @@ export function updateWeeklyGoal(_id: string, _patch: Partial<WeeklyGoal>): void
 export function addWeeklyGoal(_goal: WeeklyGoal): void {
   // TODO: Supabase 연동 후 실제 저장 호출로 교체
 }
+
+/**
+ * 월간 목표를 새로 만든다 — 온보딩(7단계) "이대로 시작하기" 확정 시 호출된다.
+ * 위 addWeeklyGoal과 같은 이유로 지금은 호출 경로만 확립.
+ */
+export function addMonthlyGoal(_goal: MonthlyGoal): void {
+  // TODO: Supabase 연동 후 실제 저장 호출로 교체
+}

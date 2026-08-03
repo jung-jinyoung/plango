@@ -44,6 +44,17 @@ export interface Task {
   status: 'todo' | 'done' | 'carried' | 'dropped'
 }
 
+/**
+ * 온보딩 역산(decomposeMonthlyGoal, CLAUDE.md 10절) 결과 — 아직 확정 전인
+ * 주간 목표 초안. features/ai와 features/goal이 둘 다 이 타입을 알아야 해서
+ * (features/*는 서로 직접 import 하지 않는다, CLAUDE.md 6절) entities에 둔다.
+ */
+export interface WeeklyGoalDraft {
+  title: string
+  weekOf: string
+  estimatedHours: number
+}
+
 // 파생값 — 저장하지 않는다 (CLAUDE.md 4절). 구현은 features/*, 순수 함수로.
 //   resolveCategory(task)        // 목표 체인 → 없으면 task.categoryId
 //   actualMin(task)              // actualBlock에서 계산

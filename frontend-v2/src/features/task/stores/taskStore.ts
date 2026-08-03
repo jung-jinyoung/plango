@@ -1,8 +1,12 @@
 // 할 일·약속 스토어. 데이터는 taskRepository를 통해서만 읽고 쓴다.
 
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { getSeedTasks, updateTask as updateTaskInRepository } from '../lib/taskRepository'
+import { computed, ref } from 'vue'
+import {
+  addTask as addTaskInRepository,
+  getSeedTasks,
+  updateTask as updateTaskInRepository,
+} from '../lib/taskRepository'
 import type { Task } from '../../../entities/types'
 
 export const useTaskStore = defineStore('task', () => {
@@ -11,6 +15,8 @@ export const useTaskStore = defineStore('task', () => {
   // 얕은 복사로 스토어 자신만의 반응형 상태를 갖는다.
   const tasks = ref<Task[]>([...getSeedTasks()])
 
+  const tasksById = computed(() => new Map(tasks.value.map((t) => [t.id, t])))
+
   function updateTask(id: string, patch: Partial<Task>) {
     const index = tasks.value.findIndex((t) => t.id === id)
     if (index === -1) return
@@ -18,5 +24,12 @@ export const useTaskStore = defineStore('task', () => {
     updateTaskInRepository(id, patch)
   }
 
-  return { tasks, updateTask }
+  // 같은 id가 이미 있으면(중복 확정 등) 아무 것도 안 한다 — addWeeklyGoal 등과 같은 패턴.
+  function addTask(task: Task) {
+    if (tasksById.value.has(task.id)) return
+    tasks.value.push(task)
+    addTaskInRepository(task)
+  }
+
+  return { tasks, tasksById, updateTask, addTask }
 })
