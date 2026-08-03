@@ -3,6 +3,7 @@ import {
   accuracyRatio,
   actualMin,
   categoryColorOf,
+  findCurrentTask,
   monthlyCurrentHours,
   projectedExtraWeeks,
   resolveCategory,
@@ -229,6 +230,48 @@ describe('shouldShowGhost', () => {
       actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:00:00+09:00' },
     })
     expect(shouldShowGhost(task)).toBe(false)
+  })
+})
+
+describe('findCurrentTask', () => {
+  it('plannedBlock이 현재 시각을 걸치고 있는 todo 할 일을 찾는다', () => {
+    const current = makeTask({
+      id: 't-current',
+      plannedBlock: { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' },
+    })
+    const other = makeTask({
+      id: 't-other',
+      plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:30:00+09:00' },
+    })
+    expect(findCurrentTask([current, other], '2026-07-29T13:09:00+09:00')).toEqual(current)
+  })
+
+  it('날짜가 달라도 시:분만 맞으면 찾는다(시드 고정 날짜 + 실제 현재 시각 비교, CurrentTimeBar와 동일 방식)', () => {
+    const current = makeTask({
+      id: 't-current',
+      plannedBlock: { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' },
+    })
+    expect(findCurrentTask([current], '2026-08-03T13:09:00+09:00')).toEqual(current)
+  })
+
+  it('done·carried 상태는 후보에서 제외한다', () => {
+    const done = makeTask({
+      status: 'done',
+      plannedBlock: { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' },
+    })
+    expect(findCurrentTask([done], '2026-07-29T13:09:00+09:00')).toBeNull()
+  })
+
+  it('plannedBlock이 없으면 후보에서 제외한다', () => {
+    const inbox = makeTask({ plannedBlock: null })
+    expect(findCurrentTask([inbox], '2026-07-29T13:09:00+09:00')).toBeNull()
+  })
+
+  it('걸치는 할 일이 없으면 null', () => {
+    const later = makeTask({
+      plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' },
+    })
+    expect(findCurrentTask([later], '2026-07-29T13:09:00+09:00')).toBeNull()
   })
 })
 

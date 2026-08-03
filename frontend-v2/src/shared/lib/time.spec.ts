@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   addDays,
+  formatHHMM,
   formatMinutesAsHours,
   minutesBetween,
   minutesOfDay,
@@ -71,6 +72,12 @@ describe('minutesOfDay', () => {
   it('시:분을 자정 기준 분으로 변환한다', () => {
     expect(minutesOfDay('2026-07-29T09:00:00+09:00')).toBe(540)
     expect(minutesOfDay('2026-07-29T14:33:00+09:00')).toBe(873)
+  })
+})
+
+describe('formatHHMM', () => {
+  it("ISO 문자열에서 'HH:MM'만 뽑는다", () => {
+    expect(formatHHMM('2026-07-29T14:33:00+09:00')).toBe('14:33')
   })
 })
 

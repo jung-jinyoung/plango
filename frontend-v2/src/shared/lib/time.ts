@@ -94,3 +94,8 @@ export function formatMinutesAsHours(min: number): string {
   const m = min % 60
   return m === 0 ? `${h}h` : `${h}h ${m}m`
 }
+
+/** ISO 8601 문자열에서 'HH:MM'만 뽑는다 — minutesOfDay와 같은 이유로 문자열을 그대로 읽는다 */
+export function formatHHMM(iso: string): string {
+  return iso.slice(11, 16)
+}

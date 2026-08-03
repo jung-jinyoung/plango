@@ -1,6 +1,6 @@
 // 파생 함수 — 저장하지 않는다 (CLAUDE.md 4절)
 
-import { minutesBetween } from '../shared/lib/time'
+import { minutesBetween, minutesOfDay } from '../shared/lib/time'
 import type { Category, CategoryColor, MonthlyGoal, Task, WeeklyGoal } from './types'
 
 /** Dot/Chip 등에 색을 넘길 때 이 함수를 거친다 — 컴포넌트마다 `?? 'gray'`를 반복하지 않는다 */
@@ -172,4 +172,26 @@ export function shouldShowGhost(task: Task): boolean {
   if (!task.plannedBlock || !task.actualBlock) return false
   const plannedMin = minutesBetween(task.plannedBlock.start, task.plannedBlock.end)
   return Math.abs(actualMin(task) - plannedMin) >= 15
+}
+
+/**
+ * "지금 하는 일"(8단계, 모바일 실행 뷰) — plannedBlock이 현재 시각을 걸치고
+ * 있는 todo 할 일. 새 상태를 저장하지 않는다(TimeBlock.end가 필수라 "진행
+ * 중"을 별도로 저장할 수 없다, CLAUDE.md 5-4절 "자동 포착"은 완료 시점에만
+ * 일어난다) — 매번 이렇게 파생시킨다.
+ *
+ * 날짜가 아니라 시각(시:분)만 비교한다 — CurrentTimeBar가 useNow()의
+ * 실제 현재 시각을 시드 데이터의 고정 날짜 타임라인 위에 투영하는 것과
+ * 같은 방식(layoutTimelineBlock도 minutesOfDay만 본다).
+ */
+export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
+  const nowMin = minutesOfDay(nowIso)
+  return (
+    tasks.find((task) => {
+      if (task.status !== 'todo' || !task.plannedBlock) return false
+      const startMin = minutesOfDay(task.plannedBlock.start)
+      const endMin = minutesOfDay(task.plannedBlock.end)
+      return nowMin >= startMin && nowMin < endMin
+    }) ?? null
+  )
 }
