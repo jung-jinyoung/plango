@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { useReflectionStore } from '../features/reflect/stores/reflectionStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import ReflectDayPage from './ReflectDayPage.vue'
 
@@ -91,5 +92,21 @@ describe('ReflectDayPage', () => {
     }
 
     expect(wrapper.text()).toContain('오늘 남은 할 일이 없어요')
+  })
+
+  it('처음엔 "오늘 마감하기"가 활성 상태고, 누르면 reflectionStore에 오늘 날짜가 마감 처리된다', async () => {
+    const wrapper = mount(ReflectDayPage)
+    const reflectionStore = useReflectionStore()
+
+    expect(reflectionStore.isDayReflected('2026-07-29')).toBe(false)
+
+    const closeButton = wrapper.findAll('button').find((b) => b.text() === '오늘 마감하기')!
+    expect(closeButton.attributes('disabled')).toBeUndefined()
+    await closeButton.trigger('click')
+
+    expect(reflectionStore.isDayReflected('2026-07-29')).toBe(true)
+
+    const after = wrapper.findAll('button').find((b) => b.text() === '오늘 마감했어요')!
+    expect(after.attributes('disabled')).toBeDefined()
   })
 })

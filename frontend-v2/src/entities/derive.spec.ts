@@ -4,8 +4,10 @@ import {
   actualMin,
   captureActualStart,
   categoryColorOf,
+  filterStaleCarried,
   findCurrentTask,
   hasScheduleConflict,
+  lastActiveDate,
   monthlyCurrentHours,
   projectedExtraWeeks,
   resolveCategory,
@@ -276,6 +278,85 @@ describe('findCurrentTask', () => {
       plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' },
     })
     expect(findCurrentTask([later], '2026-07-29T13:09:00+09:00')).toBeNull()
+  })
+})
+
+describe('lastActiveDate', () => {
+  it('plannedBlock이 있는 task 중 가장 최근 날짜를 반환한다', () => {
+    const tasks = [
+      makeTask({ id: 't1', plannedBlock: { start: '2026-07-20T09:00:00+09:00', end: '2026-07-20T10:00:00+09:00' } }),
+      makeTask({ id: 't2', plannedBlock: { start: '2026-07-25T09:00:00+09:00', end: '2026-07-25T10:00:00+09:00' } }),
+      makeTask({ id: 't3', plannedBlock: { start: '2026-07-22T09:00:00+09:00', end: '2026-07-22T10:00:00+09:00' } }),
+    ]
+    expect(lastActiveDate(tasks, '2026-07-29')).toBe('2026-07-25')
+  })
+
+  it('today보다 미래인 plannedBlock(다음 주 약속 등)은 활동으로 안 친다', () => {
+    const tasks = [
+      makeTask({ id: 't1', plannedBlock: { start: '2026-07-25T09:00:00+09:00', end: '2026-07-25T10:00:00+09:00' } }),
+      makeTask({ id: 't2', plannedBlock: { start: '2026-08-03T09:00:00+09:00', end: '2026-08-03T10:00:00+09:00' } }),
+    ]
+    expect(lastActiveDate(tasks, '2026-07-29')).toBe('2026-07-25')
+  })
+
+  it('today 당일 plannedBlock은 활동에 포함한다', () => {
+    const today = makeTask({
+      plannedBlock: { start: '2026-07-29T09:00:00+09:00', end: '2026-07-29T10:00:00+09:00' },
+    })
+    expect(lastActiveDate([today], '2026-07-29')).toBe('2026-07-29')
+  })
+
+  it('plannedBlock이 없는 task(인박스)는 무시한다', () => {
+    const inbox = makeTask({ plannedBlock: null })
+    expect(lastActiveDate([inbox], '2026-07-29')).toBeNull()
+  })
+
+  it('task가 하나도 없으면 null(판정 불가)', () => {
+    expect(lastActiveDate([], '2026-07-29')).toBeNull()
+  })
+})
+
+describe('filterStaleCarried', () => {
+  it('staleDays(기본 3일) 이내의 carried task는 남긴다', () => {
+    const recent = makeTask({
+      status: 'carried',
+      plannedBlock: { start: '2026-07-28T09:00:00+09:00', end: '2026-07-28T10:00:00+09:00' },
+    })
+    expect(filterStaleCarried([recent], '2026-07-29')).toEqual([recent])
+  })
+
+  it('staleDays 이상 지난 carried task는 걸러낸다', () => {
+    const stale = makeTask({
+      status: 'carried',
+      plannedBlock: { start: '2026-07-25T09:00:00+09:00', end: '2026-07-25T10:00:00+09:00' },
+    })
+    expect(filterStaleCarried([stale], '2026-07-29')).toEqual([])
+  })
+
+  it('carried가 아닌 task는 애초에 대상이 아니다', () => {
+    const todo = makeTask({
+      status: 'todo',
+      plannedBlock: { start: '2026-07-20T09:00:00+09:00', end: '2026-07-20T10:00:00+09:00' },
+    })
+    expect(filterStaleCarried([todo], '2026-07-29')).toEqual([])
+  })
+
+  it('status는 건드리지 않는다(R4) — 필터링 결과에도 원본 객체가 그대로 남는다', () => {
+    const recent = makeTask({
+      status: 'carried',
+      plannedBlock: { start: '2026-07-28T09:00:00+09:00', end: '2026-07-28T10:00:00+09:00' },
+    })
+    const [result] = filterStaleCarried([recent], '2026-07-29')
+    expect(result).toBe(recent) // 같은 참조 — 복사·변형 없음
+    expect(result!.status).toBe('carried')
+  })
+
+  it('staleDays를 커스텀할 수 있다', () => {
+    const twoDaysAgo = makeTask({
+      status: 'carried',
+      plannedBlock: { start: '2026-07-27T09:00:00+09:00', end: '2026-07-27T10:00:00+09:00' },
+    })
+    expect(filterStaleCarried([twoDaysAgo], '2026-07-29', 2)).toEqual([])
   })
 })
 

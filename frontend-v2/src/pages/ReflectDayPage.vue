@@ -39,6 +39,12 @@
           @carry="onCarry(entry.task.id)"
         />
       </BaseCard>
+
+      <div class="close-row">
+        <BaseButton variant="primary" :disabled="isDayReflected" @click="onMarkReflected">
+          {{ isDayReflected ? '오늘 마감했어요' : '오늘 마감하기' }}
+        </BaseButton>
+      </div>
     </div>
   </div>
 </template>
@@ -50,8 +56,10 @@ import type { CategoryColor, Task } from '../entities/types'
 import ActualBlockRow from '../features/reflect/components/ActualBlockRow.vue'
 import IncompleteTaskRow from '../features/reflect/components/IncompleteTaskRow.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
+import { useReflectionStore } from '../features/reflect/stores/reflectionStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addMinutes, formatMinutesAsHours, minutesBetween } from '../shared/lib/time'
+import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import ProgressBar from '../shared/ui/ProgressBar.vue'
 
@@ -60,6 +68,15 @@ const TODAY = '2026-07-29'
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
+const reflectionStore = useReflectionStore()
+
+// "오늘 마감" — Task 단위가 아니라 하루 단위 사실이라 별도 day-level
+// 스토어에서 관리한다(진입 라우팅 12절 조건 4의 근거).
+const isDayReflected = computed(() => reflectionStore.isDayReflected(TODAY))
+
+function onMarkReflected() {
+  reflectionStore.markDayReflected(TODAY)
+}
 
 const todayTasks = computed(() => taskStore.tasks.filter((t) => t.plannedBlock?.start.startsWith(TODAY)))
 
@@ -161,5 +178,10 @@ function onCarry(taskId: string) {
 }
 .summary-top span {
   color: var(--text-muted);
+}
+.close-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
 }
 </style>
