@@ -99,3 +99,22 @@ export function formatMinutesAsHours(min: number): string {
 export function formatHHMM(iso: string): string {
   return iso.slice(11, 16)
 }
+
+/**
+ * ISO 8601 문자열에 분(minute)을 더한 새 ISO 문자열(+09:00 고정) — 9단계
+ * "자동 포착 값 수정"에서 duration을 바꿨을 때 actualBlock.end를 재계산하는 데
+ * 쓴다. 오프셋이 문자열에 이미 박혀 있는 완전한 타임스탬프 연산이라(날짜 키만
+ * 있는 addDays/startOfWeek과 달리) Date로 절대시각을 더한 뒤 nowIso()와 같은
+ * 방식(9시간 shift 후 UTC getter로 읽기)으로 KST 표기를 만든다.
+ */
+export function addMinutes(iso: string, minutes: number): string {
+  const targetInstant = new Date(iso).getTime() + minutes * 60_000
+  const shifted = new Date(targetInstant + 9 * 60 * 60 * 1000)
+  const y = shifted.getUTCFullYear()
+  const mo = String(shifted.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(shifted.getUTCDate()).padStart(2, '0')
+  const h = String(shifted.getUTCHours()).padStart(2, '0')
+  const mi = String(shifted.getUTCMinutes()).padStart(2, '0')
+  const s = String(shifted.getUTCSeconds()).padStart(2, '0')
+  return `${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`
+}
