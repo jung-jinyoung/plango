@@ -23,3 +23,12 @@ export function layoutTimelineBlock(
     height: ((endMin - startMin) / 60) * pxPerHour,
   }
 }
+
+/**
+ * layoutTimelineBlock의 역함수 — 타임라인 위 px 위치를 자정 기준 분(minute)으로
+ * 되돌린다. 드래그 중인 블록의 새 위치를 시각으로 해석할 때 쓴다(15분 스냅은
+ * 호출부 책임 — 여기선 순수 좌표 변환만 한다).
+ */
+export function pxToMinutesOfDay(px: number, startHour: number, pxPerHour: number): number {
+  return Math.round((px / pxPerHour) * 60) + startHour * 60
+}

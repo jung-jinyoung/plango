@@ -4,6 +4,7 @@ import {
   addMinutes,
   formatHHMM,
   formatMinutesAsHours,
+  isoAt,
   minutesBetween,
   minutesOfDay,
   nowIso,
@@ -93,6 +94,17 @@ describe('addMinutes', () => {
 
   it('자정을 넘어가면 날짜도 함께 바뀐다', () => {
     expect(addMinutes('2026-07-29T23:30:00+09:00', 45)).toBe('2026-07-30T00:15:00+09:00')
+  })
+})
+
+describe('isoAt', () => {
+  it('날짜 키와 분(minute)을 ISO 문자열로 합친다', () => {
+    expect(isoAt('2026-07-29', 873)).toBe('2026-07-29T14:33:00+09:00') // 14*60+33
+  })
+
+  it('minutesOfDay와 왕복(round-trip)한다', () => {
+    const original = '2026-07-29T09:15:00+09:00'
+    expect(isoAt('2026-07-29', minutesOfDay(original))).toBe(original)
   })
 })
 

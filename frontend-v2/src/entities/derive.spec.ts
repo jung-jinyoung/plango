@@ -10,6 +10,7 @@ import {
   resolveCategory,
   resolveCategoryForMonthlyGoal,
   resolveCategoryForWeeklyGoal,
+  resolveDragTarget,
   shouldShowGhost,
   weeklyMedianActualHours,
   weeklyProgress,
@@ -317,6 +318,35 @@ describe('captureActualStart', () => {
   it('todo·carried 등 완료되지 않은 할 일은 후보에서 제외한다', () => {
     const notDone = makeTask({ status: 'todo', actualBlock: null })
     expect(captureActualStart('2026-07-29T13:00:00+09:00', [notDone])).toBe('2026-07-29T13:00:00+09:00')
+  })
+})
+
+describe('resolveDragTarget', () => {
+  const now = '2026-07-29T13:09:00+09:00'
+
+  it('확정 전 + 미래 위치 → plannedBlock(계획 수정 가능)', () => {
+    const task = makeTask({ confirmed: false })
+    expect(resolveDragTarget(task, '2026-07-29T15:00:00+09:00', now)).toBe('plannedBlock')
+  })
+
+  it('확정 후 + 미래 위치 → null(취소, R2)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, '2026-07-29T15:00:00+09:00', now)).toBeNull()
+  })
+
+  it('과거 위치 + 확정 전 → actualBlock(R3, 확정 여부 무관)', () => {
+    const task = makeTask({ confirmed: false })
+    expect(resolveDragTarget(task, '2026-07-29T10:00:00+09:00', now)).toBe('actualBlock')
+  })
+
+  it('과거 위치 + 확정 후 → actualBlock(R2는 actualBlock 교정을 막지 않는다)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, '2026-07-29T10:00:00+09:00', now)).toBe('actualBlock')
+  })
+
+  it('놓은 위치가 현재 시각과 정확히 같으면 과거로 취급한다(actualBlock)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, now, now)).toBe('actualBlock')
   })
 })
 

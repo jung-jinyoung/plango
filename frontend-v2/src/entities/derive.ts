@@ -206,6 +206,28 @@ export function captureActualStart(plannedStart: string, todayTasks: Task[]): st
   return latestPreviousEnd > plannedStart ? latestPreviousEnd : plannedStart
 }
 
+/**
+ * 오늘 뷰 타임라인 드래그가 어느 필드를 바꿔야 하는지 판정한다(R2·R3).
+ * dropStartIso는 드래그를 놓은 위치의 새 시작 시각.
+ *
+ * - 놓은 위치가 현재 시각 이전(과거)이면 확정 여부와 무관하게 항상
+ *   actualBlock(실제 기록)이다 — R2는 plannedBlock만 보호하지 actualBlock
+ *   교정을 막지 않는다.
+ * - 놓은 위치가 현재 시각 이후(미래)면, 아직 확정 전이면 plannedBlock(계획
+ *   수정)이고, 이미 확정됐으면 null — 이 드래그는 취소해야 한다(R2).
+ *
+ * ISO 문자열끼리 그대로 비교한다 — findCurrentTask/captureActualStart와
+ * 같은 전제(같은 날짜·오프셋 형식이면 사전식 비교가 시간 순서와 일치).
+ */
+export function resolveDragTarget(
+  task: Task,
+  dropStartIso: string,
+  nowIso: string,
+): 'plannedBlock' | 'actualBlock' | null {
+  if (dropStartIso <= nowIso) return 'actualBlock'
+  return task.confirmed ? null : 'plannedBlock'
+}
+
 export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
   const nowMin = minutesOfDay(nowIso)
   return (
