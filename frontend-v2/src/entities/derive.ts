@@ -184,6 +184,28 @@ export function shouldShowGhost(task: Task): boolean {
  * 실제 현재 시각을 시드 데이터의 고정 날짜 타임라인 위에 투영하는 것과
  * 같은 방식(layoutTimelineBlock도 minutesOfDay만 본다).
  */
+/**
+ * "다 했어요"(완료 체크) 자동 포착의 시작 시각 초안(product-spec.md 5-4절
+ * "자동 포착" — 부정확해도 되는 초안, 9단계 일괄 확인에서 고친다).
+ *
+ * 오늘 이미 완료된 할 일 중 가장 늦은 actualBlock.end가 이 할 일의
+ * plannedBlock.start보다 늦으면(직전 작업이 밀려서 이 작업도 늦게
+ * 시작했을 가능성) 그 시각을 시작으로 쓰고, 아니면 plannedBlock.start를
+ * 그대로 쓴다 — 직전 작업이 일찍 끝났다고 이 작업도 일찍 시작했다고
+ * 가정하지 않는다.
+ *
+ * ISO 문자열끼리 그대로 비교한다 — 같은 날짜·같은 오프셋 형식이라
+ * 사전식 비교가 시간 순서와 일치한다(minutesOfDay와 같은 전제).
+ */
+export function captureActualStart(plannedStart: string, todayTasks: Task[]): string {
+  const previousEnds = todayTasks
+    .filter((t) => t.status === 'done' && t.actualBlock)
+    .map((t) => t.actualBlock!.end)
+  if (previousEnds.length === 0) return plannedStart
+  const latestPreviousEnd = previousEnds.reduce((max, end) => (end > max ? end : max))
+  return latestPreviousEnd > plannedStart ? latestPreviousEnd : plannedStart
+}
+
 export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
   const nowMin = minutesOfDay(nowIso)
   return (

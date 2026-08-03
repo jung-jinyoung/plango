@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   accuracyRatio,
   actualMin,
+  captureActualStart,
   categoryColorOf,
   findCurrentTask,
   monthlyCurrentHours,
@@ -272,6 +273,49 @@ describe('findCurrentTask', () => {
       plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' },
     })
     expect(findCurrentTask([later], '2026-07-29T13:09:00+09:00')).toBeNull()
+  })
+})
+
+describe('captureActualStart', () => {
+  it('오늘 완료된 할 일이 없으면 plannedBlock.start를 그대로 쓴다', () => {
+    expect(captureActualStart('2026-07-29T13:00:00+09:00', [])).toBe('2026-07-29T13:00:00+09:00')
+  })
+
+  it('직전 완료가 plannedBlock.start보다 늦으면(밀렸으면) 그 시각을 쓴다', () => {
+    const previous = makeTask({
+      status: 'done',
+      actualBlock: { start: '2026-07-29T09:00:00+09:00', end: '2026-07-29T13:30:00+09:00' },
+    })
+    expect(captureActualStart('2026-07-29T13:00:00+09:00', [previous])).toBe('2026-07-29T13:30:00+09:00')
+  })
+
+  it('직전 완료가 plannedBlock.start보다 이르면(일찍 끝났으면) plannedBlock.start를 그대로 쓴다', () => {
+    const previous = makeTask({
+      status: 'done',
+      actualBlock: { start: '2026-07-29T09:00:00+09:00', end: '2026-07-29T11:51:00+09:00' },
+    })
+    expect(captureActualStart('2026-07-29T13:00:00+09:00', [previous])).toBe('2026-07-29T13:00:00+09:00')
+  })
+
+  it('여러 완료 항목 중 가장 늦은 actualBlock.end를 기준으로 삼는다', () => {
+    const earlier = makeTask({
+      id: 't-earlier',
+      status: 'done',
+      actualBlock: { start: '2026-07-29T09:00:00+09:00', end: '2026-07-29T10:45:00+09:00' },
+    })
+    const latest = makeTask({
+      id: 't-latest',
+      status: 'done',
+      actualBlock: { start: '2026-07-29T11:00:00+09:00', end: '2026-07-29T13:20:00+09:00' },
+    })
+    expect(captureActualStart('2026-07-29T13:00:00+09:00', [earlier, latest])).toBe(
+      '2026-07-29T13:20:00+09:00',
+    )
+  })
+
+  it('todo·carried 등 완료되지 않은 할 일은 후보에서 제외한다', () => {
+    const notDone = makeTask({ status: 'todo', actualBlock: null })
+    expect(captureActualStart('2026-07-29T13:00:00+09:00', [notDone])).toBe('2026-07-29T13:00:00+09:00')
   })
 })
 
