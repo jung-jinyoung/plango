@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { actualMin, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
+import { actualMin, hasScheduleConflict, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
 import { addMinutes, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
 import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
 import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
@@ -236,10 +236,10 @@ function onPointerUp(event: PointerEvent) {
   const field = resolveDragTarget(task, newStartIso, now.value)
   if (!field) return // 확정된 미래 계획을 옮기려는 시도 — 취소(R2)
 
-  emit('drag-block', task.id, field, {
-    start: newStartIso,
-    end: addMinutes(newStartIso, drag.durationMin),
-  })
+  const newBlock: TimeBlock = { start: newStartIso, end: addMinutes(newStartIso, drag.durationMin) }
+  if (hasScheduleConflict(newBlock, task.id, props.tasks.map((t) => t.task))) return // 다른 일정과 겹침 — 취소
+
+  emit('drag-block', task.id, field, newBlock)
 }
 </script>
 

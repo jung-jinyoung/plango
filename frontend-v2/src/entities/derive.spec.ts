@@ -5,6 +5,7 @@ import {
   captureActualStart,
   categoryColorOf,
   findCurrentTask,
+  hasScheduleConflict,
   monthlyCurrentHours,
   projectedExtraWeeks,
   resolveCategory,
@@ -347,6 +348,50 @@ describe('resolveDragTarget', () => {
   it('놓은 위치가 현재 시각과 정확히 같으면 과거로 취급한다(actualBlock)', () => {
     const task = makeTask({ confirmed: true })
     expect(resolveDragTarget(task, now, now)).toBe('actualBlock')
+  })
+})
+
+describe('hasScheduleConflict', () => {
+  const other = makeTask({
+    id: 'other',
+    plannedBlock: { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' },
+  })
+
+  it('다른 task의 plannedBlock과 시간이 겹치면 true', () => {
+    const newBlock = { start: '2026-07-29T13:30:00+09:00', end: '2026-07-29T14:30:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [other])).toBe(true)
+  })
+
+  it('경계만 맞닿으면(뒤이어 붙음) 겹침이 아니다', () => {
+    const rightAfter = { start: '2026-07-29T14:00:00+09:00', end: '2026-07-29T15:00:00+09:00' }
+    const rightBefore = { start: '2026-07-29T12:00:00+09:00', end: '2026-07-29T13:00:00+09:00' }
+    expect(hasScheduleConflict(rightAfter, 'dragged', [other])).toBe(false)
+    expect(hasScheduleConflict(rightBefore, 'dragged', [other])).toBe(false)
+  })
+
+  it('겹치지 않으면 false', () => {
+    const newBlock = { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [other])).toBe(false)
+  })
+
+  it('자기 자신(taskId 일치)은 비교 대상에서 제외한다', () => {
+    const sameBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(sameBlock, 'other', [other])).toBe(false)
+  })
+
+  it('plannedBlock이 없는 task(인박스 등)는 비교 대상에서 제외한다', () => {
+    const inbox = makeTask({ id: 'inbox', plannedBlock: null })
+    const newBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [inbox])).toBe(false)
+  })
+
+  it('다른 날짜의 블록과는 겹치지 않는다', () => {
+    const otherDay = makeTask({
+      id: 'other-day',
+      plannedBlock: { start: '2026-07-30T13:00:00+09:00', end: '2026-07-30T14:00:00+09:00' },
+    })
+    const newBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [otherDay])).toBe(false)
   })
 })
 

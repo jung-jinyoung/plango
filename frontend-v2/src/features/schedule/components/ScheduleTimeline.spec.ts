@@ -29,6 +29,13 @@ function mountTimeline(task: Task) {
   })
 }
 
+function mountTimelineMulti(tasks: Task[]) {
+  const inputs: TimelineTaskInput[] = tasks.map((task) => ({ task, color: 'blue' }))
+  return mount(ScheduleTimeline, {
+    props: { tasks: inputs, startHour: 8, endHour: 21, pxPerHour: 64 },
+  })
+}
+
 // 08:00 시작·64px/h 기준 15:00 블록의 top = (15-8)*64 = 448px
 async function drag(wrapper: ReturnType<typeof mountTimeline>, deltaPx: number) {
   const block = wrapper.find('.block')
@@ -114,5 +121,54 @@ describe('ScheduleTimeline 드래그', () => {
     await block.trigger('pointerup', { clientY: 64, pointerId: 2 }) // 다른 포인터 — 무시돼야 함
 
     expect(wrapper.emitted('drag-block')).toBeUndefined()
+  })
+
+  it('드롭 위치가 다른 task의 plannedBlock과 겹치면 취소된다(emit 없음, store 변경 없음과 같은 경로)', async () => {
+    const dragged = makeTask({
+      id: 'dragged',
+      plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' },
+      confirmed: false,
+    })
+    const other = makeTask({
+      id: 'other',
+      plannedBlock: { start: '2026-07-29T16:00:00+09:00', end: '2026-07-29T17:00:00+09:00' },
+      confirmed: false,
+    })
+    const wrapper = mountTimelineMulti([dragged, other])
+
+    // dragged(15:00~16:00)를 1시간 아래로 옮기면 16:00~17:00 — other와 정확히 겹친다
+    const block = wrapper.findAll('.block')[0]!
+    await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
+    await block.trigger('pointermove', { clientY: 64, pointerId: 1 })
+    await block.trigger('pointerup', { clientY: 64, pointerId: 1 })
+
+    expect(wrapper.emitted('drag-block')).toBeUndefined()
+  })
+
+  it('겹치지 않는 위치로 드래그하면 다른 task가 있어도 정상적으로 emit한다', async () => {
+    const dragged = makeTask({
+      id: 'dragged',
+      plannedBlock: { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' },
+      confirmed: false,
+    })
+    const other = makeTask({
+      id: 'other',
+      plannedBlock: { start: '2026-07-29T18:00:00+09:00', end: '2026-07-29T19:00:00+09:00' },
+      confirmed: false,
+    })
+    const wrapper = mountTimelineMulti([dragged, other])
+
+    const block = wrapper.findAll('.block')[0]!
+    await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
+    await block.trigger('pointermove', { clientY: 64, pointerId: 1 })
+    await block.trigger('pointerup', { clientY: 64, pointerId: 1 })
+
+    const events = wrapper.emitted('drag-block')
+    expect(events).toHaveLength(1)
+    expect(events![0]).toEqual([
+      'dragged',
+      'plannedBlock',
+      { start: '2026-07-29T16:00:00+09:00', end: '2026-07-29T17:00:00+09:00' },
+    ])
   })
 })

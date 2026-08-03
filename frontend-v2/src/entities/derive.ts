@@ -1,7 +1,7 @@
 // 파생 함수 — 저장하지 않는다 (CLAUDE.md 4절)
 
 import { minutesBetween, minutesOfDay } from '../shared/lib/time'
-import type { Category, CategoryColor, MonthlyGoal, Task, WeeklyGoal } from './types'
+import type { Category, CategoryColor, MonthlyGoal, Task, TimeBlock, WeeklyGoal } from './types'
 
 /** Dot/Chip 등에 색을 넘길 때 이 함수를 거친다 — 컴포넌트마다 `?? 'gray'`를 반복하지 않는다 */
 export function categoryColorOf(category: Category | null): CategoryColor {
@@ -226,6 +226,25 @@ export function resolveDragTarget(
 ): 'plannedBlock' | 'actualBlock' | null {
   if (dropStartIso <= nowIso) return 'actualBlock'
   return task.confirmed ? null : 'plannedBlock'
+}
+
+/** 두 TimeBlock이 겹치는지. 경계가 맞닿기만 하는 건(한쪽 end === 다른쪽 start) 겹침이 아니다 — 뒤이어 붙는 일정은 정상이다. */
+function blocksOverlap(a: TimeBlock, b: TimeBlock): boolean {
+  return a.start < b.end && b.start < a.end
+}
+
+/**
+ * 드래그로 놓은 새 블록이 같은 taskId를 제외한 다른 task의 plannedBlock과
+ * 시간이 겹치는지 판정한다. 드롭 대상 필드(plannedBlock/actualBlock)와
+ * 무관하게 항상 plannedBlock을 기준으로 비교한다 — plannedBlock이 "지금
+ * 스케줄된 하루"를 나타내므로, 실제 기록을 놓든 계획을 옮기든 이미 다른
+ * 일이 잡힌 시간대와 겹치면 안 된다.
+ *
+ * ISO 문자열이 날짜까지 포함하므로 별도로 "같은 날짜"를 걸러낼 필요가
+ * 없다 — 다른 날짜 블록은 애초에 시간 구간이 겹칠 수 없다.
+ */
+export function hasScheduleConflict(newBlock: TimeBlock, taskId: string, tasks: Task[]): boolean {
+  return tasks.some((t) => t.id !== taskId && t.plannedBlock && blocksOverlap(newBlock, t.plannedBlock))
 }
 
 export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
