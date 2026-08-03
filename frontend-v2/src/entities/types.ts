@@ -42,6 +42,7 @@ export interface Task {
   plannedBlock: TimeBlock | null
   actualBlock: TimeBlock | null
   status: 'todo' | 'done' | 'carried' | 'dropped'
+  confirmed: boolean // "오늘 확정" 이후 true — plannedBlock 잠금(R2). 확정 시점에 존재하던 task만 true가 된다
 }
 
 /**

@@ -145,6 +145,7 @@ function onConfirmTodayTasks(
       plannedBlock: null, // 아직 시간 미배정 — 오늘 뷰의 인박스에 그대로 나타난다
       actualBlock: null,
       status: 'todo',
+      confirmed: false, // 아직 확정 스냅샷에 포함된 적 없음 — 시간 배정 후 드래그로 자유롭게 조정 가능해야 한다
     })
   })
   tasksConfirmed.value = true

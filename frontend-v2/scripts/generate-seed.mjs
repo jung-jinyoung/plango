@@ -425,11 +425,19 @@ for (const [dayOffset, count] of NEXT_WEEK_APPT_COUNTS) {
   }
 }
 
+// "오늘 확정"(R2) 잠금 여부 — 오늘 일정에 걸린 task만 아직 미확정(false)으로
+// 둬서 화면의 확정 버튼으로 시연할 수 있게 하고, 그 외(과거 · 인박스 미배정)는
+// 이미 지나갔거나 드래그 판정 대상이 아니므로 true로 채운다.
+const tasksWithConfirmed = tasks.map((t) => ({
+  ...t,
+  confirmed: !(t.plannedBlock && t.plannedBlock.start.startsWith(TODAY)),
+}))
+
 const seedData = {
   categories,
   monthlyGoals: [monthlyGoalThesis, monthlyGoalFitness],
   weeklyGoals,
-  tasks,
+  tasks: tasksWithConfirmed,
 }
 
 writeFileSync(OUT_PATH, JSON.stringify(seedData, null, 2) + '\n', 'utf-8')

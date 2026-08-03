@@ -76,6 +76,7 @@ function makeTask(overrides: Partial<Task>): Task {
     plannedBlock: null,
     actualBlock: null,
     status: 'todo',
+    confirmed: true,
     ...overrides,
   }
 }
