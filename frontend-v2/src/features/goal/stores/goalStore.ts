@@ -6,22 +6,23 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import {
+  addMonthlyGoal as addMonthlyGoalInRepository,
   addWeeklyGoal as addWeeklyGoalInRepository,
   getSeedCategories,
   getSeedMonthlyGoals,
   getSeedWeeklyGoals,
   updateWeeklyGoal as updateWeeklyGoalInRepository,
 } from '../lib/goalRepository'
-import type { WeeklyGoal } from '../../../entities/types'
+import type { MonthlyGoal, WeeklyGoal } from '../../../entities/types'
 
 export const useGoalStore = defineStore('goal', () => {
   const categories = getSeedCategories()
-  const monthlyGoals = getSeedMonthlyGoals()
-  // taskStore.tasks와 같은 이유로 얕은 복사해서 스토어 자신만의 반응형 상태로 둔다.
+  // weeklyGoals와 같은 이유로 얕은 복사해서 스토어 자신만의 반응형 상태로 둔다.
+  const monthlyGoals = ref<MonthlyGoal[]>([...getSeedMonthlyGoals()])
   const weeklyGoals = ref<WeeklyGoal[]>([...getSeedWeeklyGoals()])
 
   const categoriesById = computed(() => new Map(categories.map((c) => [c.id, c])))
-  const monthlyGoalsById = computed(() => new Map(monthlyGoals.map((g) => [g.id, g])))
+  const monthlyGoalsById = computed(() => new Map(monthlyGoals.value.map((g) => [g.id, g])))
   const weeklyGoalsById = computed(() => new Map(weeklyGoals.value.map((g) => [g.id, g])))
 
   function updateWeeklyGoal(id: string, patch: Partial<WeeklyGoal>) {
@@ -39,6 +40,13 @@ export const useGoalStore = defineStore('goal', () => {
     addWeeklyGoalInRepository(goal)
   }
 
+  // 온보딩 "이대로 시작하기" 확정 시 호출. addWeeklyGoal과 같은 이유로 중복 id는 무시한다.
+  function addMonthlyGoal(goal: MonthlyGoal) {
+    if (monthlyGoalsById.value.has(goal.id)) return
+    monthlyGoals.value.push(goal)
+    addMonthlyGoalInRepository(goal)
+  }
+
   return {
     categories,
     monthlyGoals,
@@ -48,5 +56,6 @@ export const useGoalStore = defineStore('goal', () => {
     weeklyGoalsById,
     updateWeeklyGoal,
     addWeeklyGoal,
+    addMonthlyGoal,
   }
 })
