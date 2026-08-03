@@ -44,9 +44,32 @@ describe('MobileRunPage', () => {
 
     const after = taskStore.tasksById.get('today-18')
     expect(after?.status).toBe('done')
-    // 자동 포착(CLAUDE.md 5-4절): 시작은 plannedBlock 그대로, 끝은 완료 시점(현재 시각)
+    // 자동 포착(CLAUDE.md 5-4절, captureActualStart): 오늘 이미 끝난 today-16/17의
+    // actualBlock.end(10:45, 11:51)가 today-18의 plannedBlock.start(13:00)보다
+    // 이르므로 직전 완료를 반영할 게 없다 — plannedBlock.start 그대로, 끝은 완료
+    // 시점(현재 시각)
     expect(after?.actualBlock).toEqual({
       start: '2026-07-29T13:00:00+09:00',
+      end: '2026-07-29T13:09:00+09:00',
+    })
+  })
+
+  it('직전 작업이 밀려서 늦게 끝났으면, 다음 작업의 자동 포착 시작 시각도 그 시각을 따라간다', async () => {
+    const wrapper = mount(MobileRunPage)
+    const taskStore = useTaskStore()
+
+    // today-16(논문 결과표 초안)이 실제로는 13:05까지 밀려서 끝난 상황을 시뮬레이션
+    taskStore.updateTask('today-16', {
+      actualBlock: { start: '2026-07-29T09:00:00+09:00', end: '2026-07-29T13:05:00+09:00' },
+    })
+
+    const doneButton = wrapper.findAll('button').find((b) => b.text() === '다 했어요')!
+    await doneButton.trigger('click')
+
+    const after = taskStore.tasksById.get('today-18')
+    // plannedBlock.start(13:00)가 아니라 직전 완료 시각(13:05)을 시작으로 쓴다
+    expect(after?.actualBlock).toEqual({
+      start: '2026-07-29T13:05:00+09:00',
       end: '2026-07-29T13:09:00+09:00',
     })
   })

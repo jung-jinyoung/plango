@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { actualMin, categoryColorOf, findCurrentTask, resolveCategory } from '../entities/derive'
+import { actualMin, captureActualStart, categoryColorOf, findCurrentTask, resolveCategory } from '../entities/derive'
 import type { CategoryColor, Task } from '../entities/types'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
@@ -134,11 +134,12 @@ function pipClass(task: Task) {
 }
 
 // "다 했어요" — 완료 시점에 actualBlock을 만든다(CLAUDE.md 5-4절 자동 포착).
-// taskStore.updateTask를 그대로 재사용, 새 액션 없음.
+// 시작 시각은 captureActualStart로 계산(직전 완료가 밀렸으면 그 시각, 아니면
+// plannedBlock.start). taskStore.updateTask를 그대로 재사용, 새 액션 없음.
 function onComplete(task: Task) {
   if (!task.plannedBlock) return
   taskStore.updateTask(task.id, {
-    actualBlock: { start: task.plannedBlock.start, end: now.value },
+    actualBlock: { start: captureActualStart(task.plannedBlock.start, todayTasks.value), end: now.value },
     status: 'done',
   })
 }
