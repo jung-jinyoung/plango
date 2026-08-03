@@ -65,10 +65,12 @@ import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import type { TimeBlock } from '../entities/types'
 
-// 시드 데이터가 설계된 "오늘" 날짜로 고정 — 실제 진입 라우팅(CLAUDE.md 14절
-// 10단계)에서 useNow() 기반 실제 날짜로 교체한다. 지금은 seed-data.json이
-// 이 날짜를 중심으로 만들어져 있어서(scripts/generate-seed.mjs) 고정값을 쓴다.
-const TODAY = '2026-07-29'
+// DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
+// 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
+// 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
+// 이름도 다르게 뒀다.
+// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
+const DEMO_TODAY = '2026-07-29'
 
 const router = useRouter()
 const goalStore = useGoalStore()
@@ -84,7 +86,7 @@ const candidateGoals = computed(() => goalStore.weeklyGoals.filter((g) => g.stat
 const monthlyGoal = computed(() => goalStore.monthlyGoalsById.get('mg-thesis') ?? null)
 
 const todayTasks = computed(() =>
-  allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(TODAY)),
+  allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(DEMO_TODAY)),
 )
 
 // 오늘 이전의 carried task 중 3일 이상 지난 것은 filterStaleCarried가 걸러낸다
@@ -93,15 +95,15 @@ const todayTasks = computed(() =>
 const carriedCount = computed(
   () =>
     filterStaleCarried(
-      allTasks.value.filter((t) => t.plannedBlock && t.plannedBlock.start < TODAY),
-      TODAY,
+      allTasks.value.filter((t) => t.plannedBlock && t.plannedBlock.start < DEMO_TODAY),
+      DEMO_TODAY,
     ).length,
 )
 
 // 진입 라우팅(CLAUDE.md 12절) "복귀 리셋" — 마지막 활동으로부터 3일 이상
 // 지났으면 이월 배너 대신 이 배너를 보여준다(누적 미완료를 보여주지 않는다).
 const isReturningAfterGap = computed(() =>
-  hasLongActivityGap(lastActiveDate(allTasks.value, TODAY), TODAY),
+  hasLongActivityGap(lastActiveDate(allTasks.value, DEMO_TODAY), DEMO_TODAY),
 )
 
 function onAcceptReturnGap() {
