@@ -5,6 +5,7 @@ import TodayPage from '../pages/TodayPage.vue'
 import ReflectWeekPage from '../pages/ReflectWeekPage.vue'
 import OnboardingPage from '../pages/OnboardingPage.vue'
 import MobileRunPage from '../pages/MobileRunPage.vue'
+import ReflectDayPage from '../pages/ReflectDayPage.vue'
 
 // 임시 라우트 — 실제 진입 라우팅(초기 도착 페이지 결정)은 CLAUDE.md 14절
 // 10단계에서 구성한다. /today 자체는 실제 페이지(pages/TodayPage.vue)이고,
@@ -19,6 +20,7 @@ const router = createRouter({
     { path: '/reflect/week', name: 'reflect-week', component: ReflectWeekPage },
     { path: '/onboarding', name: 'onboarding', component: OnboardingPage },
     { path: '/mobile-run', name: 'mobile-run', component: MobileRunPage },
+    { path: '/reflect/day', name: 'reflect-day', component: ReflectDayPage },
   ],
 })
 
