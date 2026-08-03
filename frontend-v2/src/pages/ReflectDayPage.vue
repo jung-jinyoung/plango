@@ -63,8 +63,12 @@ import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import ProgressBar from '../shared/ui/ProgressBar.vue'
 
-// TodayPage.vue와 같은 이유로 시드 데이터가 설계된 "오늘" 날짜를 고정으로 쓴다.
-const TODAY = '2026-07-29'
+// DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
+// 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
+// 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
+// 이름도 다르게 뒀다.
+// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
+const DEMO_TODAY = '2026-07-29'
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
@@ -72,13 +76,13 @@ const reflectionStore = useReflectionStore()
 
 // "오늘 마감" — Task 단위가 아니라 하루 단위 사실이라 별도 day-level
 // 스토어에서 관리한다(진입 라우팅 12절 조건 4의 근거).
-const isDayReflected = computed(() => reflectionStore.isDayReflected(TODAY))
+const isDayReflected = computed(() => reflectionStore.isDayReflected(DEMO_TODAY))
 
 function onMarkReflected() {
-  reflectionStore.markDayReflected(TODAY)
+  reflectionStore.markDayReflected(DEMO_TODAY)
 }
 
-const todayTasks = computed(() => taskStore.tasks.filter((t) => t.plannedBlock?.start.startsWith(TODAY)))
+const todayTasks = computed(() => taskStore.tasks.filter((t) => t.plannedBlock?.start.startsWith(DEMO_TODAY)))
 
 function resolveColor(task: Task): CategoryColor {
   const category = resolveCategory(task, goalStore.weeklyGoalsById, goalStore.monthlyGoalsById, goalStore.categoriesById)

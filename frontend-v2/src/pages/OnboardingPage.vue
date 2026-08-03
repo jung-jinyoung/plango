@@ -60,10 +60,14 @@ import { useTaskStore } from '../features/task/stores/taskStore'
 import { startOfWeek } from '../shared/lib/time'
 import Dot from '../shared/ui/Dot.vue'
 
-// 시드 데이터의 "오늘" 날짜로 고정 — TodayPage.vue와 같은 이유(10단계에서 교체).
-const TODAY = '2026-07-29'
-const CURRENT_MONDAY = startOfWeek(TODAY)
-const MONTH = TODAY.slice(0, 7) // 'YYYY-MM'
+// DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
+// 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
+// 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
+// 이름도 다르게 뒀다.
+// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
+const DEMO_TODAY = '2026-07-29'
+const CURRENT_MONDAY = startOfWeek(DEMO_TODAY)
+const MONTH = DEMO_TODAY.slice(0, 7) // 'YYYY-MM'
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
