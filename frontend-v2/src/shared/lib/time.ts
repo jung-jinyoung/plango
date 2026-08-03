@@ -118,3 +118,15 @@ export function addMinutes(iso: string, minutes: number): string {
   const s = String(shifted.getUTCSeconds()).padStart(2, '0')
   return `${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`
 }
+
+/**
+ * 'YYYY-MM-DD' 날짜 키 + 자정 기준 분(minute)을 ISO 8601 문자열(+09:00)로
+ * 합친다 — minutesOfDay의 역함수. 드래그로 타임라인 px 위치를 시각으로
+ * 되돌릴 때(features/schedule) 쓴다. 순수 문자열 조립이라 타임존 계산이
+ * 필요 없다(addDays/startOfWeek과 달리 Date를 거치지 않는다).
+ */
+export function isoAt(dateKey: string, minutesOfDay: number): string {
+  const hh = Math.floor(minutesOfDay / 60)
+  const mm = minutesOfDay % 60
+  return `${dateKey}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+09:00`
+}

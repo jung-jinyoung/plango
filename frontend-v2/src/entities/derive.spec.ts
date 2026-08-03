@@ -5,11 +5,13 @@ import {
   captureActualStart,
   categoryColorOf,
   findCurrentTask,
+  hasScheduleConflict,
   monthlyCurrentHours,
   projectedExtraWeeks,
   resolveCategory,
   resolveCategoryForMonthlyGoal,
   resolveCategoryForWeeklyGoal,
+  resolveDragTarget,
   shouldShowGhost,
   weeklyMedianActualHours,
   weeklyProgress,
@@ -76,6 +78,7 @@ function makeTask(overrides: Partial<Task>): Task {
     plannedBlock: null,
     actualBlock: null,
     status: 'todo',
+    confirmed: true,
     ...overrides,
   }
 }
@@ -316,6 +319,79 @@ describe('captureActualStart', () => {
   it('todo·carried 등 완료되지 않은 할 일은 후보에서 제외한다', () => {
     const notDone = makeTask({ status: 'todo', actualBlock: null })
     expect(captureActualStart('2026-07-29T13:00:00+09:00', [notDone])).toBe('2026-07-29T13:00:00+09:00')
+  })
+})
+
+describe('resolveDragTarget', () => {
+  const now = '2026-07-29T13:09:00+09:00'
+
+  it('확정 전 + 미래 위치 → plannedBlock(계획 수정 가능)', () => {
+    const task = makeTask({ confirmed: false })
+    expect(resolveDragTarget(task, '2026-07-29T15:00:00+09:00', now)).toBe('plannedBlock')
+  })
+
+  it('확정 후 + 미래 위치 → null(취소, R2)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, '2026-07-29T15:00:00+09:00', now)).toBeNull()
+  })
+
+  it('과거 위치 + 확정 전 → actualBlock(R3, 확정 여부 무관)', () => {
+    const task = makeTask({ confirmed: false })
+    expect(resolveDragTarget(task, '2026-07-29T10:00:00+09:00', now)).toBe('actualBlock')
+  })
+
+  it('과거 위치 + 확정 후 → actualBlock(R2는 actualBlock 교정을 막지 않는다)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, '2026-07-29T10:00:00+09:00', now)).toBe('actualBlock')
+  })
+
+  it('놓은 위치가 현재 시각과 정확히 같으면 과거로 취급한다(actualBlock)', () => {
+    const task = makeTask({ confirmed: true })
+    expect(resolveDragTarget(task, now, now)).toBe('actualBlock')
+  })
+})
+
+describe('hasScheduleConflict', () => {
+  const other = makeTask({
+    id: 'other',
+    plannedBlock: { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' },
+  })
+
+  it('다른 task의 plannedBlock과 시간이 겹치면 true', () => {
+    const newBlock = { start: '2026-07-29T13:30:00+09:00', end: '2026-07-29T14:30:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [other])).toBe(true)
+  })
+
+  it('경계만 맞닿으면(뒤이어 붙음) 겹침이 아니다', () => {
+    const rightAfter = { start: '2026-07-29T14:00:00+09:00', end: '2026-07-29T15:00:00+09:00' }
+    const rightBefore = { start: '2026-07-29T12:00:00+09:00', end: '2026-07-29T13:00:00+09:00' }
+    expect(hasScheduleConflict(rightAfter, 'dragged', [other])).toBe(false)
+    expect(hasScheduleConflict(rightBefore, 'dragged', [other])).toBe(false)
+  })
+
+  it('겹치지 않으면 false', () => {
+    const newBlock = { start: '2026-07-29T15:00:00+09:00', end: '2026-07-29T16:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [other])).toBe(false)
+  })
+
+  it('자기 자신(taskId 일치)은 비교 대상에서 제외한다', () => {
+    const sameBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(sameBlock, 'other', [other])).toBe(false)
+  })
+
+  it('plannedBlock이 없는 task(인박스 등)는 비교 대상에서 제외한다', () => {
+    const inbox = makeTask({ id: 'inbox', plannedBlock: null })
+    const newBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [inbox])).toBe(false)
+  })
+
+  it('다른 날짜의 블록과는 겹치지 않는다', () => {
+    const otherDay = makeTask({
+      id: 'other-day',
+      plannedBlock: { start: '2026-07-30T13:00:00+09:00', end: '2026-07-30T14:00:00+09:00' },
+    })
+    const newBlock = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+    expect(hasScheduleConflict(newBlock, 'dragged', [otherDay])).toBe(false)
   })
 })
 

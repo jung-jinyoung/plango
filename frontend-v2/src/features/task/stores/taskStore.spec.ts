@@ -54,6 +54,7 @@ describe('useTaskStore', () => {
       plannedBlock: null,
       actualBlock: null,
       status: 'todo',
+      confirmed: false,
     })
 
     expect(store.tasks.length).toBe(before + 1)
