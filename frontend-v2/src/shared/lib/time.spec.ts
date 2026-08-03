@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   addDays,
+  addMinutes,
   formatHHMM,
   formatMinutesAsHours,
   minutesBetween,
@@ -78,6 +79,20 @@ describe('minutesOfDay', () => {
 describe('formatHHMM', () => {
   it("ISO 문자열에서 'HH:MM'만 뽑는다", () => {
     expect(formatHHMM('2026-07-29T14:33:00+09:00')).toBe('14:33')
+  })
+})
+
+describe('addMinutes', () => {
+  it('분을 더한 새 ISO 문자열을 만든다', () => {
+    expect(addMinutes('2026-07-29T09:00:00+09:00', 105)).toBe('2026-07-29T10:45:00+09:00')
+  })
+
+  it('음수로 시간을 되돌릴 수 있다', () => {
+    expect(addMinutes('2026-07-29T10:45:00+09:00', -105)).toBe('2026-07-29T09:00:00+09:00')
+  })
+
+  it('자정을 넘어가면 날짜도 함께 바뀐다', () => {
+    expect(addMinutes('2026-07-29T23:30:00+09:00', 45)).toBe('2026-07-30T00:15:00+09:00')
   })
 })
 
