@@ -11,7 +11,16 @@
 
     <template v-for="item in items" :key="item.task.id">
       <!-- 단일 블록: 계획만 있거나(아직 실행 전), 계획·실제 차이가 15분 미만이라 병합된 경우 -->
-      <div v-if="item.kind === 'single'" class="block" :style="blockStyle(item.layout, item)">
+      <div
+        v-if="item.kind === 'single'"
+        class="block"
+        :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+        :style="[blockStyle(item.layout, item), dragTransform(item)]"
+        @pointerdown="onPointerDown($event, item)"
+        @pointermove="onPointerMove"
+        @pointerup="onPointerUp"
+        @pointercancel="onPointerCancel"
+      >
         <b>{{ item.task.title }}</b>
       </div>
 
@@ -21,6 +30,7 @@
         class="lane"
         :style="{ top: `${item.lane.top}px`, height: `${item.lane.height}px` }"
       >
+        <!-- 계획(ghost)은 확정 후 잠기는 비교 기준선이라 드래그 핸들러를 붙이지 않는다(R2) -->
         <div
           class="ghost"
           :style="{ height: `${item.ghost.height}px`, marginTop: `${item.ghost.top - item.lane.top}px` }"
@@ -29,11 +39,19 @@
         </div>
         <div
           class="real"
-          :style="{
-            height: `${item.real.height}px`,
-            marginTop: `${item.real.top - item.lane.top}px`,
-            ...blockStyle(null, item),
-          }"
+          :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+          :style="[
+            {
+              height: `${item.real.height}px`,
+              marginTop: `${item.real.top - item.lane.top}px`,
+              ...blockStyle(null, item),
+            },
+            dragTransform(item),
+          ]"
+          @pointerdown="onPointerDown($event, item)"
+          @pointermove="onPointerMove"
+          @pointerup="onPointerUp"
+          @pointercancel="onPointerCancel"
         >
           <b>{{ item.task.title }}</b>
           <span class="delta">+{{ item.deltaMin }}분</span>
@@ -46,11 +64,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { actualMin, shouldShowGhost } from '../../../entities/derive'
-import { minutesBetween } from '../../../shared/lib/time'
-import type { CategoryColor, Task } from '../../../entities/types'
-import { layoutTimelineBlock, type TimelineLayout } from '../lib/layoutTimelineBlock'
+import { computed, ref } from 'vue'
+import { actualMin, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
+import { addMinutes, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
+import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
+import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
 import CurrentTimeBar from './CurrentTimeBar.vue'
 
 // 색은 이미 페이지 레벨에서 resolveCategory로 정해져 들어온다 —
@@ -143,6 +161,86 @@ function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: Ca
     color: `var(--cat-${item.color}-deep)`,
   }
 }
+
+// 드래그로 블록 시간을 조정한다(R2·R3). 실제 store 변경은 emit으로 위임하고
+// (features/schedule은 store를 모른다, CLAUDE.md 6절) 여기선 좌표↔시각 변환과
+// R2·R3 판정(resolveDragTarget)만 담당한다.
+const emit = defineEmits<{
+  'drag-block': [taskId: string, field: 'plannedBlock' | 'actualBlock', block: TimeBlock]
+}>()
+
+const now = useNow()
+
+interface ActiveDrag {
+  taskId: string
+  pointerId: number
+  startClientY: number
+  originalTop: number
+  durationMin: number
+  dateKey: string
+}
+
+const activeDrag = ref<ActiveDrag | null>(null)
+const previewOffsetPx = ref(0)
+
+const SNAP_MIN = 15
+function snap(min: number): number {
+  return Math.round(min / SNAP_MIN) * SNAP_MIN
+}
+
+function dragTransform(item: TimelineItem) {
+  if (activeDrag.value?.taskId !== item.task.id) return {}
+  return { transform: `translateY(${previewOffsetPx.value}px)`, zIndex: 20 }
+}
+
+function onPointerDown(event: PointerEvent, item: TimelineItem) {
+  const block = item.task.actualBlock ?? item.task.plannedBlock
+  if (!block) return
+  const layout = item.kind === 'single' ? item.layout : item.real
+  ;(event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId)
+  activeDrag.value = {
+    taskId: item.task.id,
+    pointerId: event.pointerId,
+    startClientY: event.clientY,
+    originalTop: layout.top,
+    durationMin: minutesBetween(block.start, block.end),
+    dateKey: block.start.slice(0, 10),
+  }
+  previewOffsetPx.value = 0
+}
+
+function onPointerMove(event: PointerEvent) {
+  if (!activeDrag.value || event.pointerId !== activeDrag.value.pointerId) return
+  previewOffsetPx.value = event.clientY - activeDrag.value.startClientY
+}
+
+function onPointerCancel(event: PointerEvent) {
+  if (!activeDrag.value || event.pointerId !== activeDrag.value.pointerId) return
+  activeDrag.value = null
+  previewOffsetPx.value = 0
+}
+
+function onPointerUp(event: PointerEvent) {
+  const drag = activeDrag.value
+  if (!drag || event.pointerId !== drag.pointerId) return
+
+  const newTop = drag.originalTop + previewOffsetPx.value
+  const newStartMin = snap(pxToMinutesOfDay(newTop, props.startHour, props.pxPerHour))
+  const newStartIso = isoAt(drag.dateKey, newStartMin)
+  const task = props.tasks.find((t) => t.task.id === drag.taskId)?.task
+
+  activeDrag.value = null
+  previewOffsetPx.value = 0
+  if (!task) return
+
+  const field = resolveDragTarget(task, newStartIso, now.value)
+  if (!field) return // 확정된 미래 계획을 옮기려는 시도 — 취소(R2)
+
+  emit('drag-block', task.id, field, {
+    start: newStartIso,
+    end: addMinutes(newStartIso, drag.durationMin),
+  })
+}
 </script>
 
 <style scoped>
@@ -171,11 +269,20 @@ function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: Ca
   padding: 6px 10px;
   overflow: hidden;
   font-size: 13px;
+  cursor: grab;
+  touch-action: none;
 }
 .block b {
   display: block;
   font-weight: 600;
   line-height: 1.35;
+}
+
+/* 대기 상태엔 그림자 없음(CLAUDE.md 13절) — 드래그 중에만 --elev-drag를 쓴다 */
+.block.is-dragging,
+.real.is-dragging {
+  cursor: grabbing;
+  box-shadow: var(--elev-drag);
 }
 
 /* 계획·실제 나란히(목업 .pair 그대로 포팅) */
@@ -207,6 +314,8 @@ function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: Ca
   padding: 6px 10px;
   overflow: hidden;
   font-size: 13px;
+  cursor: grab;
+  touch-action: none;
 }
 .real b {
   display: block;

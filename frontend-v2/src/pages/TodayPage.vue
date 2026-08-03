@@ -11,6 +11,15 @@
     </aside>
 
     <main class="col-main">
+      <div class="confirm-row">
+        <BaseButton
+          variant="primary"
+          :disabled="todayConfirmed || todayTasks.length === 0"
+          @click="onConfirmToday"
+        >
+          {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
+        </BaseButton>
+      </div>
       <CarryOverBanner
         v-if="!bannerDismissed && carriedYesterdayCount > 0"
         :count="carriedYesterdayCount"
@@ -18,7 +27,13 @@
         @accept="bannerDismissed = true"
       />
       <BaseCard class="timeline-card">
-        <ScheduleTimeline :tasks="timelineTasks" :start-hour="8" :end-hour="21" :px-per-hour="64" />
+        <ScheduleTimeline
+          :tasks="timelineTasks"
+          :start-hour="8"
+          :end-hour="21"
+          :px-per-hour="64"
+          @drag-block="onDragBlock"
+        />
       </BaseCard>
     </main>
 
@@ -39,7 +54,9 @@ import type { TimelineTaskInput } from '../features/schedule/components/Schedule
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addDays } from '../shared/lib/time'
+import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
+import type { TimeBlock } from '../entities/types'
 
 // 시드 데이터가 설계된 "오늘" 날짜로 고정 — 실제 진입 라우팅(CLAUDE.md 14절
 // 10단계)에서 useNow() 기반 실제 날짜로 교체한다. 지금은 seed-data.json이
@@ -91,6 +108,24 @@ const unplacedTasks = computed(() =>
     .filter((t) => t.plannedBlock === null)
     .map((task) => ({ task, color: resolveColor(task) })),
 )
+
+// "오늘 확정"(R2) — 오늘 task 전체를 한 번에 잠근다. 확정 후 오늘에 새 task가
+// 추가되면(온보딩 등) every()가 다시 false가 될 수 있는데, 이미 confirmed:true인
+// 다른 task엔 영향이 없다(개별 필드라 서로 독립적) — 버튼이 다시 눌리는 정도의
+// 코스메틱한 차이일 뿐, R2 정합성 문제는 아니다.
+const todayConfirmed = computed(
+  () => todayTasks.value.length > 0 && todayTasks.value.every((t) => t.confirmed),
+)
+
+function onConfirmToday() {
+  todayTasks.value.forEach((t) => taskStore.updateTask(t.id, { confirmed: true }))
+}
+
+// ScheduleTimeline은 store를 모른다(CLAUDE.md 6절) — R2·R3 판정(resolveDragTarget)까지
+// 끝낸 결과만 emit으로 받아서 여기서 taskStore.updateTask를 호출한다.
+function onDragBlock(taskId: string, field: 'plannedBlock' | 'actualBlock', block: TimeBlock) {
+  taskStore.updateTask(taskId, { [field]: block })
+}
 </script>
 
 <style scoped>
@@ -103,5 +138,10 @@ const unplacedTasks = computed(() =>
 }
 .timeline-card {
   padding: 20px 20px 8px;
+}
+.confirm-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 </style>
