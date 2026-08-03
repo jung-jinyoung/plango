@@ -20,9 +20,14 @@
           {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
         </BaseButton>
       </div>
+      <ReturnGapBanner
+        v-if="!bannerDismissed && isReturningAfterGap"
+        @dismiss="bannerDismissed = true"
+        @accept="onAcceptReturnGap"
+      />
       <CarryOverBanner
-        v-if="!bannerDismissed && carriedYesterdayCount > 0"
-        :count="carriedYesterdayCount"
+        v-else-if="!bannerDismissed && carriedCount > 0"
+        :count="carriedCount"
         @dismiss="bannerDismissed = true"
         @accept="bannerDismissed = true"
       />
@@ -45,15 +50,17 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { categoryColorOf, resolveCategory } from '../entities/derive'
+import { useRouter } from 'vue-router'
+import { categoryColorOf, filterStaleCarried, lastActiveDate, resolveCategory } from '../entities/derive'
+import { hasLongActivityGap } from '../features/reflect/lib/resolveEntry'
 import CarryOverBanner from '../features/task/components/CarryOverBanner.vue'
+import ReturnGapBanner from '../features/task/components/ReturnGapBanner.vue'
 import GoalSidebar from '../features/goal/components/GoalSidebar.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { useTaskStore } from '../features/task/stores/taskStore'
-import { addDays } from '../shared/lib/time'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import type { TimeBlock } from '../entities/types'
@@ -62,8 +69,8 @@ import type { TimeBlock } from '../entities/types'
 // 10단계)에서 useNow() 기반 실제 날짜로 교체한다. 지금은 seed-data.json이
 // 이 날짜를 중심으로 만들어져 있어서(scripts/generate-seed.mjs) 고정값을 쓴다.
 const TODAY = '2026-07-29'
-const YESTERDAY = addDays(TODAY, -1)
 
+const router = useRouter()
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
 
@@ -80,11 +87,27 @@ const todayTasks = computed(() =>
   allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(TODAY)),
 )
 
-const carriedYesterdayCount = computed(
+// 오늘 이전의 carried task 중 3일 이상 지난 것은 filterStaleCarried가 걸러낸다
+// (화면 표시 필터일 뿐 status는 안 건드림, R4) — 평소엔 "어제" 정도만 남지만
+// 며칠 건너뛴 경우에도 3일 미만이면 자연스럽게 같이 보인다.
+const carriedCount = computed(
   () =>
-    allTasks.value.filter((t) => t.status === 'carried' && t.plannedBlock?.start.startsWith(YESTERDAY))
-      .length,
+    filterStaleCarried(
+      allTasks.value.filter((t) => t.plannedBlock && t.plannedBlock.start < TODAY),
+      TODAY,
+    ).length,
 )
+
+// 진입 라우팅(CLAUDE.md 12절) "복귀 리셋" — 마지막 활동으로부터 3일 이상
+// 지났으면 이월 배너 대신 이 배너를 보여준다(누적 미완료를 보여주지 않는다).
+const isReturningAfterGap = computed(() =>
+  hasLongActivityGap(lastActiveDate(allTasks.value, TODAY), TODAY),
+)
+
+function onAcceptReturnGap() {
+  bannerDismissed.value = true
+  router.push({ name: 'reflect-week' })
+}
 
 function resolveColor(task: (typeof allTasks.value)[number]) {
   const category = resolveCategory(
