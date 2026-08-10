@@ -6,6 +6,7 @@ import ReflectWeekPage from '../pages/ReflectWeekPage.vue'
 import OnboardingPage from '../pages/OnboardingPage.vue'
 import MobileRunPage from '../pages/MobileRunPage.vue'
 import ReflectDayPage from '../pages/ReflectDayPage.vue'
+import PersonaPickerPage from '../pages/PersonaPickerPage.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { resolveEntry } from '../features/reflect/lib/resolveEntry'
 import { useReflectionStore } from '../features/reflect/stores/reflectionStore'
@@ -18,6 +19,9 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'design-preview', component: DesignPreview },
     { path: '/gallery', name: 'component-gallery', component: ComponentGallery },
+    // 포트폴리오 데모 진입점(QR/URL) — 페르소나 선택. beforeEach 가드는
+    // to.path === '/'에서만 발동하므로 이 라우트는 가드 영향을 받지 않는다.
+    { path: '/demo', name: 'persona-picker', component: PersonaPickerPage },
     { path: '/today', name: 'today', component: TodayPage },
     { path: '/reflect/week', name: 'reflect-week', component: ReflectWeekPage },
     { path: '/onboarding', name: 'onboarding', component: OnboardingPage },
