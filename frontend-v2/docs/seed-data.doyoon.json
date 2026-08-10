@@ -1,0 +1,1925 @@
+{
+  "categories": [
+    {
+      "id": "cat-project",
+      "name": "사이드 프로젝트",
+      "color": "purple"
+    },
+    {
+      "id": "cat-study",
+      "name": "영어 공부",
+      "color": "mint"
+    },
+    {
+      "id": "cat-etc",
+      "name": "기타",
+      "color": "gray"
+    }
+  ],
+  "monthlyGoals": [
+    {
+      "id": "mg-project",
+      "title": "사이드 프로젝트 MVP 출시",
+      "month": "2026-07",
+      "categoryId": "cat-project",
+      "baselineHours": 40,
+      "status": "active"
+    },
+    {
+      "id": "mg-study",
+      "title": "영어 공부 습관 만들기",
+      "month": "2026-07",
+      "categoryId": "cat-study",
+      "baselineHours": 10,
+      "status": "active"
+    }
+  ],
+  "weeklyGoals": [
+    {
+      "id": "wg-achieved-0",
+      "title": "요구사항 정리",
+      "weekOf": "2026-06-29",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 3,
+      "carryCount": 0,
+      "status": "achieved"
+    },
+    {
+      "id": "wg-achieved-1",
+      "title": "DB 스키마 설계",
+      "weekOf": "2026-07-06",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 6,
+      "carryCount": 0,
+      "status": "achieved"
+    },
+    {
+      "id": "wg-achieved-2",
+      "title": "API 설계 문서 작성",
+      "weekOf": "2026-07-13",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 4,
+      "carryCount": 0,
+      "status": "achieved"
+    },
+    {
+      "id": "wg-achieved-3",
+      "title": "인증 플로우 구현",
+      "weekOf": "2026-07-20",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 5,
+      "carryCount": 0,
+      "status": "achieved"
+    },
+    {
+      "id": "wg-carrying",
+      "title": "관리자 대시보드 마무리",
+      "weekOf": "2026-07-27",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 4,
+      "carryCount": 2,
+      "status": "active"
+    },
+    {
+      "id": "wg-current",
+      "title": "온보딩 플로우 화면 구현",
+      "weekOf": "2026-07-27",
+      "monthlyGoalId": "mg-project",
+      "estimatedHours": 6,
+      "carryCount": 0,
+      "status": "active"
+    },
+    {
+      "id": "wg-study",
+      "title": "영어 회화 습관 잡기",
+      "weekOf": "2026-07-27",
+      "monthlyGoalId": "mg-study",
+      "estimatedHours": 2,
+      "carryCount": 0,
+      "status": "active"
+    },
+    {
+      "id": "wg-study-last",
+      "title": "영어 회화 습관 잡기",
+      "weekOf": "2026-07-20",
+      "monthlyGoalId": "mg-study",
+      "estimatedHours": 2,
+      "carryCount": 0,
+      "status": "achieved"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "wg-achieved-0-1",
+      "title": "요구사항 정리 관련 작업 1",
+      "weeklyGoalId": "wg-achieved-0",
+      "categoryId": null,
+      "estimatedMin": 90,
+      "plannedBlock": {
+        "start": "2026-06-29T20:00:00+09:00",
+        "end": "2026-06-29T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-29T20:00:00+09:00",
+        "end": "2026-06-29T22:42:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-0-2",
+      "title": "요구사항 정리 관련 작업 2",
+      "weeklyGoalId": "wg-achieved-0",
+      "categoryId": null,
+      "estimatedMin": 90,
+      "plannedBlock": {
+        "start": "2026-07-01T20:00:00+09:00",
+        "end": "2026-07-01T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-01T20:00:00+09:00",
+        "end": "2026-07-01T22:42:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-1-3",
+      "title": "DB 스키마 설계 관련 작업 1",
+      "weeklyGoalId": "wg-achieved-1",
+      "categoryId": null,
+      "estimatedMin": 180,
+      "plannedBlock": {
+        "start": "2026-07-06T20:00:00+09:00",
+        "end": "2026-07-06T23:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-06T20:00:00+09:00",
+        "end": "2026-07-06T24:48:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-1-4",
+      "title": "DB 스키마 설계 관련 작업 2",
+      "weeklyGoalId": "wg-achieved-1",
+      "categoryId": null,
+      "estimatedMin": 180,
+      "plannedBlock": {
+        "start": "2026-07-08T20:00:00+09:00",
+        "end": "2026-07-08T23:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-08T20:00:00+09:00",
+        "end": "2026-07-08T24:48:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-2-5",
+      "title": "API 설계 문서 작성 관련 작업 1",
+      "weeklyGoalId": "wg-achieved-2",
+      "categoryId": null,
+      "estimatedMin": 120,
+      "plannedBlock": {
+        "start": "2026-07-13T20:00:00+09:00",
+        "end": "2026-07-13T22:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-13T20:00:00+09:00",
+        "end": "2026-07-13T22:48:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-2-6",
+      "title": "API 설계 문서 작성 관련 작업 2",
+      "weeklyGoalId": "wg-achieved-2",
+      "categoryId": null,
+      "estimatedMin": 120,
+      "plannedBlock": {
+        "start": "2026-07-15T20:00:00+09:00",
+        "end": "2026-07-15T22:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-15T20:00:00+09:00",
+        "end": "2026-07-15T22:48:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-3-7",
+      "title": "인증 플로우 구현 관련 작업 1",
+      "weeklyGoalId": "wg-achieved-3",
+      "categoryId": null,
+      "estimatedMin": 150,
+      "plannedBlock": {
+        "start": "2026-07-20T20:00:00+09:00",
+        "end": "2026-07-20T22:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-20T20:00:00+09:00",
+        "end": "2026-07-20T23:00:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-achieved-3-8",
+      "title": "인증 플로우 구현 관련 작업 2",
+      "weeklyGoalId": "wg-achieved-3",
+      "categoryId": null,
+      "estimatedMin": 150,
+      "plannedBlock": {
+        "start": "2026-07-22T20:00:00+09:00",
+        "end": "2026-07-22T22:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-22T20:00:00+09:00",
+        "end": "2026-07-22T23:00:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-current-9",
+      "title": "온보딩 플로우 화면 설계",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 60,
+      "plannedBlock": {
+        "start": "2026-07-27T20:00:00+09:00",
+        "end": "2026-07-27T21:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T20:00:00+09:00",
+        "end": "2026-07-27T21:15:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-study-10",
+      "title": "영어 회화 연습",
+      "weeklyGoalId": "wg-study",
+      "categoryId": null,
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-27T22:00:00+09:00",
+        "end": "2026-07-27T22:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T22:00:00+09:00",
+        "end": "2026-07-27T22:45:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-study-last-11",
+      "title": "영어 회화 연습",
+      "weeklyGoalId": "wg-study-last",
+      "categoryId": null,
+      "estimatedMin": 60,
+      "plannedBlock": {
+        "start": "2026-07-26T22:00:00+09:00",
+        "end": "2026-07-26T23:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-26T22:00:00+09:00",
+        "end": "2026-07-26T23:05:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-carrying-12",
+      "title": "관리자 대시보드 필터 기능",
+      "weeklyGoalId": "wg-carrying",
+      "categoryId": null,
+      "estimatedMin": 45,
+      "plannedBlock": {
+        "start": "2026-07-27T21:00:00+09:00",
+        "end": "2026-07-27T21:45:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T21:00:00+09:00",
+        "end": "2026-07-27T22:00:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "wg-carrying-13",
+      "title": "관리자 대시보드 성능 개선",
+      "weeklyGoalId": "wg-carrying",
+      "categoryId": null,
+      "estimatedMin": 60,
+      "plannedBlock": {
+        "start": "2026-07-27T22:00:00+09:00",
+        "end": "2026-07-27T23:00:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "today-14",
+      "title": "데일리 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 15,
+      "plannedBlock": {
+        "start": "2026-07-29T09:00:00+09:00",
+        "end": "2026-07-29T09:15:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-29T09:00:00+09:00",
+        "end": "2026-07-29T09:12:00+09:00"
+      },
+      "status": "done",
+      "confirmed": false
+    },
+    {
+      "id": "today-15",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-29T14:00:00+09:00",
+        "end": "2026-07-29T14:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-29T14:00:00+09:00",
+        "end": "2026-07-29T14:33:00+09:00"
+      },
+      "status": "done",
+      "confirmed": false
+    },
+    {
+      "id": "today-16",
+      "title": "친구와 저녁 약속",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 60,
+      "plannedBlock": {
+        "start": "2026-07-29T19:00:00+09:00",
+        "end": "2026-07-29T20:00:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": false
+    },
+    {
+      "id": "today-17",
+      "title": "온보딩 플로우 화면 구현",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 60,
+      "plannedBlock": {
+        "start": "2026-07-29T20:00:00+09:00",
+        "end": "2026-07-29T21:00:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-29T20:00:00+09:00",
+        "end": "2026-07-29T21:20:00+09:00"
+      },
+      "status": "done",
+      "confirmed": false
+    },
+    {
+      "id": "today-18",
+      "title": "API 에러 핸들링 정리",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 40,
+      "plannedBlock": {
+        "start": "2026-07-29T21:20:00+09:00",
+        "end": "2026-07-29T22:00:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": false
+    },
+    {
+      "id": "today-19",
+      "title": "영어 회화 연습",
+      "weeklyGoalId": "wg-study",
+      "categoryId": null,
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-29T22:00:00+09:00",
+        "end": "2026-07-29T22:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": false
+    },
+    {
+      "id": "inbox-20",
+      "title": "리드미 정리",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 20,
+      "plannedBlock": null,
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "inbox-21",
+      "title": "은행 업무 보기",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 20,
+      "plannedBlock": null,
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "carried-22",
+      "title": "코드 리뷰 반영",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T21:00:00+09:00",
+        "end": "2026-07-28T21:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "carried",
+      "confirmed": true
+    },
+    {
+      "id": "carried-23",
+      "title": "테스트 코드 작성",
+      "weeklyGoalId": "wg-current",
+      "categoryId": null,
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T22:00:00+09:00",
+        "end": "2026-07-28T22:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "carried",
+      "confirmed": true
+    },
+    {
+      "id": "appt-24",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-06-29T19:00:00+09:00",
+        "end": "2026-06-29T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-29T19:00:00+09:00",
+        "end": "2026-06-29T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-25",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-06-29T20:00:00+09:00",
+        "end": "2026-06-29T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-29T20:00:00+09:00",
+        "end": "2026-06-29T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-26",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-06-30T19:00:00+09:00",
+        "end": "2026-06-30T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-30T19:00:00+09:00",
+        "end": "2026-06-30T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-27",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-06-30T20:00:00+09:00",
+        "end": "2026-06-30T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-30T20:00:00+09:00",
+        "end": "2026-06-30T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-28",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-06-30T21:00:00+09:00",
+        "end": "2026-06-30T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-06-30T21:00:00+09:00",
+        "end": "2026-06-30T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-29",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-01T19:00:00+09:00",
+        "end": "2026-07-01T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-01T19:00:00+09:00",
+        "end": "2026-07-01T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-30",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-01T20:00:00+09:00",
+        "end": "2026-07-01T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-01T20:00:00+09:00",
+        "end": "2026-07-01T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-31",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-02T19:00:00+09:00",
+        "end": "2026-07-02T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-02T19:00:00+09:00",
+        "end": "2026-07-02T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-32",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-02T20:00:00+09:00",
+        "end": "2026-07-02T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-02T20:00:00+09:00",
+        "end": "2026-07-02T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-33",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-02T21:00:00+09:00",
+        "end": "2026-07-02T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-02T21:00:00+09:00",
+        "end": "2026-07-02T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-34",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-03T19:00:00+09:00",
+        "end": "2026-07-03T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-03T19:00:00+09:00",
+        "end": "2026-07-03T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-35",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-03T20:00:00+09:00",
+        "end": "2026-07-03T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-03T20:00:00+09:00",
+        "end": "2026-07-03T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-36",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-04T19:00:00+09:00",
+        "end": "2026-07-04T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-04T19:00:00+09:00",
+        "end": "2026-07-04T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-37",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-04T20:00:00+09:00",
+        "end": "2026-07-04T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-04T20:00:00+09:00",
+        "end": "2026-07-04T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-38",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-04T21:00:00+09:00",
+        "end": "2026-07-04T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-04T21:00:00+09:00",
+        "end": "2026-07-04T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-39",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-05T19:00:00+09:00",
+        "end": "2026-07-05T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-05T19:00:00+09:00",
+        "end": "2026-07-05T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-40",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-05T20:00:00+09:00",
+        "end": "2026-07-05T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-05T20:00:00+09:00",
+        "end": "2026-07-05T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-41",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-06T19:00:00+09:00",
+        "end": "2026-07-06T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-06T19:00:00+09:00",
+        "end": "2026-07-06T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-42",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-06T20:00:00+09:00",
+        "end": "2026-07-06T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-06T20:00:00+09:00",
+        "end": "2026-07-06T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-43",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-07T19:00:00+09:00",
+        "end": "2026-07-07T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-07T19:00:00+09:00",
+        "end": "2026-07-07T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-44",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-07T20:00:00+09:00",
+        "end": "2026-07-07T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-07T20:00:00+09:00",
+        "end": "2026-07-07T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-45",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-07T21:00:00+09:00",
+        "end": "2026-07-07T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-07T21:00:00+09:00",
+        "end": "2026-07-07T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-46",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-08T19:00:00+09:00",
+        "end": "2026-07-08T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-08T19:00:00+09:00",
+        "end": "2026-07-08T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-47",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-08T20:00:00+09:00",
+        "end": "2026-07-08T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-08T20:00:00+09:00",
+        "end": "2026-07-08T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-48",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-09T19:00:00+09:00",
+        "end": "2026-07-09T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-09T19:00:00+09:00",
+        "end": "2026-07-09T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-49",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-09T20:00:00+09:00",
+        "end": "2026-07-09T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-09T20:00:00+09:00",
+        "end": "2026-07-09T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-50",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-09T21:00:00+09:00",
+        "end": "2026-07-09T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-09T21:00:00+09:00",
+        "end": "2026-07-09T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-51",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-10T19:00:00+09:00",
+        "end": "2026-07-10T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-10T19:00:00+09:00",
+        "end": "2026-07-10T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-52",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-10T20:00:00+09:00",
+        "end": "2026-07-10T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-10T20:00:00+09:00",
+        "end": "2026-07-10T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-53",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-11T19:00:00+09:00",
+        "end": "2026-07-11T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-11T19:00:00+09:00",
+        "end": "2026-07-11T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-54",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-11T20:00:00+09:00",
+        "end": "2026-07-11T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-11T20:00:00+09:00",
+        "end": "2026-07-11T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-55",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-11T21:00:00+09:00",
+        "end": "2026-07-11T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-11T21:00:00+09:00",
+        "end": "2026-07-11T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-56",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-12T19:00:00+09:00",
+        "end": "2026-07-12T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-12T19:00:00+09:00",
+        "end": "2026-07-12T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-57",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-12T20:00:00+09:00",
+        "end": "2026-07-12T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-12T20:00:00+09:00",
+        "end": "2026-07-12T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-58",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-13T19:00:00+09:00",
+        "end": "2026-07-13T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-13T19:00:00+09:00",
+        "end": "2026-07-13T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-59",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-13T20:00:00+09:00",
+        "end": "2026-07-13T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-13T20:00:00+09:00",
+        "end": "2026-07-13T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-60",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-14T19:00:00+09:00",
+        "end": "2026-07-14T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-14T19:00:00+09:00",
+        "end": "2026-07-14T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-61",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-14T20:00:00+09:00",
+        "end": "2026-07-14T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-14T20:00:00+09:00",
+        "end": "2026-07-14T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-62",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-14T21:00:00+09:00",
+        "end": "2026-07-14T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-14T21:00:00+09:00",
+        "end": "2026-07-14T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-63",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-15T19:00:00+09:00",
+        "end": "2026-07-15T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-15T19:00:00+09:00",
+        "end": "2026-07-15T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-64",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-15T20:00:00+09:00",
+        "end": "2026-07-15T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-15T20:00:00+09:00",
+        "end": "2026-07-15T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-65",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-16T19:00:00+09:00",
+        "end": "2026-07-16T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-16T19:00:00+09:00",
+        "end": "2026-07-16T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-66",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-16T20:00:00+09:00",
+        "end": "2026-07-16T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-16T20:00:00+09:00",
+        "end": "2026-07-16T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-67",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-16T21:00:00+09:00",
+        "end": "2026-07-16T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-16T21:00:00+09:00",
+        "end": "2026-07-16T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-68",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-17T19:00:00+09:00",
+        "end": "2026-07-17T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-17T19:00:00+09:00",
+        "end": "2026-07-17T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-69",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-17T20:00:00+09:00",
+        "end": "2026-07-17T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-17T20:00:00+09:00",
+        "end": "2026-07-17T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-70",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-18T19:00:00+09:00",
+        "end": "2026-07-18T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-18T19:00:00+09:00",
+        "end": "2026-07-18T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-71",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-18T20:00:00+09:00",
+        "end": "2026-07-18T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-18T20:00:00+09:00",
+        "end": "2026-07-18T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-72",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-18T21:00:00+09:00",
+        "end": "2026-07-18T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-18T21:00:00+09:00",
+        "end": "2026-07-18T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-73",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-19T19:00:00+09:00",
+        "end": "2026-07-19T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-19T19:00:00+09:00",
+        "end": "2026-07-19T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-74",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-19T20:00:00+09:00",
+        "end": "2026-07-19T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-19T20:00:00+09:00",
+        "end": "2026-07-19T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-75",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-20T19:00:00+09:00",
+        "end": "2026-07-20T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-20T19:00:00+09:00",
+        "end": "2026-07-20T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-76",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-20T20:00:00+09:00",
+        "end": "2026-07-20T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-20T20:00:00+09:00",
+        "end": "2026-07-20T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-77",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T19:00:00+09:00",
+        "end": "2026-07-21T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T19:00:00+09:00",
+        "end": "2026-07-21T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-78",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T20:00:00+09:00",
+        "end": "2026-07-21T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T20:00:00+09:00",
+        "end": "2026-07-21T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-79",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-21T21:00:00+09:00",
+        "end": "2026-07-21T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-21T21:00:00+09:00",
+        "end": "2026-07-21T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-80",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-22T19:00:00+09:00",
+        "end": "2026-07-22T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-22T19:00:00+09:00",
+        "end": "2026-07-22T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-81",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-22T20:00:00+09:00",
+        "end": "2026-07-22T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-22T20:00:00+09:00",
+        "end": "2026-07-22T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-82",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T19:00:00+09:00",
+        "end": "2026-07-23T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T19:00:00+09:00",
+        "end": "2026-07-23T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-83",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T20:00:00+09:00",
+        "end": "2026-07-23T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T20:00:00+09:00",
+        "end": "2026-07-23T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-84",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-23T21:00:00+09:00",
+        "end": "2026-07-23T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-23T21:00:00+09:00",
+        "end": "2026-07-23T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-85",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-24T19:00:00+09:00",
+        "end": "2026-07-24T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-24T19:00:00+09:00",
+        "end": "2026-07-24T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-86",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-24T20:00:00+09:00",
+        "end": "2026-07-24T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-24T20:00:00+09:00",
+        "end": "2026-07-24T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-87",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T19:00:00+09:00",
+        "end": "2026-07-25T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T19:00:00+09:00",
+        "end": "2026-07-25T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-88",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T20:00:00+09:00",
+        "end": "2026-07-25T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T20:00:00+09:00",
+        "end": "2026-07-25T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-89",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-25T21:00:00+09:00",
+        "end": "2026-07-25T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-25T21:00:00+09:00",
+        "end": "2026-07-25T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-90",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-26T19:00:00+09:00",
+        "end": "2026-07-26T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-26T19:00:00+09:00",
+        "end": "2026-07-26T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-91",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-26T20:00:00+09:00",
+        "end": "2026-07-26T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-26T20:00:00+09:00",
+        "end": "2026-07-26T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-92",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-27T19:00:00+09:00",
+        "end": "2026-07-27T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T19:00:00+09:00",
+        "end": "2026-07-27T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-93",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-27T20:00:00+09:00",
+        "end": "2026-07-27T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-27T20:00:00+09:00",
+        "end": "2026-07-27T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-94",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T19:00:00+09:00",
+        "end": "2026-07-28T19:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-28T19:00:00+09:00",
+        "end": "2026-07-28T19:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-95",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T20:00:00+09:00",
+        "end": "2026-07-28T20:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-28T20:00:00+09:00",
+        "end": "2026-07-28T20:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-96",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-28T21:00:00+09:00",
+        "end": "2026-07-28T21:30:00+09:00"
+      },
+      "actualBlock": {
+        "start": "2026-07-28T21:00:00+09:00",
+        "end": "2026-07-28T21:30:00+09:00"
+      },
+      "status": "done",
+      "confirmed": true
+    },
+    {
+      "id": "appt-97",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-30T19:00:00+09:00",
+        "end": "2026-07-30T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-98",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-30T20:00:00+09:00",
+        "end": "2026-07-30T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-99",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-30T21:00:00+09:00",
+        "end": "2026-07-30T21:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-100",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-31T19:00:00+09:00",
+        "end": "2026-07-31T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-101",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-07-31T20:00:00+09:00",
+        "end": "2026-07-31T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-102",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-01T19:00:00+09:00",
+        "end": "2026-08-01T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-103",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-01T20:00:00+09:00",
+        "end": "2026-08-01T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-104",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-01T21:00:00+09:00",
+        "end": "2026-08-01T21:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-105",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-02T19:00:00+09:00",
+        "end": "2026-08-02T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-106",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-02T20:00:00+09:00",
+        "end": "2026-08-02T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-107",
+      "title": "병원 예약",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-04T19:00:00+09:00",
+        "end": "2026-08-04T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-108",
+      "title": "가족 통화",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-04T20:00:00+09:00",
+        "end": "2026-08-04T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-109",
+      "title": "팀 스탠드업",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-04T21:00:00+09:00",
+        "end": "2026-08-04T21:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-110",
+      "title": "1:1 미팅",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-06T19:00:00+09:00",
+        "end": "2026-08-06T19:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    },
+    {
+      "id": "appt-111",
+      "title": "코드 리뷰",
+      "weeklyGoalId": null,
+      "categoryId": "cat-etc",
+      "estimatedMin": 30,
+      "plannedBlock": {
+        "start": "2026-08-06T20:00:00+09:00",
+        "end": "2026-08-06T20:30:00+09:00"
+      },
+      "actualBlock": null,
+      "status": "todo",
+      "confirmed": true
+    }
+  ]
+}
