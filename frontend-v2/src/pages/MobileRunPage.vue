@@ -1,4 +1,5 @@
 <template>
+  <PersonaBadge />
   <div class="mobile-run-page">
     <div class="summary">
       <div class="summary-top">
@@ -80,13 +81,15 @@ import BaseCard from '../shared/ui/BaseCard.vue'
 import Chip from '../shared/ui/Chip.vue'
 import Dot from '../shared/ui/Dot.vue'
 import ProgressBar from '../shared/ui/ProgressBar.vue'
+import PersonaBadge from '../shared/ui/PersonaBadge.vue'
+import { getDemoToday } from '../shared/lib/seedDateShift'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
 // 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
 // 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
-// 이름도 다르게 뒀다.
-// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
-const DEMO_TODAY = '2026-07-29'
+// 이름도 다르게 뒀다. getDemoToday()는 VITE_DEMO_FRESH가 켜진 배포에서만
+// 방문 시점의 "이번 주"로 이동하고, 그 외에는 시드 고정값을 그대로 낸다.
+const DEMO_TODAY = getDemoToday()
 
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()

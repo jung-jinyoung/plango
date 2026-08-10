@@ -1,4 +1,5 @@
 <template>
+  <PersonaBadge />
   <div class="today-page">
     <aside class="col-sidebar">
       <GoalSidebar
@@ -63,14 +64,16 @@ import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.v
 import { useTaskStore } from '../features/task/stores/taskStore'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
+import PersonaBadge from '../shared/ui/PersonaBadge.vue'
+import { getDemoToday } from '../shared/lib/seedDateShift'
 import type { TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
 // 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
 // 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
-// 이름도 다르게 뒀다.
-// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
-const DEMO_TODAY = '2026-07-29'
+// 이름도 다르게 뒀다. getDemoToday()는 VITE_DEMO_FRESH가 켜진 배포에서만
+// 방문 시점의 "이번 주"로 이동하고, 그 외에는 시드 고정값을 그대로 낸다.
+const DEMO_TODAY = getDemoToday()
 
 const router = useRouter()
 const goalStore = useGoalStore()
@@ -81,9 +84,11 @@ const bannerDismissed = ref(false)
 const allTasks = computed(() => taskStore.tasks)
 const weeklyGoals = computed(() => goalStore.weeklyGoals)
 const candidateGoals = computed(() => goalStore.weeklyGoals.filter((g) => g.status === 'active'))
-// 사이드바에 보여줄 월간 목표 — 지금은 시드의 논문 목표 하나로 고정.
-// 여러 월간 목표 중 "표시할 것"을 고르는 로직은 아직 없다(향후 과제).
-const monthlyGoal = computed(() => goalStore.monthlyGoalsById.get('mg-thesis') ?? null)
+// 사이드바에 보여줄 월간 목표 — 시드에서 첫 번째로 등록된(=주력) 월간 목표
+// 하나로 고정. 여러 월간 목표 중 "표시할 것"을 고르는 로직은 아직 없다(향후
+// 과제) — 페르소나마다 주력 목표 id가 다르므로(mg-thesis/mg-project) 하드코딩
+// 대신 등록 순서 첫 번째를 쓴다.
+const monthlyGoal = computed(() => goalStore.monthlyGoals[0] ?? null)
 
 const todayTasks = computed(() =>
   allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(DEMO_TODAY)),

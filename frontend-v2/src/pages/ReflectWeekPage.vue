@@ -1,4 +1,5 @@
 <template>
+  <PersonaBadge />
   <div class="reflect-week-dark page">
     <div class="wrap">
       <div class="hero">
@@ -101,13 +102,15 @@ import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addDays, formatMinutesAsHours, startOfWeek } from '../shared/lib/time'
 import BaseCard from '../shared/ui/BaseCard.vue'
+import PersonaBadge from '../shared/ui/PersonaBadge.vue'
+import { getDemoToday } from '../shared/lib/seedDateShift'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
 // 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
 // 판단하는 router/index.ts(진입 라우팅)와는 별개 상수다 — 혼동 방지용으로
-// 이름도 다르게 뒀다.
-// TODO(CLAUDE.md 17절, Supabase 연동 후): 이 상수 대신 nowIso()를 쓴다.
-const DEMO_TODAY = '2026-07-29'
+// 이름도 다르게 뒀다. getDemoToday()는 VITE_DEMO_FRESH가 켜진 배포에서만
+// 방문 시점의 "이번 주"로 이동하고, 그 외에는 시드 고정값을 그대로 낸다.
+const DEMO_TODAY = getDemoToday()
 const CURRENT_MONDAY = startOfWeek(DEMO_TODAY)
 const LAST_MONDAY = addDays(CURRENT_MONDAY, -7)
 const NEXT_MONDAY = addDays(CURRENT_MONDAY, 7)
@@ -138,16 +141,16 @@ const heroEstimatedMin = computed(() =>
 const heroActualLabel = computed(() => formatMinutesAsHours(heroActualMin.value))
 const heroEstimatedLabel = computed(() => formatMinutesAsHours(heroEstimatedMin.value))
 
-// 정확도 — 연구 계열(mg-thesis) achieved 4주(연구 주제 확정 2.0 → 선행연구
-// 정리 완료 1.8 → 선행 자료 스크리닝 1.6 → 실험 설계 확정 1.4, 시간순) 전체를
-// computeWeeklyAccuracy로 구해서, 그중 "지난주"(실험 설계 확정) 값을 대표값으로
-// 쓴다. 습관 계열(mg-fitness) achieved는 별개 트랙이라 여기 안 섞는다 — 안 섞으면
-// wg-ex-3(습관, LAST_MONDAY)가 실험 설계 확정과 같은 주에 겹칠 때 "지난주" 대표값이
-// 조용히 습관 목표 쪽으로 넘어가버리는 문제가 있었다(taskRepository.spec.ts의
-// monthlyGoalId 스코핑과 동일한 이유).
+// 정확도 — 주력 월간 목표(시드 등록 순서 첫 번째. 이서연=mg-thesis,
+// 김도윤=mg-project) achieved 4주 전체를 computeWeeklyAccuracy로 구해서,
+// 그중 "지난주" 값을 대표값으로 쓴다. 습관 계열(mg-fitness/mg-study) achieved는
+// 별개 트랙이라 여기 안 섞는다 — 안 섞으면 습관 achieved가 주력 목표와 같은
+// 주에 겹칠 때 "지난주" 대표값이 조용히 습관 목표 쪽으로 넘어가버리는 문제가
+// 있었다(taskRepository.spec.ts의 monthlyGoalId 스코핑과 동일한 이유).
+const primaryMonthlyGoalId = computed(() => goalStore.monthlyGoals[0]?.id ?? null)
 const achievedGoalsInOrder = computed(() =>
   goalStore.weeklyGoals
-    .filter((g) => g.status === 'achieved' && g.monthlyGoalId === 'mg-thesis')
+    .filter((g) => g.status === 'achieved' && g.monthlyGoalId === primaryMonthlyGoalId.value)
     .slice()
     .sort((a, b) => a.weekOf.localeCompare(b.weekOf)),
 )
