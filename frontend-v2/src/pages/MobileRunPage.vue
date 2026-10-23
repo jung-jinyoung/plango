@@ -34,6 +34,33 @@
       <p>지금 하기로 한 일이 없어요</p>
     </BaseCard>
 
+    <!-- 계획 시간이 지났는데 기록이 없는 일 — 웹의 "기록할까요?"와 같은 판정(needsCheck).
+         모바일에 허용된 동작(완료·미루기, 기획서 3-2절)만 둔다 -->
+    <section v-if="checkTasks.length > 0" class="section">
+      <div class="sec-h">기록할까요?</div>
+      <div v-for="item in checkTasks" :key="item.task.id" class="item check-item">
+        <span v-if="item.task.plannedBlock" class="tm">{{ formatHHMM(item.task.plannedBlock.start) }}</span>
+        <Dot :color="item.color" />
+        <span class="tt">{{ item.task.title }}</span>
+        <button
+          type="button"
+          class="mini-btn"
+          :aria-label="`${item.task.title} 계획대로 했어요`"
+          @click="onCompleteAsPlanned(item.task)"
+        >
+          했어요
+        </button>
+        <button
+          type="button"
+          class="mini-btn"
+          :aria-label="`${item.task.title} 미루기`"
+          @click="onPostpone(item.task)"
+        >
+          미루기
+        </button>
+      </div>
+    </section>
+
     <section v-if="upcomingTasks.length > 0" class="section">
       <div class="sec-h">이따 할 일</div>
       <div
@@ -71,7 +98,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { actualMin, captureActualStart, categoryColorOf, findCurrentTask, resolveCategory } from '../entities/derive'
+import {
+  actualMin,
+  captureActualStart,
+  categoryColorOf,
+  findCurrentTask,
+  needsCheck,
+  resolveCategory,
+} from '../entities/derive'
 import type { CategoryColor, Task } from '../entities/types'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
@@ -125,9 +159,16 @@ const elapsedPercent = computed(() => {
   return (elapsedMin.value / currentTask.value.estimatedMin) * 100
 })
 
+// 지난 일(기록할까요?)은 "이따 할 일"에서 뺀다 — 시각이 지난 일을 "이따"로 보여주지 않는다
+const checkTasks = computed(() =>
+  todayTasks.value
+    .filter((t) => needsCheck(t, now.value))
+    .map((task) => ({ task, color: resolveColor(task) })),
+)
+
 const upcomingTasks = computed(() =>
   todayTasks.value
-    .filter((t) => t.status === 'todo' && t.id !== currentTask.value?.id)
+    .filter((t) => t.status === 'todo' && t.id !== currentTask.value?.id && !needsCheck(t, now.value))
     .map((task) => ({ task, color: resolveColor(task) })),
 )
 
@@ -153,6 +194,12 @@ function onComplete(task: Task) {
 
 // "미루기" — plannedBlock은 그대로 두고 status만 carried로 바꾼다(드래그 없음,
 // product-spec.md "완료 / 미루기 / 시간 변경. 드래그 없음."). taskStore.updateTask 재사용.
+// 지난 일을 "했어요" — 계획 시간 그대로 실제로 기록한다(웹의 "계획대로 했어요"와 같다)
+function onCompleteAsPlanned(task: Task) {
+  if (!task.plannedBlock) return
+  taskStore.updateTask(task.id, { actualBlock: { ...task.plannedBlock }, status: 'done' })
+}
+
 function onPostpone(task: Task) {
   taskStore.updateTask(task.id, { status: 'carried' })
 }
@@ -294,6 +341,25 @@ function onPostpone(task: Task) {
   color: var(--text-muted);
   margin-bottom: 10px;
   padding-left: 2px;
+}
+.mini-btn {
+  flex: none;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--radius-ctrl);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mini-btn:focus-visible {
+  outline: 2px solid var(--rose-500);
+  outline-offset: 2px;
+}
+.check-item {
+  gap: 8px;
 }
 .item {
   background: var(--surface-card);

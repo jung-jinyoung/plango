@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import MobileRunPage from './MobileRunPage.vue'
+import { useNow } from '../shared/lib/time'
 
 // "지금 하는 일" 카드의 "다 했어요"/"미루기"는 R6이 적용되는 AI 제안이 아니라
 // 사용자가 직접 누르는 확정 액션이다 — 클릭 전까지 스토어가 그대로인지,
@@ -105,5 +106,55 @@ describe('MobileRunPage', () => {
     expect(wrapper.text()).toContain('논문 결과표 초안')
     expect(wrapper.text()).toContain('팀 회의')
     expect(wrapper.text()).toContain('6개 중 2개 했어요')
+  })
+})
+
+describe('MobileRunPage — 기록할까요?', () => {
+  // useNow()는 공유 ref를 처음 부를 때 만든다 — describe 본문에서 부르면 위 테스트의
+  // 가짜 시계보다 먼저 실제 시각으로 만들어지므로 beforeEach 안에서 부른다
+  let realNow = ''
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    const now = useNow()
+    realNow = now.value
+    now.value = '2026-07-29T14:30:00+09:00' // 그래프 3개 다듬기(13:00~14:00)는 지났고 기록이 없다
+  })
+  afterEach(() => {
+    useNow().value = realNow
+  })
+
+  const section = (wrapper: ReturnType<typeof mount>, title: string) =>
+    wrapper.findAll('.section').find((s) => s.find('.sec-h').text() === title)
+
+  it('계획 시간이 지난 일은 "이따 할 일"이 아니라 "기록할까요?"에 모은다', () => {
+    const wrapper = mount(MobileRunPage)
+    expect(section(wrapper, '기록할까요?')!.text()).toContain('그래프 3개 다듬기')
+    expect(section(wrapper, '이따 할 일')!.text()).not.toContain('그래프 3개 다듬기')
+  })
+
+  it('"했어요"를 누르면 계획 시간 그대로 실제가 기록되고 끝낸 일로 옮겨진다', async () => {
+    const wrapper = mount(MobileRunPage)
+    await section(wrapper, '기록할까요?')!
+      .findAll('button')
+      .find((b) => b.text() === '했어요')!
+      .trigger('click')
+
+    const task = useTaskStore().tasksById.get('today-18')!
+    expect(task.status).toBe('done')
+    expect(task.actualBlock).toEqual(task.plannedBlock)
+    expect(section(wrapper, '기록할까요?')).toBeUndefined()
+    expect(section(wrapper, '끝낸 일')!.text()).toContain('그래프 3개 다듬기')
+  })
+
+  it('"미루기"를 누르면 다음으로 옮긴 일로 간다', async () => {
+    const wrapper = mount(MobileRunPage)
+    await section(wrapper, '기록할까요?')!
+      .findAll('button')
+      .find((b) => b.text() === '미루기')!
+      .trigger('click')
+
+    expect(useTaskStore().tasksById.get('today-18')!.status).toBe('carried')
+    expect(section(wrapper, '다음으로 옮긴 일')!.text()).toContain('그래프 3개 다듬기')
   })
 })
