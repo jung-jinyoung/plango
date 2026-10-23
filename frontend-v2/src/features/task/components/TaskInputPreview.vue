@@ -1,5 +1,15 @@
 <template>
   <div class="task-input-preview">
+    <!-- 문법 안내 — 입력하면 뜨는 미리보기 칩과 같은 모양으로 보여줘서 "이렇게 적으면 이렇게
+         나뉜다"를 설명 없이 연결한다. 도움말 페이지는 따로 두지 않는다(CLAUDE.md 9절) -->
+    <p class="guide">
+      <span class="guide-chips" aria-hidden="true">
+        <Chip>할 일</Chip>
+        <Chip variant="time">30m</Chip>
+        <Chip variant="category" dot># 목표</Chip>
+      </span>
+      <span>한 줄로 적으면 시간과 목표를 알아서 읽을 수 있어요</span>
+    </p>
     <!-- 회색 박스 + placeholder만으로는 이미 채워진 칸처럼 보였다 — 흰 입력창에 전면 보더,
          포커스 링, 오른쪽 추가 버튼으로 "여기에 적는다"를 드러낸다 -->
     <div class="field" :class="{ 'has-submit': submittable }">
@@ -156,6 +166,19 @@ function onEnter(event: KeyboardEvent) {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.guide {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.guide-chips {
+  display: inline-flex;
+  gap: 4px;
 }
 .field {
   position: relative;
