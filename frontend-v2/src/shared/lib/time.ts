@@ -18,13 +18,34 @@ export function minutesOfDay(iso: string): number {
 }
 
 /**
+ * 타임라인에 그릴 시각 범위(시 단위). 기본 범위를 유지하되, 주어진 시각(현재 시각,
+ * 블록 시작·끝) 중 범위 밖이 있으면 그 시각을 덮도록 넓힌다 — 밤·이른 아침에도
+ * 현재 시각 바가 카드 밖으로 나가지 않게. 하루 경계는 자정이라 0~24시를 넘지 않는다.
+ * 블록 끝이 다음 날 00:00이면 minutesOfDay가 0이 되므로 시작 쪽 계산에서만 쓰인다.
+ */
+export function timelineHourRange(
+  isos: string[],
+  defaultStart: number,
+  defaultEnd: number,
+): { startHour: number; endHour: number } {
+  let startHour = defaultStart
+  let endHour = defaultEnd
+  for (const iso of isos) {
+    const min = minutesOfDay(iso)
+    startHour = Math.min(startHour, Math.floor(min / 60))
+    endHour = Math.max(endHour, Math.ceil(min / 60))
+  }
+  return { startHour: Math.max(0, startHour), endHour: Math.min(24, endHour) }
+}
+
+/**
  * 지금 이 순간을 KST(+09:00) ISO 8601 문자열로 만든다. UTC 타임스탬프에
  * 9시간을 더해 UTC getter로 읽는 방식이라, 실행 머신의 시스템 타임존과
  * 무관하게 항상 한국 표준시 기준으로 나온다 — new Date().getHours() 같은
  * 로컬 getter에 의존하면 머신 타임존에 따라 결과가 달라진다.
  */
 export function nowIso(): string {
-  const shifted = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const shifted = new Date(Date.now() + nowOffsetMs + 9 * 60 * 60 * 1000)
   const y = shifted.getUTCFullYear()
   const mo = String(shifted.getUTCMonth() + 1).padStart(2, '0')
   const d = String(shifted.getUTCDate()).padStart(2, '0')
@@ -32,6 +53,20 @@ export function nowIso(): string {
   const mi = String(shifted.getUTCMinutes()).padStart(2, '0')
   const s = String(shifted.getUTCSeconds()).padStart(2, '0')
   return `${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`
+}
+
+let nowOffsetMs = 0
+
+/**
+ * 체험 배포 전용 — 현재 시각이 startIso에서 시작해 실제 시간만큼 흐르게 한다.
+ * 체험 모드는 페르소나마다 정해둔 장면(예: 이서연 수요일 13:45)에서 시작한다 —
+ * 방문 시각에 따라 "지금 할 일"이 없거나 날짜가 어긋나 경과 시간·완료 기록·드래그
+ * 판정이 틀어지는 것을 막고, 누가 언제 들어와도 같은 장면을 보게 한다.
+ * boot/demo-clock.ts에서 체험 모드일 때만 켠다 — 개발 빌드의 진입 라우팅은 실제
+ * 시각으로 판단해야 하므로 꺼진 채로 둔다. null이면 해제.
+ */
+export function setNowOverride(startIso: string | null): void {
+  nowOffsetMs = startIso ? new Date(startIso).getTime() - Date.now() : 0
 }
 
 let sharedNow: Ref<string> | null = null
@@ -71,6 +106,14 @@ export function addDays(dateKey: string, days: number): string {
   return dt.toISOString().slice(0, 10)
 }
 
+const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토']
+
+/** 'YYYY-MM-DD'를 화면 표시용 "7월 29일 수요일"로 */
+export function formatDateKo(dateKey: string): string {
+  const dt = parseDateKey(dateKey)
+  return `${dt.getUTCMonth() + 1}월 ${dt.getUTCDate()}일 ${WEEKDAY_KO[dt.getUTCDay()]}요일`
+}
+
 /** 그 날짜가 속한 주의 월요일 'YYYY-MM-DD' (CLAUDE.md 5절: 주의 시작은 월요일) */
 export function startOfWeek(dateKey: string): string {
   const dt = parseDateKey(dateKey)
@@ -93,6 +136,19 @@ export function formatMinutesAsHours(min: number): string {
   const h = Math.floor(min / 60)
   const m = min % 60
   return m === 0 ? `${h}h` : `${h}h ${m}m`
+}
+
+/** 분(minute)을 문장용 "1시간 45분" 형태로. 1시간 미만은 "40분", 정각이면 "1시간" — 모바일 실행 뷰(목업 04) */
+export function formatMinutesKo(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  if (h === 0) return `${m}분`
+  return m === 0 ? `${h}시간` : `${h}시간 ${m}분`
+}
+
+/** 경과 분(minute)을 타이머용 "1:23"(H:MM) 형태로 */
+export function formatElapsed(min: number): string {
+  return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`
 }
 
 /** ISO 8601 문자열에서 'HH:MM'만 뽑는다 — minutesOfDay와 같은 이유로 문자열을 그대로 읽는다 */
@@ -129,6 +185,11 @@ export function isoAt(dateKey: string, minutesOfDay: number): string {
   const hh = Math.floor(minutesOfDay / 60)
   const mm = minutesOfDay % 60
   return `${dateKey}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+09:00`
+}
+
+/** 분(minute)을 다음 15분 경계로 올린다 — 이미 경계면 그대로(CLAUDE.md 5절 15분 스냅) */
+export function ceilTo15Min(min: number): number {
+  return Math.ceil(min / 15) * 15
 }
 
 /** 그 ISO 시각이 18:00 이후인지 — 진입 라우팅(CLAUDE.md 12절) "18시 이후/이전" 분기 판정 */

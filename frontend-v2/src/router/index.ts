@@ -6,10 +6,12 @@ import ReflectWeekPage from '../pages/ReflectWeekPage.vue'
 import OnboardingPage from '../pages/OnboardingPage.vue'
 import MobileRunPage from '../pages/MobileRunPage.vue'
 import ReflectDayPage from '../pages/ReflectDayPage.vue'
+import PersonaPickerPage from '../pages/PersonaPickerPage.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { resolveEntry } from '../features/reflect/lib/resolveEntry'
 import { useReflectionStore } from '../features/reflect/stores/reflectionStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
+import { isDemoFreshEnabled } from '../shared/lib/seedDateShift'
 import { nowIso, startOfWeek } from '../shared/lib/time'
 
 // /gallery는 ComponentGallery.vue와 함께 병합 후 삭제할 임시 라우트.
@@ -18,6 +20,9 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'design-preview', component: DesignPreview },
     { path: '/gallery', name: 'component-gallery', component: ComponentGallery },
+    // 포트폴리오 데모 진입점(QR/URL) — 페르소나 선택. beforeEach 가드는
+    // to.path === '/'에서만 발동하므로 이 라우트는 가드 영향을 받지 않는다.
+    { path: '/demo', name: 'persona-picker', component: PersonaPickerPage },
     { path: '/today', name: 'today', component: TodayPage },
     { path: '/reflect/week', name: 'reflect-week', component: ReflectWeekPage },
     { path: '/onboarding', name: 'onboarding', component: OnboardingPage },
@@ -38,6 +43,12 @@ const router = createRouter({
 // 데모 시나리오 통합 테스트로 이 버그를 발견했다 — demoScenario.spec.ts).
 router.beforeEach((to) => {
   if (to.path !== '/') return true
+
+  // 포트폴리오 데모 배포(VITE_DEMO_FRESH가 켜진 빌드)에서는 루트를 항상 페르소나
+  // 선택 화면으로 보낸다 — 방문자가 언제 들어오든 같은 첫 화면을 보도록.
+  // 페르소나를 고르면 PersonaPickerPage가 today로 보낸다. 진입 라우팅은
+  // 개발·실서비스 빌드에서 그대로 동작한다.
+  if (isDemoFreshEnabled()) return { name: 'persona-picker' }
 
   const goalStore = useGoalStore()
   const taskStore = useTaskStore()

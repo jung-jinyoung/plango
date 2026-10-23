@@ -38,7 +38,7 @@ function mountTimelineMulti(tasks: Task[]) {
 
 // 08:00 시작·64px/h 기준 15:00 블록의 top = (15-8)*64 = 448px
 async function drag(wrapper: ReturnType<typeof mountTimeline>, deltaPx: number) {
-  const block = wrapper.find('.block')
+  const block = wrapper.find('.tl-block')
   await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
   await block.trigger('pointermove', { clientY: deltaPx, pointerId: 1 })
   await block.trigger('pointerup', { clientY: deltaPx, pointerId: 1 })
@@ -114,7 +114,7 @@ describe('ScheduleTimeline 드래그', () => {
   it('pointerId가 다른 pointermove/pointerup은 무시한다', async () => {
     const task = makeTask({ confirmed: false })
     const wrapper = mountTimeline(task)
-    const block = wrapper.find('.block')
+    const block = wrapper.find('.tl-block')
 
     await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
     await block.trigger('pointermove', { clientY: 64, pointerId: 2 }) // 다른 포인터 — 무시돼야 함
@@ -137,7 +137,7 @@ describe('ScheduleTimeline 드래그', () => {
     const wrapper = mountTimelineMulti([dragged, other])
 
     // dragged(15:00~16:00)를 1시간 아래로 옮기면 16:00~17:00 — other와 정확히 겹친다
-    const block = wrapper.findAll('.block')[0]!
+    const block = wrapper.findAll('.tl-block')[0]!
     await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
     await block.trigger('pointermove', { clientY: 64, pointerId: 1 })
     await block.trigger('pointerup', { clientY: 64, pointerId: 1 })
@@ -158,7 +158,7 @@ describe('ScheduleTimeline 드래그', () => {
     })
     const wrapper = mountTimelineMulti([dragged, other])
 
-    const block = wrapper.findAll('.block')[0]!
+    const block = wrapper.findAll('.tl-block')[0]!
     await block.trigger('pointerdown', { clientY: 0, pointerId: 1 })
     await block.trigger('pointermove', { clientY: 64, pointerId: 1 })
     await block.trigger('pointerup', { clientY: 64, pointerId: 1 })

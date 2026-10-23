@@ -6,15 +6,24 @@
       class="hour-line"
       :style="{ top: `${(hour - startHour) * pxPerHour}px` }"
     >
-      <span class="hour-label">{{ String(hour).padStart(2, '0') }}:00</span>
+      <!-- 현재 시각 바가 맨 위에 붙어 있으면(타임라인보다 이른 시각) 첫 라벨과 겹치므로 숨긴다 -->
+      <span v-if="!(hour === startHour && nowBeforeStart)" class="hour-label">
+        {{ String(hour).padStart(2, '0') }}:00
+      </span>
     </div>
 
     <template v-for="item in items" :key="item.task.id">
       <!-- 단일 블록: 계획만 있거나(아직 실행 전), 계획·실제 차이가 15분 미만이라 병합된 경우 -->
       <div
         v-if="item.kind === 'single'"
-        class="block"
-        :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+        class="tl-block"
+        :class="[
+          `is-${item.state}`,
+          {
+            'is-dragging': activeDrag?.taskId === item.task.id,
+            'is-compact': item.layout.height < COMPACT_BELOW_PX,
+          },
+        ]"
         :style="[blockStyle(item.layout, item), dragTransform(item)]"
         @pointerdown="onPointerDown($event, item)"
         @pointermove="onPointerMove"
@@ -22,6 +31,8 @@
         @pointercancel="onPointerCancel"
       >
         <b>{{ item.task.title }}</b>
+        <small>{{ item.durationLabel }}</small>
+        <span v-if="STATE_LABEL[item.state]" class="state">{{ STATE_LABEL[item.state] }}</span>
       </div>
 
       <!-- 계획·실제가 15분 이상 어긋나면 목업 그대로 나란히(고스트 38% + 실제 나머지) -->
@@ -36,10 +47,14 @@
           :style="{ height: `${item.ghost.height}px`, marginTop: `${item.ghost.top - item.lane.top}px` }"
         >
           <b>계획</b>
+          <small>{{ formatMinutesKo(item.plannedMin) }}</small>
         </div>
         <div
           class="real"
-          :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+          :class="{
+            'is-dragging': activeDrag?.taskId === item.task.id,
+            'is-compact': item.real.height < COMPACT_BELOW_PX,
+          }"
           :style="[
             {
               height: `${item.real.height}px`,
@@ -54,6 +69,7 @@
           @pointercancel="onPointerCancel"
         >
           <b>{{ item.task.title }}</b>
+          <small>{{ formatMinutesKo(actualMin(item.task)) }}</small>
           <span class="delta">+{{ item.deltaMin }}분</span>
         </div>
       </div>
@@ -65,8 +81,21 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { actualMin, hasScheduleConflict, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
-import { addMinutes, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
+import {
+  actualMin,
+  hasScheduleConflict,
+  needsCheck,
+  resolveDragTarget,
+  shouldShowGhost,
+} from '../../../entities/derive'
+import {
+  addMinutes,
+  formatMinutesKo,
+  isoAt,
+  minutesBetween,
+  minutesOfDay,
+  useNow,
+} from '../../../shared/lib/time'
 import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
 import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
 import CurrentTimeBar from './CurrentTimeBar.vue'
@@ -77,6 +106,8 @@ export interface TimelineTaskInput {
   task: Task
   color: CategoryColor
 }
+
+const now = useNow()
 
 const props = defineProps<{
   tasks: TimelineTaskInput[]
@@ -91,6 +122,8 @@ const hourMarks = computed(() => {
   return marks
 })
 
+const nowBeforeStart = computed(() => minutesOfDay(now.value) < props.startHour * 60)
+
 const totalHeight = computed(() => (props.endHour - props.startHour) * props.pxPerHour)
 
 interface SingleItem {
@@ -98,6 +131,24 @@ interface SingleItem {
   task: Task
   color: CategoryColor
   layout: TimelineLayout
+  // 실측이 있으면 실제 시간, 아직 실행 전이면 계획 길이 + "예상" (목업 01)
+  durationLabel: string
+  state: BlockState
+}
+
+// 지난 계획 중 기록이 없는 것(기록할까요?)과 정리된 것(옮김·안 함)을 앞으로 할 계획과 구분한다.
+// 실패 언어·경고색은 쓰지 않는다(CLAUDE.md 8절) — 점선(원래 계획과 같은 표기)과 중립 톤뿐이다.
+type BlockState = 'normal' | 'needs-check' | 'carried' | 'dropped'
+const STATE_LABEL: Record<BlockState, string> = {
+  normal: '',
+  'needs-check': '기록할까요?',
+  carried: '다음으로 옮김',
+  dropped: '이번엔 안 함',
+}
+
+function blockState(task: Task): BlockState {
+  if (task.status === 'carried' || task.status === 'dropped') return task.status
+  return needsCheck(task, now.value) ? 'needs-check' : 'normal'
 }
 
 interface PairItem {
@@ -107,6 +158,7 @@ interface PairItem {
   lane: TimelineLayout
   ghost: TimelineLayout
   real: TimelineLayout
+  plannedMin: number
   deltaMin: number
 }
 
@@ -136,13 +188,17 @@ const items = computed<TimelineItem[]>(() =>
           lane: { top: laneTop, height: laneBottom - laneTop },
           ghost: plannedLayout,
           real: actualLayout,
+          plannedMin,
           deltaMin: Math.abs(actualMin(task) - plannedMin),
         }
       }
 
       const layout = actualLayout ?? plannedLayout
       if (!layout) return null
-      return { kind: 'single', task, color, layout }
+      const durationLabel = task.actualBlock
+        ? formatMinutesKo(actualMin(task))
+        : `${formatMinutesKo(minutesBetween(task.plannedBlock!.start, task.plannedBlock!.end))} 예상`
+      return { kind: 'single', task, color, layout, durationLabel, state: blockState(task) }
     })
     .filter((item): item is TimelineItem => item !== null),
 )
@@ -150,8 +206,17 @@ const items = computed<TimelineItem[]>(() =>
 /** 약속은 카테고리와 무관하게 항상 중립색 — CLAUDE.md 7절.
  * single일 땐 layout의 top/height도 같이 반환하고, pair(real)일 땐 top/height는
  * 바깥 :style에서 이미 처리하므로 색만 반환한다(layout 인자를 null로 넘긴다). */
-function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: CategoryColor }) {
+function blockStyle(
+  layout: TimelineLayout | null,
+  item: { task: Task; color: CategoryColor; state?: BlockState },
+) {
   const pos = layout ? { top: `${layout.top}px`, height: `${layout.height}px` } : {}
+  if (item.state === 'needs-check') {
+    return { ...pos, background: 'transparent', color: 'var(--text-secondary)' }
+  }
+  if (item.state === 'carried' || item.state === 'dropped') {
+    return { ...pos, background: 'var(--surface-sunken)', color: 'var(--text-muted)' }
+  }
   if (item.task.weeklyGoalId === null) {
     return { ...pos, background: 'var(--surface-sunken)', color: 'var(--text-secondary)' }
   }
@@ -167,9 +232,9 @@ function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: Ca
 // R2·R3 판정(resolveDragTarget)만 담당한다.
 const emit = defineEmits<{
   'drag-block': [taskId: string, field: 'plannedBlock' | 'actualBlock', block: TimeBlock]
+  // 움직이지 않고 눌렀다 뗀 경우 — 페이지가 편집·완료 확인 패널을 연다
+  'select-block': [taskId: string]
 }>()
-
-const now = useNow()
 
 interface ActiveDrag {
   taskId: string
@@ -184,6 +249,9 @@ const activeDrag = ref<ActiveDrag | null>(null)
 const previewOffsetPx = ref(0)
 
 const SNAP_MIN = 15
+// 이보다 낮은 블록(64px/시간 기준 약 37분 미만)은 제목·시간을 한 줄로 줄인다
+const COMPACT_BELOW_PX = 40
+const CLICK_TOLERANCE_PX = 4
 function snap(min: number): number {
   return Math.round(min / SNAP_MIN) * SNAP_MIN
 }
@@ -224,6 +292,14 @@ function onPointerUp(event: PointerEvent) {
   const drag = activeDrag.value
   if (!drag || event.pointerId !== drag.pointerId) return
 
+  // 거의 움직이지 않았으면 드래그가 아니라 클릭이다
+  if (Math.abs(previewOffsetPx.value) < CLICK_TOLERANCE_PX) {
+    activeDrag.value = null
+    previewOffsetPx.value = 0
+    emit('select-block', drag.taskId)
+    return
+  }
+
   const newTop = drag.originalTop + previewOffsetPx.value
   const newStartMin = snap(pxToMinutesOfDay(newTop, props.startHour, props.pxPerHour))
   const newStartIso = isoAt(drag.dateKey, newStartMin)
@@ -261,10 +337,12 @@ function onPointerUp(event: PointerEvent) {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.block {
+.tl-block {
   position: absolute;
   left: 56px;
   right: 8px;
+  /* 15분 블록도 읽히도록(CLAUDE.md 7절 밀도 표: 최소 높이 22px) */
+  min-height: 22px;
   border-radius: var(--radius-block);
   padding: 6px 10px;
   overflow: hidden;
@@ -272,14 +350,62 @@ function onPointerUp(event: PointerEvent) {
   cursor: grab;
   touch-action: none;
 }
-.block b {
+/* 짧은 블록 — 제목과 시간을 한 줄로, 넘치는 제목은 말줄임 */
+.tl-block.is-compact,
+.real.is-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 22px;
+}
+.is-compact b {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.is-compact small,
+.is-compact .delta {
+  flex: none;
+  margin-top: 0;
+  white-space: nowrap;
+}
+.is-compact .state {
+  top: 50%;
+  transform: translateY(-50%);
+}
+/* 기록할까요? — 원래 계획(고스트)과 같은 점선 표기. 전면 보더(CLAUDE.md 7절) */
+.tl-block.is-needs-check {
+  border: 1.5px dashed var(--text-muted);
+}
+/* 짧은 블록에서도 잘리지 않게 제목 줄 오른쪽 위에 둔다 */
+.state {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.tl-block.is-carried .state,
+.tl-block.is-dropped .state {
+  background: var(--surface-card);
+}
+.tl-block b {
   display: block;
   font-weight: 600;
   line-height: 1.35;
 }
 
 /* 대기 상태엔 그림자 없음(CLAUDE.md 13절) — 드래그 중에만 --elev-drag를 쓴다 */
-.block.is-dragging,
+.tl-block.is-dragging,
 .real.is-dragging {
   cursor: grabbing;
   box-shadow: var(--elev-drag);
@@ -304,6 +430,7 @@ function onPointerUp(event: PointerEvent) {
   overflow: hidden;
 }
 .ghost b {
+  display: block;
   font-weight: 500;
   font-size: 11.5px;
 }
@@ -321,6 +448,14 @@ function onPointerUp(event: PointerEvent) {
   display: block;
   font-weight: 600;
   line-height: 1.35;
+}
+.tl-block small,
+.real small,
+.ghost small {
+  display: block;
+  font-size: 11.5px;
+  opacity: 0.72;
+  font-variant-numeric: tabular-nums;
 }
 .delta {
   font-size: 11px;

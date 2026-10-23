@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { WeeklyGoal } from '../../../entities/types'
-import { parseTaskInput } from './parse'
+import { activeGoalQuery, goalKeyword, parseTaskInput } from './parse'
 
 function makeGoal(id: string, title: string): WeeklyGoal {
   return {
@@ -82,5 +82,31 @@ describe('parseTaskInput', () => {
     expect(result.weeklyGoalId).toBeNull()
     expect(result.matchedGoalTitle).toBeNull()
     expect(result.title).toBe('#정리 하기')
+  })
+})
+
+describe('activeGoalQuery', () => {
+  it('입력 끝의 #토큰 검색어를 돌려준다', () => {
+    expect(activeGoalQuery('서론 30m #결')).toBe('결')
+    expect(activeGoalQuery('서론 30m #')).toBe('')
+  })
+
+  it('끝이 #토큰이 아니면 null', () => {
+    expect(activeGoalQuery('서론 #결과 30m')).toBeNull()
+    expect(activeGoalQuery('서론 30m')).toBeNull()
+  })
+})
+
+describe('goalKeyword', () => {
+  it('이 목표에만 매칭되는 가장 짧은 단어를 고른다', () => {
+    expect(goalKeyword(candidateGoals[1]!, candidateGoals)).toBe('운동')
+  })
+
+  it('고른 단어로 다시 파싱하면 그 목표에 연결된다', () => {
+    // '정리'는 wg-3·wg-4 둘 다 겹쳐서 모호하다 — 겹치지 않는 단어를 골라야 한다
+    for (const goal of candidateGoals) {
+      const parsed = parseTaskInput(`할 일 30m #${goalKeyword(goal, candidateGoals)}`, candidateGoals)
+      expect(parsed.weeklyGoalId).toBe(goal.id)
+    }
   })
 })

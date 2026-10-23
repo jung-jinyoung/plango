@@ -12,6 +12,9 @@
     "build": "quasar build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "seed:seyeon": "node scripts/generate-seed.mjs",
+    "seed:doyoon": "node scripts/generate-seed-doyoon.mjs",
+    "seed:all": "pnpm seed:seyeon && pnpm seed:doyoon",
     "postinstall": "quasar prepare --silent"
   },
   "dependencies": {

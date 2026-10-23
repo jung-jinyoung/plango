@@ -1,16 +1,22 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   addDays,
   addMinutes,
+  ceilTo15Min,
   daysSince,
   formatHHMM,
+  formatDateKo,
+  formatElapsed,
   formatMinutesAsHours,
+  formatMinutesKo,
   isAfter18,
   isoAt,
   minutesBetween,
   minutesOfDay,
   nowIso,
+  setNowOverride,
   startOfWeek,
+  timelineHourRange,
   useNow,
 } from './time'
 
@@ -69,6 +75,92 @@ describe('formatMinutesAsHours', () => {
 
   it('0분은 0h', () => {
     expect(formatMinutesAsHours(0)).toBe('0h')
+  })
+})
+
+describe('formatDateKo', () => {
+  it('월·일·요일을 표시한다', () => {
+    expect(formatDateKo('2026-07-29')).toBe('7월 29일 수요일')
+    expect(formatDateKo('2026-08-02')).toBe('8월 2일 일요일')
+  })
+})
+
+describe('formatMinutesKo', () => {
+  it('시간과 분을 같이 표시한다', () => {
+    expect(formatMinutesKo(105)).toBe('1시간 45분')
+  })
+
+  it('1시간 미만이면 분만 표시한다', () => {
+    expect(formatMinutesKo(40)).toBe('40분')
+  })
+
+  it('정각이면 분을 생략한다', () => {
+    expect(formatMinutesKo(60)).toBe('1시간')
+  })
+})
+
+describe('formatElapsed', () => {
+  it('H:MM으로 표시하고 분은 두 자리로 채운다', () => {
+    expect(formatElapsed(83)).toBe('1:23')
+    expect(formatElapsed(5)).toBe('0:05')
+  })
+})
+
+describe('setNowOverride', () => {
+  afterEach(() => {
+    setNowOverride(null)
+    vi.useRealTimers()
+  })
+
+  it('정한 시각에서 시작해 실제 시간만큼 흐른다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-23T15:00:00.000Z')) // 실제: KST 토 00:00
+    setNowOverride('2026-10-21T13:45:00+09:00')
+    expect(nowIso()).toBe('2026-10-21T13:45:00+09:00')
+
+    vi.advanceTimersByTime(90 * 1000)
+    expect(nowIso()).toBe('2026-10-21T13:46:30+09:00')
+  })
+
+  it('null이면 실제 시각으로 돌아간다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-31T04:30:15.000Z'))
+    setNowOverride('2026-07-29T13:45:00+09:00')
+    setNowOverride(null)
+    expect(nowIso()).toBe('2026-07-31T13:30:15+09:00')
+  })
+})
+
+describe('ceilTo15Min', () => {
+  it('다음 15분 경계로 올리고, 이미 경계면 그대로 둔다', () => {
+    expect(ceilTo15Min(13 * 60 + 31)).toBe(13 * 60 + 45)
+    expect(ceilTo15Min(13 * 60 + 45)).toBe(13 * 60 + 45)
+  })
+})
+
+describe('timelineHourRange', () => {
+  const at = (hhmm: string) => `2026-07-29T${hhmm}:00+09:00`
+
+  it('모든 시각이 기본 범위 안이면 기본 범위를 그대로 쓴다', () => {
+    expect(timelineHourRange([at('09:00'), at('13:45'), at('20:30')], 8, 21)).toEqual({
+      startHour: 8,
+      endHour: 21,
+    })
+  })
+
+  it('현재 시각이 끝보다 늦으면 그 시각을 덮는 정각까지 늘린다', () => {
+    expect(timelineHourRange([at('22:49')], 8, 21)).toEqual({ startHour: 8, endHour: 23 })
+  })
+
+  it('현재 시각이 시작보다 이르면 그 시각의 정각부터 시작한다', () => {
+    expect(timelineHourRange([at('06:30')], 8, 21)).toEqual({ startHour: 6, endHour: 21 })
+  })
+
+  it('하루 경계(0~24시)를 넘지 않는다', () => {
+    expect(timelineHourRange([at('23:30'), at('00:10')], 8, 21)).toEqual({
+      startHour: 0,
+      endHour: 24,
+    })
   })
 })
 

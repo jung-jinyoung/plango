@@ -87,6 +87,23 @@ export function monthlyCurrentHours(
 }
 
 /**
+ * 월간 목표에 실제로 쓴 시간(시간 단위) = 하위 주간 목표에 연결된 할 일의 실측 합.
+ * 주간 목표 status와 무관하게 실제로 쓴 시간은 모두 센다(dropped 포함).
+ * monthlyCurrentHours(예상 총량)와 짝을 이뤄 "N시간 썼어요 / M시간 예상"이 된다.
+ */
+export function monthlySpentHours(
+  monthlyGoal: MonthlyGoal,
+  weeklyEntries: { goal: WeeklyGoal; tasks: Task[] }[],
+): number {
+  let totalMin = 0
+  for (const { goal, tasks } of weeklyEntries) {
+    if (goal.monthlyGoalId !== monthlyGoal.id) continue
+    totalMin += tasks.reduce((sum, task) => sum + actualMin(task), 0)
+  }
+  return totalMin / 60
+}
+
+/**
  * 예상 정확도 = Σ실제 / Σ예상. 값이 클수록 예상보다 오래 걸렸다는 뜻.
  * 예상 합이 0 이하면 판정할 수 없으니 0을 반환한다.
  */
@@ -257,6 +274,15 @@ export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
       return nowMin >= startMin && nowMin < endMin
     }) ?? null
   )
+}
+
+/**
+ * 계획 시간이 이미 지났는데 했는지 기록이 없는 할 일 — 오늘 화면이 "기록할까요?"로 권한다.
+ * findCurrentTask와 같은 이유로 날짜가 아니라 시각(시:분)만 비교한다(현재 시각 바와 일치).
+ */
+export function needsCheck(task: Task, nowIso: string): boolean {
+  if (task.status !== 'todo' || !task.plannedBlock || task.actualBlock) return false
+  return minutesOfDay(task.plannedBlock.end) <= minutesOfDay(nowIso)
 }
 
 /**

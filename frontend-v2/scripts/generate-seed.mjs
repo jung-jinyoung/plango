@@ -20,26 +20,17 @@ import { dirname, resolve } from 'node:path'
 // (이 임포트 없이 스크립트가 직접 toISOString()으로 계산하다가 로컬 자정이
 // UTC 기준 하루 밀리는 타임존 버그가 실제로 났었다.)
 import { addDays, startOfWeek } from '../src/shared/lib/time.ts'
+// iso/block/nextId는 generate-seed-doyoon.mjs와 공유하는 저수준 헬퍼.
+import { block, createIdGenerator } from './lib/seedHelpers.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT_PATH = resolve(__dirname, '../docs/seed-data.json')
 
+// TODAY는 generate-seed-doyoon.mjs와 반드시 같은 값이어야 한다 — 런타임
+// 날짜 이동(shared/lib/seedDateShift.ts의 ANCHOR_TODAY)이 두 페르소나에
+// 동일한 offset을 적용하는 전제라서, 여기서 어긋나면 페르소나를 바꿀 때
+// "이번 주" 정렬이 깨진다.
 const TODAY = '2026-07-29' // 목업 기준 "오늘" (수요일)
-const TZ = '+09:00'
-
-function iso(dateStr, hh, mm = 0) {
-  const h = String(hh).padStart(2, '0')
-  const m = String(mm).padStart(2, '0')
-  return `${dateStr}T${h}:${m}:00${TZ}`
-}
-/** 분(minute) 오프셋 → HH:MM 기준 TimeBlock */
-function block(dateStr, startMin, durationMin) {
-  const sh = Math.floor(startMin / 60)
-  const sm = startMin % 60
-  const eh = Math.floor((startMin + durationMin) / 60)
-  const em = (startMin + durationMin) % 60
-  return { start: iso(dateStr, sh, sm), end: iso(dateStr, eh, em) }
-}
 const isPastDay = (dateStr) => dateStr < TODAY
 
 const CURRENT_MONDAY = startOfWeek(TODAY) // 2026-07-27
@@ -173,8 +164,7 @@ const weeklyGoals = [
 ]
 
 const tasks = []
-let seq = 0
-const nextId = (prefix) => `${prefix}-${(seq += 1)}`
+const nextId = createIdGenerator()
 
 // --- achieved 4주: 목표 연결 할 일 (화/목처럼 주 초반에 분산 배치) ---
 for (const w of achievedPlans) {
