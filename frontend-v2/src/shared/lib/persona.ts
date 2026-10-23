@@ -17,6 +17,8 @@ export interface PersonaMeta {
   situation: string
   // 들어가면 보게 될 것 — 시드 데이터에 실제로 있는 장면만 쓴다
   preview: string[]
+  // 체험 배포에서 "지금"이 시작하는 시각('HH:MM') — 진행 중인 일이 있는 장면을 고른다
+  demoStartTime: string
 }
 
 export const PERSONA_META: Record<PersonaId, PersonaMeta> = {
@@ -27,6 +29,7 @@ export const PERSONA_META: Record<PersonaId, PersonaMeta> = {
     description: '논문을 쓰는 중이에요. 진도가 안 보여 불안하고, 스스로 계획을 쪼개고 있어요.',
     situation: '논문 마감이 다가오는 대학원생의 한 주',
     preview: ['처음 예상보다 늘어난 논문 작업량', '3주째 밀리고 있는 분석 작업'],
+    demoStartTime: '13:45', // 그래프 3개 다듬기(13:00~14:00) 진행 중
   },
   doyoon: {
     id: 'doyoon',
@@ -35,6 +38,7 @@ export const PERSONA_META: Record<PersonaId, PersonaMeta> = {
     description: '회사 일과 사이드 프로젝트를 같이 굴리고 있어요. 저녁과 주말에 몰아서 확인해요.',
     situation: '회사 일과 사이드 프로젝트를 같이 하는 직장인의 한 주',
     preview: ['약속 3개 사이에 끼워 넣은 작업 시간', '3주째 밀리고 있는 대시보드 작업'],
+    demoStartTime: '21:30', // API 에러 핸들링 정리(21:20~22:00) 진행 중
   },
 }
 

@@ -5,7 +5,7 @@ import { defineConfig } from '#q-app'
 
 export default defineConfig((/* ctx */) => {
   return {
-    boot: ['demo-date', 'theme'],
+    boot: ['demo-clock', 'theme'],
 
     css: ['app.scss'],
 

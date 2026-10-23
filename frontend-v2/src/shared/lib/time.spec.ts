@@ -14,7 +14,7 @@ import {
   minutesBetween,
   minutesOfDay,
   nowIso,
-  setNowDateOverride,
+  setNowOverride,
   startOfWeek,
   timelineHourRange,
   useNow,
@@ -106,24 +106,27 @@ describe('formatElapsed', () => {
   })
 })
 
-describe('setNowDateOverride', () => {
+describe('setNowOverride', () => {
   afterEach(() => {
-    setNowDateOverride(null)
+    setNowOverride(null)
     vi.useRealTimers()
   })
 
-  it('날짜만 바꿔 끼우고 시각은 실제 값을 유지한다', () => {
+  it('정한 시각에서 시작해 실제 시간만큼 흐른다', () => {
     vi.useFakeTimers()
-    vi.setSystemTime(new Date('2026-07-31T04:30:15.000Z')) // KST 금 13:30:15
-    setNowDateOverride('2026-07-29')
-    expect(nowIso()).toBe('2026-07-29T13:30:15+09:00')
+    vi.setSystemTime(new Date('2026-10-23T15:00:00.000Z')) // 실제: KST 토 00:00
+    setNowOverride('2026-10-21T13:45:00+09:00')
+    expect(nowIso()).toBe('2026-10-21T13:45:00+09:00')
+
+    vi.advanceTimersByTime(90 * 1000)
+    expect(nowIso()).toBe('2026-10-21T13:46:30+09:00')
   })
 
-  it('null이면 실제 날짜로 돌아간다', () => {
+  it('null이면 실제 시각으로 돌아간다', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-07-31T04:30:15.000Z'))
-    setNowDateOverride('2026-07-29')
-    setNowDateOverride(null)
+    setNowOverride('2026-07-29T13:45:00+09:00')
+    setNowOverride(null)
     expect(nowIso()).toBe('2026-07-31T13:30:15+09:00')
   })
 })

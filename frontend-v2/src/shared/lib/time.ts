@@ -45,29 +45,28 @@ export function timelineHourRange(
  * 로컬 getter에 의존하면 머신 타임존에 따라 결과가 달라진다.
  */
 export function nowIso(): string {
-  const shifted = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  const shifted = new Date(Date.now() + nowOffsetMs + 9 * 60 * 60 * 1000)
   const y = shifted.getUTCFullYear()
   const mo = String(shifted.getUTCMonth() + 1).padStart(2, '0')
   const d = String(shifted.getUTCDate()).padStart(2, '0')
   const h = String(shifted.getUTCHours()).padStart(2, '0')
   const mi = String(shifted.getUTCMinutes()).padStart(2, '0')
   const s = String(shifted.getUTCSeconds()).padStart(2, '0')
-  const dateKey = nowDateOverride ?? `${y}-${mo}-${d}`
-  return `${dateKey}T${h}:${mi}:${s}+09:00`
+  return `${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`
 }
 
-let nowDateOverride: string | null = null
+let nowOffsetMs = 0
 
 /**
- * 체험 배포 전용 — nowIso()/useNow()의 날짜 부분만 화면의 "오늘"('YYYY-MM-DD')로
- * 바꿔 끼운다. 시:분:초는 실제 값 그대로. 체험 모드의 "오늘"은 시드 기준으로
- * 이번 주 수요일에 고정되는데(seedDateShift), 현재 시각의 날짜가 실제 방문일이면
- * 날짜까지 비교하는 계산(경과 시간, 완료 시각, 드래그 계획/실제 판정)이 며칠씩
- * 어긋난다. boot/demo-date.ts에서 체험 모드일 때만 켠다 — 개발 빌드의 진입
- * 라우팅은 실제 날짜로 판단해야 하므로 꺼진 채로 둔다. null이면 해제.
+ * 체험 배포 전용 — 현재 시각이 startIso에서 시작해 실제 시간만큼 흐르게 한다.
+ * 체험 모드는 페르소나마다 정해둔 장면(예: 이서연 수요일 13:45)에서 시작한다 —
+ * 방문 시각에 따라 "지금 할 일"이 없거나 날짜가 어긋나 경과 시간·완료 기록·드래그
+ * 판정이 틀어지는 것을 막고, 누가 언제 들어와도 같은 장면을 보게 한다.
+ * boot/demo-clock.ts에서 체험 모드일 때만 켠다 — 개발 빌드의 진입 라우팅은 실제
+ * 시각으로 판단해야 하므로 꺼진 채로 둔다. null이면 해제.
  */
-export function setNowDateOverride(dateKey: string | null): void {
-  nowDateOverride = dateKey
+export function setNowOverride(startIso: string | null): void {
+  nowOffsetMs = startIso ? new Date(startIso).getTime() - Date.now() : 0
 }
 
 let sharedNow: Ref<string> | null = null
