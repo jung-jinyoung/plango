@@ -13,6 +13,10 @@ export interface PersonaMeta {
   name: string
   role: string
   description: string
+  // 소개 랜딩용 — 이름보다 상황을 먼저 보여준다(처음 온 방문자에게 이름은 의미가 없다)
+  situation: string
+  // 들어가면 보게 될 것 — 시드 데이터에 실제로 있는 장면만 쓴다
+  preview: string[]
 }
 
 export const PERSONA_META: Record<PersonaId, PersonaMeta> = {
@@ -21,12 +25,16 @@ export const PERSONA_META: Record<PersonaId, PersonaMeta> = {
     name: '이서연',
     role: '27세 · 대학원생',
     description: '논문을 쓰는 중이에요. 진도가 안 보여 불안하고, 스스로 계획을 쪼개고 있어요.',
+    situation: '논문 마감이 다가오는 대학원생의 한 주',
+    preview: ['처음 예상보다 늘어난 논문 작업량', '3주째 밀리고 있는 분석 작업'],
   },
   doyoon: {
     id: 'doyoon',
     name: '김도윤',
     role: '32세 · 재택 직장인',
     description: '회사 일과 사이드 프로젝트를 같이 굴리고 있어요. 저녁과 주말에 몰아서 확인해요.',
+    situation: '회사 일과 사이드 프로젝트를 같이 하는 직장인의 한 주',
+    preview: ['약속 3개 사이에 끼워 넣은 작업 시간', '3주째 밀리고 있는 대시보드 작업'],
   },
 }
 
