@@ -52,7 +52,22 @@ export function nowIso(): string {
   const h = String(shifted.getUTCHours()).padStart(2, '0')
   const mi = String(shifted.getUTCMinutes()).padStart(2, '0')
   const s = String(shifted.getUTCSeconds()).padStart(2, '0')
-  return `${y}-${mo}-${d}T${h}:${mi}:${s}+09:00`
+  const dateKey = nowDateOverride ?? `${y}-${mo}-${d}`
+  return `${dateKey}T${h}:${mi}:${s}+09:00`
+}
+
+let nowDateOverride: string | null = null
+
+/**
+ * 체험 배포 전용 — nowIso()/useNow()의 날짜 부분만 화면의 "오늘"('YYYY-MM-DD')로
+ * 바꿔 끼운다. 시:분:초는 실제 값 그대로. 체험 모드의 "오늘"은 시드 기준으로
+ * 이번 주 수요일에 고정되는데(seedDateShift), 현재 시각의 날짜가 실제 방문일이면
+ * 날짜까지 비교하는 계산(경과 시간, 완료 시각, 드래그 계획/실제 판정)이 며칠씩
+ * 어긋난다. boot/demo-date.ts에서 체험 모드일 때만 켠다 — 개발 빌드의 진입
+ * 라우팅은 실제 날짜로 판단해야 하므로 꺼진 채로 둔다. null이면 해제.
+ */
+export function setNowDateOverride(dateKey: string | null): void {
+  nowDateOverride = dateKey
 }
 
 let sharedNow: Ref<string> | null = null

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   addDays,
   addMinutes,
@@ -13,6 +13,7 @@ import {
   minutesBetween,
   minutesOfDay,
   nowIso,
+  setNowDateOverride,
   startOfWeek,
   timelineHourRange,
   useNow,
@@ -101,6 +102,28 @@ describe('formatElapsed', () => {
   it('H:MM으로 표시하고 분은 두 자리로 채운다', () => {
     expect(formatElapsed(83)).toBe('1:23')
     expect(formatElapsed(5)).toBe('0:05')
+  })
+})
+
+describe('setNowDateOverride', () => {
+  afterEach(() => {
+    setNowDateOverride(null)
+    vi.useRealTimers()
+  })
+
+  it('날짜만 바꿔 끼우고 시각은 실제 값을 유지한다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-31T04:30:15.000Z')) // KST 금 13:30:15
+    setNowDateOverride('2026-07-29')
+    expect(nowIso()).toBe('2026-07-29T13:30:15+09:00')
+  })
+
+  it('null이면 실제 날짜로 돌아간다', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-31T04:30:15.000Z'))
+    setNowDateOverride('2026-07-29')
+    setNowDateOverride(null)
+    expect(nowIso()).toBe('2026-07-31T13:30:15+09:00')
   })
 })
 
