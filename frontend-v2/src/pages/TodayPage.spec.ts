@@ -232,7 +232,7 @@ describe('TodayPage — 블록 클릭: 기록할까요?와 편집', () => {
   })
 
   async function clickBlock(wrapper: ReturnType<typeof mount>, title: string) {
-    const block = wrapper.findAll('.block').find((b) => b.text().includes(title))!
+    const block = wrapper.findAll('.tl-block').find((b) => b.text().includes(title))!
     await block.trigger('pointerdown', { pointerId: 1, clientY: 100 })
     await block.trigger('pointerup', { pointerId: 1, clientY: 100 })
     await flushPromises()
@@ -244,7 +244,7 @@ describe('TodayPage — 블록 클릭: 기록할까요?와 편집', () => {
 
   it('계획이 지났는데 기록이 없는 블록은 "기록할까요?"로 표시한다', () => {
     const wrapper = mount(TodayPage, { global: { plugins: [router] } })
-    const block = wrapper.findAll('.block').find((b) => b.text().includes('그래프 3개 다듬기'))!
+    const block = wrapper.findAll('.tl-block').find((b) => b.text().includes('그래프 3개 다듬기'))!
     expect(block.text()).toContain('기록할까요?')
     expect(block.classes()).toContain('is-needs-check')
   })
@@ -269,7 +269,7 @@ describe('TodayPage — 블록 클릭: 기록할까요?와 편집', () => {
     await flushPromises()
 
     expect(useTaskStore().tasksById.get('today-18')!.status).toBe('carried')
-    const block = wrapper.findAll('.block').find((b) => b.text().includes('그래프 3개 다듬기'))!
+    const block = wrapper.findAll('.tl-block').find((b) => b.text().includes('그래프 3개 다듬기'))!
     expect(block.text()).toContain('다음으로 옮김')
   })
 

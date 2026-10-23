@@ -13,8 +13,14 @@
       <!-- 단일 블록: 계획만 있거나(아직 실행 전), 계획·실제 차이가 15분 미만이라 병합된 경우 -->
       <div
         v-if="item.kind === 'single'"
-        class="block"
-        :class="[`is-${item.state}`, { 'is-dragging': activeDrag?.taskId === item.task.id }]"
+        class="tl-block"
+        :class="[
+          `is-${item.state}`,
+          {
+            'is-dragging': activeDrag?.taskId === item.task.id,
+            'is-compact': item.layout.height < COMPACT_BELOW_PX,
+          },
+        ]"
         :style="[blockStyle(item.layout, item), dragTransform(item)]"
         @pointerdown="onPointerDown($event, item)"
         @pointermove="onPointerMove"
@@ -42,7 +48,10 @@
         </div>
         <div
           class="real"
-          :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+          :class="{
+            'is-dragging': activeDrag?.taskId === item.task.id,
+            'is-compact': item.real.height < COMPACT_BELOW_PX,
+          }"
           :style="[
             {
               height: `${item.real.height}px`,
@@ -228,6 +237,8 @@ const activeDrag = ref<ActiveDrag | null>(null)
 const previewOffsetPx = ref(0)
 
 const SNAP_MIN = 15
+// 이보다 낮은 블록(64px/시간 기준 약 37분 미만)은 제목·시간을 한 줄로 줄인다
+const COMPACT_BELOW_PX = 40
 const CLICK_TOLERANCE_PX = 4
 function snap(min: number): number {
   return Math.round(min / SNAP_MIN) * SNAP_MIN
@@ -314,10 +325,12 @@ function onPointerUp(event: PointerEvent) {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
 }
-.block {
+.tl-block {
   position: absolute;
   left: 56px;
   right: 8px;
+  /* 15분 블록도 읽히도록(CLAUDE.md 7절 밀도 표: 최소 높이 22px) */
+  min-height: 22px;
   border-radius: var(--radius-block);
   padding: 6px 10px;
   overflow: hidden;
@@ -325,8 +338,36 @@ function onPointerUp(event: PointerEvent) {
   cursor: grab;
   touch-action: none;
 }
+/* 짧은 블록 — 제목과 시간을 한 줄로, 넘치는 제목은 말줄임 */
+.tl-block.is-compact,
+.real.is-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 22px;
+}
+.is-compact b {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+.is-compact small,
+.is-compact .delta {
+  flex: none;
+  margin-top: 0;
+  white-space: nowrap;
+}
+.is-compact .state {
+  top: 50%;
+  transform: translateY(-50%);
+}
 /* 기록할까요? — 원래 계획(고스트)과 같은 점선 표기. 전면 보더(CLAUDE.md 7절) */
-.block.is-needs-check {
+.tl-block.is-needs-check {
   border: 1.5px dashed var(--text-muted);
 }
 /* 짧은 블록에서도 잘리지 않게 제목 줄 오른쪽 위에 둔다 */
@@ -341,18 +382,18 @@ function onPointerUp(event: PointerEvent) {
   font-size: 11px;
   font-weight: 600;
 }
-.block.is-carried .state,
-.block.is-dropped .state {
+.tl-block.is-carried .state,
+.tl-block.is-dropped .state {
   background: var(--surface-card);
 }
-.block b {
+.tl-block b {
   display: block;
   font-weight: 600;
   line-height: 1.35;
 }
 
 /* 대기 상태엔 그림자 없음(CLAUDE.md 13절) — 드래그 중에만 --elev-drag를 쓴다 */
-.block.is-dragging,
+.tl-block.is-dragging,
 .real.is-dragging {
   cursor: grabbing;
   box-shadow: var(--elev-drag);
@@ -396,7 +437,7 @@ function onPointerUp(event: PointerEvent) {
   font-weight: 600;
   line-height: 1.35;
 }
-.block small,
+.tl-block small,
 .real small,
 .ghost small {
   display: block;

@@ -99,7 +99,7 @@ describe('product-spec.md 13절 데모 시나리오 — 처음부터 끝까지',
       end: '2026-07-29T16:30:00+09:00',
     })
 
-    const target = wrapper.findAll('.block').find((b) => b.text().includes('논문 서론 초안'))!
+    const target = wrapper.findAll('.tl-block').find((b) => b.text().includes('논문 서론 초안'))!
     await target.trigger('pointerdown', { clientY: 0, pointerId: 501 })
     await target.trigger('pointermove', { clientY: -32, pointerId: 501 }) // 30분 = 0.5h * 64px/h
     await target.trigger('pointerup', { clientY: -32, pointerId: 501 })
