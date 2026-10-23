@@ -4,12 +4,19 @@
          포커스 링, 오른쪽 추가 버튼으로 "여기에 적는다"를 드러낸다 -->
     <div class="field" :class="{ 'has-submit': submittable }">
       <input
+        ref="inputEl"
         v-model="text"
         type="text"
         class="input"
         :placeholder="placeholder"
         aria-label="할 일 적기"
+        role="combobox"
+        :aria-expanded="suggestions.length > 0"
+        aria-controls="goal-suggestions"
         @keydown.enter="onEnter"
+        @keydown.down.prevent="move(1)"
+        @keydown.up.prevent="move(-1)"
+        @keydown.esc="dismissed = true"
       />
       <button
         v-if="submittable"
@@ -29,6 +36,20 @@
           />
         </svg>
       </button>
+      <!-- # 자동완성 — 이번 주 목표 중에서 고른다(CLAUDE.md 9절) -->
+      <ul v-if="suggestions.length > 0" id="goal-suggestions" class="suggestions" role="listbox">
+        <li
+          v-for="(goal, i) in suggestions"
+          :key="goal.id"
+          role="option"
+          :aria-selected="i === activeIndex"
+          class="suggestion"
+          :class="{ active: i === activeIndex }"
+          @mousedown.prevent="pick(goal)"
+        >
+          # {{ goal.title }}
+        </li>
+      </ul>
     </div>
     <div class="chips">
       <Chip v-if="parsed.title">{{ parsed.title }}</Chip>
@@ -42,7 +63,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Chip from '../../../shared/ui/Chip.vue'
-import { parseTaskInput, type ParsedTaskInput } from '../lib/parse'
+import {
+  activeGoalQuery,
+  goalKeyword,
+  parseTaskInput,
+  type ParsedTaskInput,
+} from '../lib/parse'
 import type { WeeklyGoal } from '../../../entities/types'
 
 const props = defineProps<{
@@ -60,6 +86,7 @@ const emit = defineEmits<{
 }>()
 
 const text = ref('')
+const inputEl = ref<HTMLInputElement | null>(null)
 const parsed = computed(() => parseTaskInput(text.value, props.candidateGoals))
 
 watch(parsed, (value) => emit('update:parsed', value), { immediate: true })
@@ -72,11 +99,41 @@ const placeholder = computed(() => {
 
 // 예상 시간은 사용자가 적는다(R7) — 시간 토큰이 없으면 추가하지 않고 적어달라고 안내한다
 const canSubmit = computed(() => parsed.value.title !== '' && parsed.value.estimatedMin !== null)
-const hint = computed(() =>
-  parsed.value.title !== '' && parsed.value.estimatedMin === null
-    ? '45m처럼 시간을 같이 적으면 추가할 수 있어요'
-    : 'Enter나 오른쪽 버튼으로 추가해요',
-)
+// 4시간 초과는 쪼개도록 제안만 한다(기획서 7-6절) — 회고의 해상도는 블록 크기가 결정한다
+const hint = computed(() => {
+  if (parsed.value.title !== '' && parsed.value.estimatedMin === null)
+    return '45m처럼 시간을 같이 적으면 추가할 수 있어요'
+  if ((parsed.value.estimatedMin ?? 0) > 240)
+    return '4시간이 넘어요. 나눠서 적으면 회고할 때 더 정확하게 볼 수 있어요'
+  return 'Enter나 오른쪽 버튼으로 추가해요'
+})
+
+// ---------- # 자동완성 ----------
+const dismissed = ref(false)
+const activeIndex = ref(0)
+const suggestions = computed(() => {
+  const query = activeGoalQuery(text.value)
+  if (query === null || dismissed.value) return []
+  const q = query.toLowerCase()
+  return props.candidateGoals.filter((g) => g.title.toLowerCase().includes(q))
+})
+watch(text, () => {
+  dismissed.value = false
+  activeIndex.value = 0
+})
+
+function move(step: number) {
+  if (suggestions.value.length === 0) return
+  const n = suggestions.value.length
+  activeIndex.value = (activeIndex.value + step + n) % n
+}
+
+// 고른 목표를 이 목표에만 매칭되는 한 단어로 # 뒤에 넣는다(goalKeyword)
+function pick(goal: WeeklyGoal) {
+  text.value = text.value.replace(/#\S*$/, `#${goalKeyword(goal, props.candidateGoals)} `)
+  dismissed.value = true
+  inputEl.value?.focus()
+}
 
 function submit() {
   if (!canSubmit.value) return
@@ -87,6 +144,9 @@ function submit() {
 function onEnter(event: KeyboardEvent) {
   // 한글 조합 중 Enter는 글자 확정용이라 무시한다(안 거르면 마지막 글자가 잘린 채 두 번 들어간다)
   if (event.isComposing) return
+  // 자동완성이 열려 있으면 Enter는 목표 선택이다
+  const selected = suggestions.value[activeIndex.value]
+  if (selected) return pick(selected)
   submit()
 }
 </script>
@@ -147,6 +207,30 @@ function onEnter(event: KeyboardEvent) {
 .submit:focus-visible {
   outline: 2px solid var(--rose-500);
   outline-offset: 2px;
+}
+.suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-ctrl);
+}
+.suggestion {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.suggestion.active,
+.suggestion:hover {
+  background: var(--surface-sunken);
 }
 .hint {
   margin: 0;

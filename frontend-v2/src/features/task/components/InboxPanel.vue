@@ -23,6 +23,13 @@
       비어 있는 시간에 놓기
     </button>
     <p v-if="placeNote" class="place-note" role="status">{{ placeNote }}</p>
+
+    <!-- 타임라인 블록 읽는 법(목업 01) -->
+    <ul class="legend">
+      <li><span class="sw sw-goal" />목표에 연결된 할 일</li>
+      <li><span class="sw sw-appt" />약속</li>
+      <li><span class="sw sw-ghost" />원래 계획</li>
+    </ul>
   </BaseCard>
 </template>
 
@@ -102,6 +109,38 @@ const emit = defineEmits<{
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--text-secondary);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.sw {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.sw-goal {
+  background: var(--cat-blue-tint);
+}
+.sw-appt {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+}
+.sw-ghost {
+  border: 1px dashed var(--text-muted);
 }
 .minutes {
   font-style: normal;

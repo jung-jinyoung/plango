@@ -133,6 +133,30 @@ describe('TodayPage — 입력·배치·이월', () => {
     expect(useTaskStore().tasks.some((t) => t.title === '참고 논문 훑기')).toBe(true)
   })
 
+  it('#을 치면 이번 주 목표 자동완성이 뜨고, 고르면 그 목표에 연결된다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    const input = wrapper.find('.task-input-preview input')
+
+    await input.setValue('표 다듬기 30m #')
+    const options = wrapper.findAll('.suggestion')
+    // 시드의 이번 주(2026-07-27) active 목표 3개만 — 지난주 목표는 섞이지 않는다
+    expect(options.map((o) => o.text())).toEqual([
+      '# 실험 데이터 분석 마무리',
+      '# 결과 파트 작성',
+      '# 운동 습관 잡기',
+    ])
+
+    await options[1]!.trigger('mousedown')
+    expect(wrapper.find('.chips').text()).toContain('# 결과 파트 작성')
+    expect(wrapper.findAll('.suggestion')).toHaveLength(0)
+  })
+
+  it('4시간이 넘으면 나눠서 적도록 제안한다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    await wrapper.find('.task-input-preview input').setValue('논문 전체 퇴고 300m')
+    expect(wrapper.text()).toContain('4시간이 넘어요')
+  })
+
   it('시간이 없으면 추가하지 않고 시간을 적어달라고 안내한다(R7)', async () => {
     const wrapper = mount(TodayPage, { global: { plugins: [router] } })
     const input = wrapper.find('.task-input-preview input')

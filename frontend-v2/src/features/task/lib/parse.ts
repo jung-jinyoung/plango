@@ -44,3 +44,27 @@ export function parseTaskInput(text: string, candidateGoals: WeeklyGoal[]): Pars
 
   return { title, estimatedMin, weeklyGoalId, matchedGoalTitle }
 }
+
+// ---------- # 자동완성 (CLAUDE.md 9절 "이번 주 목표 중 자동완성") ----------
+
+/** 입력 끝에서 쓰고 있는 #토큰의 검색어. 끝이 #토큰이 아니면 null — "#"만 친 상태는 '' */
+export function activeGoalQuery(text: string): string | null {
+  const match = text.match(/#(\S*)$/)
+  return match ? match[1]! : null
+}
+
+/**
+ * 자동완성에서 고른 목표를 # 뒤에 넣을 단어. parseTaskInput은 # 뒤를 공백 없는 한 단어로
+ * 읽고, 후보 2개 이상과 겹치면 연결하지 않으므로 — 제목 단어 중 이 목표에만 매칭되는
+ * 가장 짧은 단어를 고른다. 그런 단어가 없으면 첫 단어.
+ */
+export function goalKeyword(goal: WeeklyGoal, candidateGoals: WeeklyGoal[]): string {
+  const words = goal.title.split(/\s+/).filter(Boolean)
+  const unique = [...words]
+    .sort((a, b) => a.length - b.length)
+    .find(
+      (w) =>
+        candidateGoals.filter((g) => g.title.toLowerCase().includes(w.toLowerCase())).length === 1,
+    )
+  return unique ?? words[0] ?? goal.title
+}
