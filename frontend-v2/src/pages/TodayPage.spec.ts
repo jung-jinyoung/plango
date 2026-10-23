@@ -102,3 +102,44 @@ describe('TodayPage — 이월 배너 / 복귀 리셋', () => {
     expect(router.currentRoute.value.name).toBe('reflect-week')
   })
 })
+
+describe('TodayPage — 입력·배치·이월', () => {
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await router.push('/today')
+    await router.isReady()
+  })
+
+  it('입력창에서 Enter를 누르면 시간이 적힌 할 일이 인박스에 추가된다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    const input = wrapper.find('.task-input-preview input')
+
+    await input.setValue('서론 다시 읽기 30m')
+    await input.trigger('keydown', { key: 'Enter' })
+
+    const added = useTaskStore().tasks.find((t) => t.title === '서론 다시 읽기')
+    expect(added).toMatchObject({ estimatedMin: 30, plannedBlock: null, status: 'todo' })
+    expect(wrapper.find('.col-inbox').text()).toContain('서론 다시 읽기')
+    expect((input.element as HTMLInputElement).value).toBe('')
+  })
+
+  it('오른쪽 추가 버튼으로도 추가된다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+
+    await wrapper.find('.task-input-preview input').setValue('참고 논문 훑기 45m')
+    await wrapper.find('.task-input-preview .submit').trigger('click')
+
+    expect(useTaskStore().tasks.some((t) => t.title === '참고 논문 훑기')).toBe(true)
+  })
+
+  it('시간이 없으면 추가하지 않고 시간을 적어달라고 안내한다(R7)', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    const input = wrapper.find('.task-input-preview input')
+
+    await input.setValue('서론 다시 읽기')
+    await input.trigger('keydown', { key: 'Enter' })
+
+    expect(useTaskStore().tasks.some((t) => t.title === '서론 다시 읽기')).toBe(false)
+    expect(wrapper.text()).toContain('45m처럼 시간을 같이 적으면 추가할 수 있어요')
+  })
+})

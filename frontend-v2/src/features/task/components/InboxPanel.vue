@@ -1,7 +1,12 @@
 <template>
   <BaseCard>
     <div class="label">할 일 적기</div>
-    <TaskInputPreview :candidate-goals="candidateGoals" @update:parsed="() => {}" />
+    <TaskInputPreview
+      :candidate-goals="candidateGoals"
+      submittable
+      @update:parsed="() => {}"
+      @submit="(parsed) => emit('add', parsed)"
+    />
 
     <div class="label with-margin">아직 안 놓은 일 {{ unplacedTasks.length }}</div>
     <div v-for="item in unplacedTasks" :key="item.task.id" class="inbox-item">
@@ -14,6 +19,7 @@
 
 <script setup lang="ts">
 import type { CategoryColor, Task, WeeklyGoal } from '../../../entities/types'
+import type { ParsedTaskInput } from '../lib/parse'
 import Dot from '../../../shared/ui/Dot.vue'
 import BaseCard from '../../../shared/ui/BaseCard.vue'
 import TaskInputPreview from './TaskInputPreview.vue'
@@ -22,6 +28,11 @@ import TaskInputPreview from './TaskInputPreview.vue'
 defineProps<{
   candidateGoals: WeeklyGoal[]
   unplacedTasks: { task: Task; color: CategoryColor }[]
+}>()
+
+// 저장·배치는 페이지가 한다 — 이 패널은 입력과 요청만 올려보낸다
+const emit = defineEmits<{
+  add: [parsed: ParsedTaskInput]
 }>()
 </script>
 

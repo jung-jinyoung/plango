@@ -47,7 +47,11 @@
     </main>
 
     <aside class="col-inbox">
-      <InboxPanel :candidate-goals="candidateGoals" :unplaced-tasks="unplacedTasks" />
+      <InboxPanel
+        :candidate-goals="candidateGoals"
+        :unplaced-tasks="unplacedTasks"
+        @add="onAddTask"
+      />
     </aside>
   </div>
 </template>
@@ -64,13 +68,19 @@ import { useGoalStore } from '../features/goal/stores/goalStore'
 import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
+import type { ParsedTaskInput } from '../features/task/lib/parse'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import AppHeader from '../shared/ui/AppHeader.vue'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
-import { formatDateKo, startOfWeek, timelineHourRange, useNow } from '../shared/lib/time'
+import {
+  formatDateKo,
+  startOfWeek,
+  timelineHourRange,
+  useNow,
+} from '../shared/lib/time'
 import type { TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
@@ -88,7 +98,12 @@ const bannerDismissed = ref(false)
 
 const allTasks = computed(() => taskStore.tasks)
 const weeklyGoals = computed(() => goalStore.weeklyGoals)
-const candidateGoals = computed(() => goalStore.weeklyGoals.filter((g) => g.status === 'active'))
+// # 자동완성 후보는 이번 주 목표만(CLAUDE.md 9절) — 지난주에 active로 남은 목표가 섞이지 않게
+const candidateGoals = computed(() =>
+  goalStore.weeklyGoals.filter(
+    (g) => g.status === 'active' && g.weekOf === startOfWeek(DEMO_TODAY),
+  ),
+)
 // 사이드바에 보여줄 월간 목표 — 시드에서 첫 번째로 등록된(=주력) 월간 목표
 // 하나로 고정. 여러 월간 목표 중 "표시할 것"을 고르는 로직은 아직 없다(향후
 // 과제) — 페르소나마다 주력 목표 id가 다르므로(mg-thesis/mg-project) 하드코딩
@@ -167,6 +182,21 @@ const unplacedTasks = computed(() =>
 const todayConfirmed = computed(
   () => todayTasks.value.length > 0 && todayTasks.value.every((t) => t.confirmed),
 )
+
+// 입력창 Enter — 시간이 적힌 경우에만 올라온다(R7, TaskInputPreview). 인박스로 들어간다.
+function onAddTask(parsed: ParsedTaskInput) {
+  taskStore.addTask({
+    id: `task-inbox-${Date.now()}`,
+    title: parsed.title,
+    weeklyGoalId: parsed.weeklyGoalId,
+    categoryId: null,
+    estimatedMin: parsed.estimatedMin!,
+    plannedBlock: null,
+    actualBlock: null,
+    status: 'todo',
+    confirmed: false,
+  })
+}
 
 function onConfirmToday() {
   todayTasks.value.forEach((t) => taskStore.updateTask(t.id, { confirmed: true }))
