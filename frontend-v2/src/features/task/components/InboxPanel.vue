@@ -14,6 +14,15 @@
       <span class="title">{{ item.task.title }}</span>
       <em class="minutes">{{ item.task.estimatedMin }}분</em>
     </div>
+    <button
+      type="button"
+      class="place-btn"
+      :disabled="unplacedTasks.length === 0"
+      @click="emit('place')"
+    >
+      비어 있는 시간에 놓기
+    </button>
+    <p v-if="placeNote" class="place-note" role="status">{{ placeNote }}</p>
   </BaseCard>
 </template>
 
@@ -28,11 +37,13 @@ import TaskInputPreview from './TaskInputPreview.vue'
 defineProps<{
   candidateGoals: WeeklyGoal[]
   unplacedTasks: { task: Task; color: CategoryColor }[]
+  placeNote?: string
 }>()
 
 // 저장·배치는 페이지가 한다 — 이 패널은 입력과 요청만 올려보낸다
 const emit = defineEmits<{
   add: [parsed: ParsedTaskInput]
+  place: []
 }>()
 </script>
 
@@ -60,6 +71,37 @@ const emit = defineEmits<{
 .title {
   flex: 1;
   font-size: 13.5px;
+}
+/* 목업 01의 .btn-sub — 화면의 주 CTA(오늘 확정)와 겹치지 않게 중립 톤 */
+.place-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  border: none;
+  border-radius: var(--radius-ctrl);
+  background: var(--surface-sunken);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.place-btn:hover:not(:disabled) {
+  background: var(--border);
+}
+.place-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.place-btn:focus-visible {
+  outline: 2px solid var(--rose-500);
+  outline-offset: 2px;
+}
+.place-note {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
 }
 .minutes {
   font-style: normal;

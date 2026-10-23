@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   addDays,
   addMinutes,
+  ceilTo15Min,
   daysSince,
   formatHHMM,
   formatDateKo,
@@ -124,6 +125,13 @@ describe('setNowDateOverride', () => {
     setNowDateOverride('2026-07-29')
     setNowDateOverride(null)
     expect(nowIso()).toBe('2026-07-31T13:30:15+09:00')
+  })
+})
+
+describe('ceilTo15Min', () => {
+  it('다음 15분 경계로 올리고, 이미 경계면 그대로 둔다', () => {
+    expect(ceilTo15Min(13 * 60 + 31)).toBe(13 * 60 + 45)
+    expect(ceilTo15Min(13 * 60 + 45)).toBe(13 * 60 + 45)
   })
 })
 

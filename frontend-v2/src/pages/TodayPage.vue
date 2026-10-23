@@ -50,7 +50,9 @@
       <InboxPanel
         :candidate-goals="candidateGoals"
         :unplaced-tasks="unplacedTasks"
+        :place-note="placeNote"
         @add="onAddTask"
+        @place="onPlaceInGaps"
       />
     </aside>
   </div>
@@ -68,6 +70,7 @@ import { useGoalStore } from '../features/goal/stores/goalStore'
 import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
+import { placeInGaps } from '../features/schedule/lib/placeInGaps'
 import type { ParsedTaskInput } from '../features/task/lib/parse'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import AppHeader from '../shared/ui/AppHeader.vue'
@@ -77,6 +80,7 @@ import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
 import {
   formatDateKo,
+  minutesOfDay,
   startOfWeek,
   timelineHourRange,
   useNow,
@@ -89,6 +93,10 @@ import type { TimeBlock } from '../entities/types'
 // 이름도 다르게 뒀다. getDemoToday()는 VITE_DEMO_FRESH가 켜진 배포에서만
 // 방문 시점의 "이번 주"로 이동하고, 그 외에는 시드 고정값을 그대로 낸다.
 const DEMO_TODAY = getDemoToday()
+
+// 하루 기본 범위 — 타임라인 표시와 "비어 있는 시간에 놓기"가 같은 범위를 쓴다
+const DAY_START_HOUR = 8
+const DAY_END_HOUR = 21
 
 const router = useRouter()
 const goalStore = useGoalStore()
@@ -125,8 +133,8 @@ const timelineRange = computed(() =>
         [t.plannedBlock, t.actualBlock].flatMap((b) => (b ? [b.start, b.end] : [])),
       ),
     ],
-    8,
-    21,
+    DAY_START_HOUR,
+    DAY_END_HOUR,
   ),
 )
 
@@ -185,6 +193,7 @@ const todayConfirmed = computed(
 
 // 입력창 Enter — 시간이 적힌 경우에만 올라온다(R7, TaskInputPreview). 인박스로 들어간다.
 function onAddTask(parsed: ParsedTaskInput) {
+  placeNote.value = ''
   taskStore.addTask({
     id: `task-inbox-${Date.now()}`,
     title: parsed.title,
@@ -196,6 +205,30 @@ function onAddTask(parsed: ParsedTaskInput) {
     status: 'todo',
     confirmed: false,
   })
+}
+
+// "비어 있는 시간에 놓기" — 지금 이후의 빈틈에 인박스 순서대로 넣는다(기획서 7-6절).
+// "오늘 확정" 전까지는 드래그로 옮길 수 있는 제안 상태다.
+const placeNote = ref('')
+function onPlaceInGaps() {
+  const unplaced = unplacedTasks.value.map((item) => item.task)
+  const occupied = todayTasks.value.flatMap((t) => (t.plannedBlock ? [t.plannedBlock] : []))
+  const placements = placeInGaps(
+    unplaced,
+    occupied,
+    DEMO_TODAY,
+    Math.max(DAY_START_HOUR * 60, minutesOfDay(now.value)),
+    DAY_END_HOUR * 60,
+  )
+  placements.forEach((p) => taskStore.updateTask(p.taskId, { plannedBlock: p.block }))
+
+  const left = unplaced.length - placements.length
+  placeNote.value =
+    left === 0
+      ? `${placements.length}개를 놓았어요. 오늘 확정 전까지 드래그로 옮길 수 있어요.`
+      : placements.length === 0
+        ? '오늘 남은 시간이 부족해서 인박스에 그대로 뒀어요.'
+        : `${placements.length}개를 놓았어요. ${left}개는 남은 시간이 부족해서 인박스에 뒀어요.`
 }
 
 function onConfirmToday() {

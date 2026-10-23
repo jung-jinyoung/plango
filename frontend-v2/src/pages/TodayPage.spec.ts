@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import TodayPage from './TodayPage.vue'
+import { useNow } from '../shared/lib/time'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -141,5 +142,32 @@ describe('TodayPage — 입력·배치·이월', () => {
 
     expect(useTaskStore().tasks.some((t) => t.title === '서론 다시 읽기')).toBe(false)
     expect(wrapper.text()).toContain('45m처럼 시간을 같이 적으면 추가할 수 있어요')
+  })
+
+  it('"비어 있는 시간에 놓기"는 지금 이후의 빈틈에 인박스 항목을 겹치지 않게 넣는다', async () => {
+    const now = useNow()
+    const realNow = now.value
+    now.value = '2026-07-29T13:30:00+09:00'
+    try {
+      const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+      const taskStore = useTaskStore()
+
+      await wrapper.find('.place-btn').trigger('click')
+
+      // 시드 인박스: 참고문헌 정리 40분, 택배 부치기 20분 — 13시대엔 그래프(13~14),
+      // 15시부턴 서론(15~16:30)이 있어서 14:00과 16:30 틈으로 들어간다
+      const byTitle = (title: string) => taskStore.tasks.find((t) => t.title === title)!
+      expect(byTitle('참고문헌 정리').plannedBlock).toEqual({
+        start: '2026-07-29T14:00:00+09:00',
+        end: '2026-07-29T14:40:00+09:00',
+      })
+      expect(byTitle('택배 부치기').plannedBlock).toEqual({
+        start: '2026-07-29T16:30:00+09:00',
+        end: '2026-07-29T16:50:00+09:00',
+      })
+      expect(wrapper.text()).toContain('2개를 놓았어요')
+    } finally {
+      now.value = realNow
+    }
   })
 })

@@ -188,6 +188,11 @@ export function isoAt(dateKey: string, minutesOfDay: number): string {
   return `${dateKey}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+09:00`
 }
 
+/** 분(minute)을 다음 15분 경계로 올린다 — 이미 경계면 그대로(CLAUDE.md 5절 15분 스냅) */
+export function ceilTo15Min(min: number): number {
+  return Math.ceil(min / 15) * 15
+}
+
 /** 그 ISO 시각이 18:00 이후인지 — 진입 라우팅(CLAUDE.md 12절) "18시 이후/이전" 분기 판정 */
 export function isAfter18(iso: string): boolean {
   return minutesOfDay(iso) >= 18 * 60
