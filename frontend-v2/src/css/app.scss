@@ -6,6 +6,18 @@
   box-sizing: border-box;
 }
 
+// Quasar 타이포그래피는 h1에 line-height 6rem(96px), h2에 3.75rem(60px) 등을 준다 —
+// 화면마다 글자 크기만 바꾸면 줄 높이가 그대로 남아 제목 위아래가 크게 빈다
+// (모바일 실행 상단, 회고 카드 소제목). 제목 줄 높이를 글자 크기 기준으로 되돌린다.
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.35;
+}
+
 html body {
   background: var(--surface-page);
   color: var(--text-primary);
