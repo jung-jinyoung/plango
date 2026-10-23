@@ -38,8 +38,8 @@
       <BaseCard class="timeline-card">
         <ScheduleTimeline
           :tasks="timelineTasks"
-          :start-hour="8"
-          :end-hour="21"
+          :start-hour="timelineRange.startHour"
+          :end-hour="timelineRange.endHour"
           :px-per-hour="64"
           @drag-block="onDragBlock"
         />
@@ -70,7 +70,7 @@ import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
-import { formatDateKo, startOfWeek } from '../shared/lib/time'
+import { formatDateKo, startOfWeek, timelineHourRange, useNow } from '../shared/lib/time'
 import type { TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
@@ -97,6 +97,22 @@ const monthlyGoal = computed(() => goalStore.monthlyGoals[0] ?? null)
 
 const todayTasks = computed(() =>
   allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(DEMO_TODAY)),
+)
+
+// 타임라인 범위 — 기본 08~21시, 현재 시각이나 오늘 블록이 밖에 있으면 덮도록 넓힌다.
+// 포트폴리오 방문자가 밤·이른 아침에 들어와도 현재 시각 바가 카드 안에 그려진다.
+const now = useNow()
+const timelineRange = computed(() =>
+  timelineHourRange(
+    [
+      now.value,
+      ...todayTasks.value.flatMap((t) =>
+        [t.plannedBlock, t.actualBlock].flatMap((b) => (b ? [b.start, b.end] : [])),
+      ),
+    ],
+    8,
+    21,
+  ),
 )
 
 // 오늘 이전의 carried task 중 3일 이상 지난 것은 filterStaleCarried가 걸러낸다
@@ -172,6 +188,6 @@ function onDragBlock(taskId: string, field: 'plannedBlock' | 'actualBlock', bloc
   align-items: start;
 }
 .timeline-card {
-  padding: 20px 20px 8px;
+  padding: 20px;
 }
 </style>

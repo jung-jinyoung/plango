@@ -14,6 +14,7 @@ import {
   minutesOfDay,
   nowIso,
   startOfWeek,
+  timelineHourRange,
   useNow,
 } from './time'
 
@@ -100,6 +101,32 @@ describe('formatElapsed', () => {
   it('H:MM으로 표시하고 분은 두 자리로 채운다', () => {
     expect(formatElapsed(83)).toBe('1:23')
     expect(formatElapsed(5)).toBe('0:05')
+  })
+})
+
+describe('timelineHourRange', () => {
+  const at = (hhmm: string) => `2026-07-29T${hhmm}:00+09:00`
+
+  it('모든 시각이 기본 범위 안이면 기본 범위를 그대로 쓴다', () => {
+    expect(timelineHourRange([at('09:00'), at('13:45'), at('20:30')], 8, 21)).toEqual({
+      startHour: 8,
+      endHour: 21,
+    })
+  })
+
+  it('현재 시각이 끝보다 늦으면 그 시각을 덮는 정각까지 늘린다', () => {
+    expect(timelineHourRange([at('22:49')], 8, 21)).toEqual({ startHour: 8, endHour: 23 })
+  })
+
+  it('현재 시각이 시작보다 이르면 그 시각의 정각부터 시작한다', () => {
+    expect(timelineHourRange([at('06:30')], 8, 21)).toEqual({ startHour: 6, endHour: 21 })
+  })
+
+  it('하루 경계(0~24시)를 넘지 않는다', () => {
+    expect(timelineHourRange([at('23:30'), at('00:10')], 8, 21)).toEqual({
+      startHour: 0,
+      endHour: 24,
+    })
   })
 })
 

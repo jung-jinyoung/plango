@@ -18,6 +18,27 @@ export function minutesOfDay(iso: string): number {
 }
 
 /**
+ * 타임라인에 그릴 시각 범위(시 단위). 기본 범위를 유지하되, 주어진 시각(현재 시각,
+ * 블록 시작·끝) 중 범위 밖이 있으면 그 시각을 덮도록 넓힌다 — 밤·이른 아침에도
+ * 현재 시각 바가 카드 밖으로 나가지 않게. 하루 경계는 자정이라 0~24시를 넘지 않는다.
+ * 블록 끝이 다음 날 00:00이면 minutesOfDay가 0이 되므로 시작 쪽 계산에서만 쓰인다.
+ */
+export function timelineHourRange(
+  isos: string[],
+  defaultStart: number,
+  defaultEnd: number,
+): { startHour: number; endHour: number } {
+  let startHour = defaultStart
+  let endHour = defaultEnd
+  for (const iso of isos) {
+    const min = minutesOfDay(iso)
+    startHour = Math.min(startHour, Math.floor(min / 60))
+    endHour = Math.max(endHour, Math.ceil(min / 60))
+  }
+  return { startHour: Math.max(0, startHour), endHour: Math.min(24, endHour) }
+}
+
+/**
  * 지금 이 순간을 KST(+09:00) ISO 8601 문자열로 만든다. UTC 타임스탬프에
  * 9시간을 더해 UTC getter로 읽는 방식이라, 실행 머신의 시스템 타임존과
  * 무관하게 항상 한국 표준시 기준으로 나온다 — new Date().getHours() 같은
