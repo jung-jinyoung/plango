@@ -6,7 +6,10 @@
       class="hour-line"
       :style="{ top: `${(hour - startHour) * pxPerHour}px` }"
     >
-      <span class="hour-label">{{ String(hour).padStart(2, '0') }}:00</span>
+      <!-- 현재 시각 바가 맨 위에 붙어 있으면(타임라인보다 이른 시각) 첫 라벨과 겹치므로 숨긴다 -->
+      <span v-if="!(hour === startHour && nowBeforeStart)" class="hour-label">
+        {{ String(hour).padStart(2, '0') }}:00
+      </span>
     </div>
 
     <template v-for="item in items" :key="item.task.id">
@@ -85,7 +88,14 @@ import {
   resolveDragTarget,
   shouldShowGhost,
 } from '../../../entities/derive'
-import { addMinutes, formatMinutesKo, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
+import {
+  addMinutes,
+  formatMinutesKo,
+  isoAt,
+  minutesBetween,
+  minutesOfDay,
+  useNow,
+} from '../../../shared/lib/time'
 import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
 import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
 import CurrentTimeBar from './CurrentTimeBar.vue'
@@ -111,6 +121,8 @@ const hourMarks = computed(() => {
   for (let h = props.startHour; h <= props.endHour; h++) marks.push(h)
   return marks
 })
+
+const nowBeforeStart = computed(() => minutesOfDay(now.value) < props.startHour * 60)
 
 const totalHeight = computed(() => (props.endHour - props.startHour) * props.pxPerHour)
 

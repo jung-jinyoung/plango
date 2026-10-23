@@ -286,3 +286,36 @@ describe('TodayPage — 블록 클릭: 기록할까요?와 편집', () => {
     expect(useTaskStore().tasks.some((t) => t.title === '헬스장 하체 운동')).toBe(true)
   })
 })
+
+describe('TodayPage — 이른 시간의 타임라인 범위', () => {
+  const now = useNow()
+  let realNow = ''
+
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await router.push('/today')
+    await router.isReady()
+    realNow = now.value
+  })
+  afterEach(() => {
+    now.value = realNow
+  })
+
+  it('08시 전에 들어오면 00시부터 그리지 않고 현재 시각 바를 맨 위에 붙인다', () => {
+    now.value = '2026-07-29T00:03:00+09:00'
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+
+    // 첫 줄은 08:00(라벨은 바와 겹쳐서 숨기고 09:00부터 보인다)
+    expect(wrapper.find('.hour-label').text()).toBe('09:00')
+    expect(wrapper.find('.now-bar').attributes('style')).toContain('top: 0px')
+    expect(wrapper.find('.now-bar').text()).toContain('00:03')
+  })
+
+  it('21시 이후에 들어오면 그 시각까지 늘려서 바를 실제 위치에 그린다', () => {
+    now.value = '2026-07-29T22:49:00+09:00'
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+
+    const labels = wrapper.findAll('.hour-label').map((l) => l.text())
+    expect(labels.at(-1)).toBe('23:00')
+  })
+})

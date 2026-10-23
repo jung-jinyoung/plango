@@ -136,13 +136,14 @@ const todayTasks = computed(() =>
   allTasks.value.filter((t) => t.plannedBlock?.start.startsWith(DEMO_TODAY)),
 )
 
-// 타임라인 범위 — 기본 08~21시, 현재 시각이나 오늘 블록이 밖에 있으면 덮도록 넓힌다.
-// 포트폴리오 방문자가 밤·이른 아침에 들어와도 현재 시각 바가 카드 안에 그려진다.
+// 타임라인 범위 — 기본 08~21시, 오늘 블록이 밖에 있으면 덮도록 넓힌다. 현재 시각은
+// 저녁 쪽으로만 넓힌다(밤에 들어와도 바가 카드 안에 그려지도록). 이른 아침엔 넓히지 않고
+// CurrentTimeBar가 맨 위에 붙인다 — 00시부터 그리면 위쪽 몇 시간이 텅 빈다.
 const now = useNow()
 const timelineRange = computed(() =>
   timelineHourRange(
     [
-      now.value,
+      ...(minutesOfDay(now.value) >= DAY_START_HOUR * 60 ? [now.value] : []),
       ...todayTasks.value.flatMap((t) =>
         [t.plannedBlock, t.actualBlock].flatMap((b) => (b ? [b.start, b.end] : [])),
       ),

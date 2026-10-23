@@ -35,8 +35,13 @@ const props = defineProps<{
 const now = useNow()
 
 // 위치 계산은 layoutTimelineBlock 하나로 통일한다 — 여기서 분 단위 좌표 공식을 다시 안 쓴다.
-const top = computed(
-  () => layoutTimelineBlock({ start: now.value, end: now.value }, props.startHour, props.pxPerHour).top,
+// 타임라인 시작보다 이른 시각(예: 00:03에 들어온 경우)이면 맨 위에 붙인다 — 그 시각엔
+// 오늘 블록이 전부 앞으로 할 일이라 "선 아래는 계획"이라는 의미가 그대로 맞는다.
+const top = computed(() =>
+  Math.max(
+    0,
+    layoutTimelineBlock({ start: now.value, end: now.value }, props.startHour, props.pxPerHour).top,
+  ),
 )
 const label = computed(() => now.value.slice(11, 16)) // HH:MM
 </script>
