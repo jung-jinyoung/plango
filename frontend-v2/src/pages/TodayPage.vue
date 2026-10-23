@@ -33,7 +33,7 @@
         v-else-if="!bannerDismissed && carriedCount > 0"
         :count="carriedCount"
         @dismiss="bannerDismissed = true"
-        @accept="bannerDismissed = true"
+        @accept="onAcceptCarry"
       />
       <BaseCard class="timeline-card">
         <ScheduleTimeline
@@ -71,6 +71,7 @@ import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { placeInGaps } from '../features/schedule/lib/placeInGaps'
+import { carryIntoToday, pendingCarried } from '../features/task/lib/carryOver'
 import type { ParsedTaskInput } from '../features/task/lib/parse'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import AppHeader from '../shared/ui/AppHeader.vue'
@@ -141,13 +142,24 @@ const timelineRange = computed(() =>
 // 오늘 이전의 carried task 중 3일 이상 지난 것은 filterStaleCarried가 걸러낸다
 // (화면 표시 필터일 뿐 status는 안 건드림, R4) — 평소엔 "어제" 정도만 남지만
 // 며칠 건너뛴 경우에도 3일 미만이면 자연스럽게 같이 보인다.
-const carriedCount = computed(
-  () =>
+// 이미 오늘로 옮긴 항목은 빼서 화면을 다시 열어도 배너가 같은 일을 또 권하지 않게 한다.
+const carriedTasks = computed(() =>
+  pendingCarried(
     filterStaleCarried(
       allTasks.value.filter((t) => t.plannedBlock && t.plannedBlock.start < DEMO_TODAY),
       DEMO_TODAY,
-    ).length,
+    ),
+    DEMO_TODAY,
+    new Set(taskStore.tasksById.keys()),
+  ),
 )
+const carriedCount = computed(() => carriedTasks.value.length)
+
+// "오늘로 옮기기" — R4: 원래 task는 그대로 두고 오늘 인박스에 새 task를 만든다
+function onAcceptCarry() {
+  carryIntoToday(carriedTasks.value, DEMO_TODAY).forEach((t) => taskStore.addTask(t))
+  bannerDismissed.value = true
+}
 
 // 진입 라우팅(CLAUDE.md 12절) "복귀 리셋" — 마지막 활동으로부터 3일 이상
 // 지났으면 이월 배너 대신 이 배너를 보여준다(누적 미완료를 보여주지 않는다).

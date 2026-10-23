@@ -144,6 +144,25 @@ describe('TodayPage — 입력·배치·이월', () => {
     expect(wrapper.text()).toContain('45m처럼 시간을 같이 적으면 추가할 수 있어요')
   })
 
+  it('"오늘로 옮기기"는 원래 항목을 두고 오늘 인박스에 새 항목을 만들며, 다시 열어도 또 권하지 않는다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    const taskStore = useTaskStore()
+
+    await wrapper.findAll('button').find((b) => b.text() === '오늘로 옮기기')!.trigger('click')
+
+    // 시드: carried-24/25(2026-07-28)
+    for (const id of ['carried-24', 'carried-25']) {
+      expect(taskStore.tasksById.get(id)?.status).toBe('carried') // R4: 원래 항목은 그대로
+      expect(taskStore.tasksById.get(`${id}-carry-2026-07-29`)).toMatchObject({
+        plannedBlock: null,
+        status: 'todo',
+      })
+    }
+
+    const reopened = mount(TodayPage, { global: { plugins: [router] } })
+    expect(reopened.text()).not.toContain('어제 못 한 일')
+  })
+
   it('"비어 있는 시간에 놓기"는 지금 이후의 빈틈에 인박스 항목을 겹치지 않게 넣는다', async () => {
     const now = useNow()
     const realNow = now.value
