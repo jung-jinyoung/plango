@@ -153,14 +153,18 @@ for (const w of achievedPlans) {
   w.taskEstMin.forEach((est, i) => {
     const date = addDays(w.weekOf, i * 2) // 월,수 순
     const actualMinutes = Math.round(est * w.accuracyRatio)
+    // 20시(퇴근 후)부터 — 단, 실제가 길어 자정을 넘기면 그만큼 일찍 시작한다(15분 단위).
+    // 하루 경계는 자정이고(CLAUDE.md 5절) block()은 날짜를 넘기지 않아 "24:48" 같은
+    // 존재하지 않는 시각이 생겨 월간 합계가 NaN이 됐었다.
+    const startMin = Math.min(20 * 60, Math.floor((24 * 60 - Math.max(est, actualMinutes)) / 15) * 15)
     tasks.push({
       id: nextId(w.id),
       title: `${w.title} 관련 작업 ${i + 1}`,
       weeklyGoalId: w.id,
       categoryId: null,
       estimatedMin: est,
-      plannedBlock: block(date, 20 * 60, est), // 20시(퇴근 후)부터
-      actualBlock: block(date, 20 * 60, actualMinutes),
+      plannedBlock: block(date, startMin, est),
+      actualBlock: block(date, startMin, actualMinutes),
       status: 'done',
     })
   })
