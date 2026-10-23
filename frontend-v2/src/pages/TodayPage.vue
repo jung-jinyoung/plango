@@ -5,6 +5,7 @@
       <GoalSidebar
         :monthly-goal="monthlyGoal"
         :weekly-goals="weeklyGoals"
+        :week-of="startOfWeek(DEMO_TODAY)"
         :tasks="allTasks"
         :monthly-goals-by-id="goalStore.monthlyGoalsById"
         :categories-by-id="goalStore.categoriesById"
@@ -66,6 +67,7 @@ import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
+import { startOfWeek } from '../shared/lib/time'
 import type { TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로

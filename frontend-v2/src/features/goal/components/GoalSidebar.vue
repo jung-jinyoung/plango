@@ -5,8 +5,8 @@
       <div class="title">{{ monthly.goal.title }}</div>
       <ProgressBar :percent="monthlyPercent" :color="monthly.color" />
       <div class="meta">
-        <span>{{ monthly.currentHours.toFixed(0) }}시간 썼어요</span>
-        <span>{{ monthly.goal.baselineHours }}시간 예상</span>
+        <span>{{ monthly.spentHours.toFixed(0) }}시간 썼어요</span>
+        <span>{{ monthly.currentHours.toFixed(0) }}시간 예상</span>
       </div>
     </div>
 
@@ -27,6 +27,7 @@ import { computed } from 'vue'
 import {
   categoryColorOf,
   monthlyCurrentHours,
+  monthlySpentHours,
   resolveCategoryForMonthlyGoal,
   resolveCategoryForWeeklyGoal,
   weeklyProgress,
@@ -39,6 +40,7 @@ import ProgressBar from '../../../shared/ui/ProgressBar.vue'
 const props = defineProps<{
   monthlyGoal: MonthlyGoal | null
   weeklyGoals: WeeklyGoal[]
+  weekOf: string
   tasks: Task[]
   monthlyGoalsById: Map<string, MonthlyGoal>
   categoriesById: Map<string, Category>
@@ -54,16 +56,19 @@ const monthly = computed(() => {
     goal,
     color: categoryColorOf(resolveCategoryForMonthlyGoal(goal, props.categoriesById)),
     currentHours: monthlyCurrentHours(goal, weeklyEntries),
+    spentHours: monthlySpentHours(goal, weeklyEntries),
   }
 })
 
 const monthlyPercent = computed(() => {
-  if (!monthly.value || monthly.value.goal.baselineHours <= 0) return 0
-  return (monthly.value.currentHours / monthly.value.goal.baselineHours) * 100
+  if (!monthly.value || monthly.value.currentHours <= 0) return 0
+  return (monthly.value.spentHours / monthly.value.currentHours) * 100
 })
 
+// weeklyGoals는 월간 합산(지난 주 실적 포함)에도 쓰여서 전체를 받는다 —
+// "이번 주 목표" 목록만 weekOf로 좁힌다.
 const weeklyEntries = computed(() =>
-  props.weeklyGoals.map((goal) => {
+  props.weeklyGoals.filter((goal) => goal.weekOf === props.weekOf).map((goal) => {
     const goalTasks = props.tasks.filter((t) => t.weeklyGoalId === goal.id)
     const percent = weeklyProgress(goal, goalTasks)
     return {

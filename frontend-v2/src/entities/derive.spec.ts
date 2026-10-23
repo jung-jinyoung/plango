@@ -9,6 +9,7 @@ import {
   hasScheduleConflict,
   lastActiveDate,
   monthlyCurrentHours,
+  monthlySpentHours,
   projectedExtraWeeks,
   resolveCategory,
   resolveCategoryForMonthlyGoal,
@@ -164,6 +165,58 @@ describe('monthlyCurrentHours', () => {
     const otherMonthly: MonthlyGoal = { ...monthlyGoal, id: 'mg-other' }
     const entries = [{ goal: weeklyGoalActive, tasks: [] }]
     expect(monthlyCurrentHours(otherMonthly, entries)).toBe(0)
+  })
+})
+
+describe('monthlySpentHours', () => {
+  it('주간 목표 status와 무관하게 실측만 합산한다', () => {
+    const entries = [
+      {
+        goal: weeklyGoalAchieved,
+        tasks: [
+          makeTask({
+            weeklyGoalId: weeklyGoalAchieved.id,
+            actualBlock: { start: '2026-08-04T09:00:00+09:00', end: '2026-08-04T15:00:00+09:00' },
+          }),
+        ],
+      }, // 6시간
+      {
+        goal: weeklyGoalActive,
+        tasks: [
+          makeTask({
+            weeklyGoalId: weeklyGoalActive.id,
+            actualBlock: { start: '2026-08-18T09:00:00+09:00', end: '2026-08-18T10:30:00+09:00' },
+          }),
+          makeTask({ weeklyGoalId: weeklyGoalActive.id }), // 실측 없음
+        ],
+      }, // 1.5시간 — 재추정(10)이 아니라 실측
+      {
+        goal: weeklyGoalDropped,
+        tasks: [
+          makeTask({
+            weeklyGoalId: weeklyGoalDropped.id,
+            actualBlock: { start: '2026-08-11T09:00:00+09:00', end: '2026-08-11T10:00:00+09:00' },
+          }),
+        ],
+      }, // 1시간 — 그만둔 목표라도 쓴 시간은 쓴 시간
+    ]
+    expect(monthlySpentHours(monthlyGoal, entries)).toBe(8.5)
+  })
+
+  it('다른 월간 목표에 속한 주간 목표는 무시한다', () => {
+    const otherMonthly: MonthlyGoal = { ...monthlyGoal, id: 'mg-other' }
+    const entries = [
+      {
+        goal: weeklyGoalAchieved,
+        tasks: [
+          makeTask({
+            weeklyGoalId: weeklyGoalAchieved.id,
+            actualBlock: { start: '2026-08-04T09:00:00+09:00', end: '2026-08-04T10:00:00+09:00' },
+          }),
+        ],
+      },
+    ]
+    expect(monthlySpentHours(otherMonthly, entries)).toBe(0)
   })
 })
 
