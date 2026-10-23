@@ -95,6 +95,19 @@ export function formatMinutesAsHours(min: number): string {
   return m === 0 ? `${h}h` : `${h}h ${m}m`
 }
 
+/** 분(minute)을 문장용 "1시간 45분" 형태로. 1시간 미만은 "40분", 정각이면 "1시간" — 모바일 실행 뷰(목업 04) */
+export function formatMinutesKo(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  if (h === 0) return `${m}분`
+  return m === 0 ? `${h}시간` : `${h}시간 ${m}분`
+}
+
+/** 경과 분(minute)을 타이머용 "1:23"(H:MM) 형태로 */
+export function formatElapsed(min: number): string {
+  return `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`
+}
+
 /** ISO 8601 문자열에서 'HH:MM'만 뽑는다 — minutesOfDay와 같은 이유로 문자열을 그대로 읽는다 */
 export function formatHHMM(iso: string): string {
   return iso.slice(11, 16)

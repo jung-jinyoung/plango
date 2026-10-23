@@ -17,8 +17,8 @@
       <Chip v-if="currentGoalTitle" variant="category" :color="currentColor" dot>{{ currentGoalTitle }}</Chip>
 
       <div class="timer">
-        <span class="elapsed">{{ formatMinutesAsHours(elapsedMin) }}</span>
-        <span class="of">/ {{ formatMinutesAsHours(currentTask.estimatedMin) }} 예상</span>
+        <span class="elapsed">{{ formatElapsed(elapsedMin) }}</span>
+        <span class="of">/ {{ formatMinutesKo(currentTask.estimatedMin) }} 예상</span>
       </div>
       <ProgressBar :percent="elapsedPercent" :color="currentColor" />
       <div v-if="currentTask.plannedBlock" class="timer-note">
@@ -61,7 +61,7 @@
       <div v-for="task in finishedTasks" :key="task.id" class="item finished">
         <span class="check">✓</span>
         <span class="tt">{{ task.title }}</span>
-        <span class="mn">{{ formatMinutesAsHours(actualMin(task)) }}</span>
+        <span class="mn">{{ formatMinutesKo(actualMin(task)) }}</span>
       </div>
     </section>
 
@@ -75,7 +75,7 @@ import { actualMin, captureActualStart, categoryColorOf, findCurrentTask, resolv
 import type { CategoryColor, Task } from '../entities/types'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
-import { formatHHMM, formatMinutesAsHours, minutesBetween, minutesOfDay, useNow } from '../shared/lib/time'
+import { formatElapsed, formatHHMM, formatMinutesKo, minutesBetween, minutesOfDay, useNow } from '../shared/lib/time'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import Chip from '../shared/ui/Chip.vue'

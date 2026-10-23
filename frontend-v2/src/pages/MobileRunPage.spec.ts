@@ -28,7 +28,7 @@ describe('MobileRunPage', () => {
     expect(wrapper.text()).toContain('그래프 3개 다듬기')
     expect(wrapper.text()).toContain('결과 파트 작성') // 연결된 주간 목표 제목
     expect(wrapper.text()).toContain('13:00부터 하고 있어요')
-    expect(wrapper.text()).toContain('0h 9m') // 경과 = 13:00~13:09
+    expect(wrapper.text()).toContain('0:09') // 경과 = 13:00~13:09
   })
 
   it('"다 했어요"를 누르기 전엔 스토어가 그대로고, 눌러야만 완료 처리된다', async () => {

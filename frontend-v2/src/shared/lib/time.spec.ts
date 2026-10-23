@@ -4,7 +4,9 @@ import {
   addMinutes,
   daysSince,
   formatHHMM,
+  formatElapsed,
   formatMinutesAsHours,
+  formatMinutesKo,
   isAfter18,
   isoAt,
   minutesBetween,
@@ -69,6 +71,27 @@ describe('formatMinutesAsHours', () => {
 
   it('0분은 0h', () => {
     expect(formatMinutesAsHours(0)).toBe('0h')
+  })
+})
+
+describe('formatMinutesKo', () => {
+  it('시간과 분을 같이 표시한다', () => {
+    expect(formatMinutesKo(105)).toBe('1시간 45분')
+  })
+
+  it('1시간 미만이면 분만 표시한다', () => {
+    expect(formatMinutesKo(40)).toBe('40분')
+  })
+
+  it('정각이면 분을 생략한다', () => {
+    expect(formatMinutesKo(60)).toBe('1시간')
+  })
+})
+
+describe('formatElapsed', () => {
+  it('H:MM으로 표시하고 분은 두 자리로 채운다', () => {
+    expect(formatElapsed(83)).toBe('1:23')
+    expect(formatElapsed(5)).toBe('0:05')
   })
 })
 
