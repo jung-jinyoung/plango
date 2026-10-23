@@ -71,6 +71,14 @@ export function addDays(dateKey: string, days: number): string {
   return dt.toISOString().slice(0, 10)
 }
 
+const WEEKDAY_KO = ['일', '월', '화', '수', '목', '금', '토']
+
+/** 'YYYY-MM-DD'를 화면 표시용 "7월 29일 수요일"로 */
+export function formatDateKo(dateKey: string): string {
+  const dt = parseDateKey(dateKey)
+  return `${dt.getUTCMonth() + 1}월 ${dt.getUTCDate()}일 ${WEEKDAY_KO[dt.getUTCDay()]}요일`
+}
+
 /** 그 날짜가 속한 주의 월요일 'YYYY-MM-DD' (CLAUDE.md 5절: 주의 시작은 월요일) */
 export function startOfWeek(dateKey: string): string {
   const dt = parseDateKey(dateKey)

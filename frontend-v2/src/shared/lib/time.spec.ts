@@ -4,6 +4,7 @@ import {
   addMinutes,
   daysSince,
   formatHHMM,
+  formatDateKo,
   formatElapsed,
   formatMinutesAsHours,
   formatMinutesKo,
@@ -71,6 +72,13 @@ describe('formatMinutesAsHours', () => {
 
   it('0분은 0h', () => {
     expect(formatMinutesAsHours(0)).toBe('0h')
+  })
+})
+
+describe('formatDateKo', () => {
+  it('월·일·요일을 표시한다', () => {
+    expect(formatDateKo('2026-07-29')).toBe('7월 29일 수요일')
+    expect(formatDateKo('2026-08-02')).toBe('8월 2일 일요일')
   })
 })
 

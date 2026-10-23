@@ -1,5 +1,16 @@
 <template>
   <PersonaBadge />
+  <AppHeader title="오늘" :subtitle="formatDateKo(DEMO_TODAY)">
+    <template #actions>
+      <BaseButton
+        variant="primary"
+        :disabled="todayConfirmed || todayTasks.length === 0"
+        @click="onConfirmToday"
+      >
+        {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
+      </BaseButton>
+    </template>
+  </AppHeader>
   <div class="today-page">
     <aside class="col-sidebar">
       <GoalSidebar
@@ -13,15 +24,6 @@
     </aside>
 
     <main class="col-main">
-      <div class="confirm-row">
-        <BaseButton
-          variant="primary"
-          :disabled="todayConfirmed || todayTasks.length === 0"
-          @click="onConfirmToday"
-        >
-          {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
-        </BaseButton>
-      </div>
       <ReturnGapBanner
         v-if="!bannerDismissed && isReturningAfterGap"
         @dismiss="bannerDismissed = true"
@@ -63,11 +65,12 @@ import InboxPanel from '../features/task/components/InboxPanel.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { useTaskStore } from '../features/task/stores/taskStore'
+import AppHeader from '../shared/ui/AppHeader.vue'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
-import { startOfWeek } from '../shared/lib/time'
+import { formatDateKo, startOfWeek } from '../shared/lib/time'
 import type { TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
@@ -170,10 +173,5 @@ function onDragBlock(taskId: string, field: 'plannedBlock' | 'actualBlock', bloc
 }
 .timeline-card {
   padding: 20px 20px 8px;
-}
-.confirm-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 12px;
 }
 </style>
