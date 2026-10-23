@@ -14,7 +14,7 @@
       <div
         v-if="item.kind === 'single'"
         class="block"
-        :class="{ 'is-dragging': activeDrag?.taskId === item.task.id }"
+        :class="[`is-${item.state}`, { 'is-dragging': activeDrag?.taskId === item.task.id }]"
         :style="[blockStyle(item.layout, item), dragTransform(item)]"
         @pointerdown="onPointerDown($event, item)"
         @pointermove="onPointerMove"
@@ -23,6 +23,7 @@
       >
         <b>{{ item.task.title }}</b>
         <small>{{ item.durationLabel }}</small>
+        <span v-if="STATE_LABEL[item.state]" class="state">{{ STATE_LABEL[item.state] }}</span>
       </div>
 
       <!-- 계획·실제가 15분 이상 어긋나면 목업 그대로 나란히(고스트 38% + 실제 나머지) -->
@@ -68,7 +69,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { actualMin, hasScheduleConflict, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
+import {
+  actualMin,
+  hasScheduleConflict,
+  needsCheck,
+  resolveDragTarget,
+  shouldShowGhost,
+} from '../../../entities/derive'
 import { addMinutes, formatMinutesKo, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
 import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
 import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
@@ -80,6 +87,8 @@ export interface TimelineTaskInput {
   task: Task
   color: CategoryColor
 }
+
+const now = useNow()
 
 const props = defineProps<{
   tasks: TimelineTaskInput[]
@@ -103,6 +112,22 @@ interface SingleItem {
   layout: TimelineLayout
   // 실측이 있으면 실제 시간, 아직 실행 전이면 계획 길이 + "예상" (목업 01)
   durationLabel: string
+  state: BlockState
+}
+
+// 지난 계획 중 기록이 없는 것(기록할까요?)과 정리된 것(옮김·안 함)을 앞으로 할 계획과 구분한다.
+// 실패 언어·경고색은 쓰지 않는다(CLAUDE.md 8절) — 점선(원래 계획과 같은 표기)과 중립 톤뿐이다.
+type BlockState = 'normal' | 'needs-check' | 'carried' | 'dropped'
+const STATE_LABEL: Record<BlockState, string> = {
+  normal: '',
+  'needs-check': '기록할까요?',
+  carried: '다음으로 옮김',
+  dropped: '이번엔 안 함',
+}
+
+function blockState(task: Task): BlockState {
+  if (task.status === 'carried' || task.status === 'dropped') return task.status
+  return needsCheck(task, now.value) ? 'needs-check' : 'normal'
 }
 
 interface PairItem {
@@ -152,7 +177,7 @@ const items = computed<TimelineItem[]>(() =>
       const durationLabel = task.actualBlock
         ? formatMinutesKo(actualMin(task))
         : `${formatMinutesKo(minutesBetween(task.plannedBlock!.start, task.plannedBlock!.end))} 예상`
-      return { kind: 'single', task, color, layout, durationLabel }
+      return { kind: 'single', task, color, layout, durationLabel, state: blockState(task) }
     })
     .filter((item): item is TimelineItem => item !== null),
 )
@@ -160,8 +185,17 @@ const items = computed<TimelineItem[]>(() =>
 /** 약속은 카테고리와 무관하게 항상 중립색 — CLAUDE.md 7절.
  * single일 땐 layout의 top/height도 같이 반환하고, pair(real)일 땐 top/height는
  * 바깥 :style에서 이미 처리하므로 색만 반환한다(layout 인자를 null로 넘긴다). */
-function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: CategoryColor }) {
+function blockStyle(
+  layout: TimelineLayout | null,
+  item: { task: Task; color: CategoryColor; state?: BlockState },
+) {
   const pos = layout ? { top: `${layout.top}px`, height: `${layout.height}px` } : {}
+  if (item.state === 'needs-check') {
+    return { ...pos, background: 'transparent', color: 'var(--text-secondary)' }
+  }
+  if (item.state === 'carried' || item.state === 'dropped') {
+    return { ...pos, background: 'var(--surface-sunken)', color: 'var(--text-muted)' }
+  }
   if (item.task.weeklyGoalId === null) {
     return { ...pos, background: 'var(--surface-sunken)', color: 'var(--text-secondary)' }
   }
@@ -177,9 +211,9 @@ function blockStyle(layout: TimelineLayout | null, item: { task: Task; color: Ca
 // R2·R3 판정(resolveDragTarget)만 담당한다.
 const emit = defineEmits<{
   'drag-block': [taskId: string, field: 'plannedBlock' | 'actualBlock', block: TimeBlock]
+  // 움직이지 않고 눌렀다 뗀 경우 — 페이지가 편집·완료 확인 패널을 연다
+  'select-block': [taskId: string]
 }>()
-
-const now = useNow()
 
 interface ActiveDrag {
   taskId: string
@@ -194,6 +228,7 @@ const activeDrag = ref<ActiveDrag | null>(null)
 const previewOffsetPx = ref(0)
 
 const SNAP_MIN = 15
+const CLICK_TOLERANCE_PX = 4
 function snap(min: number): number {
   return Math.round(min / SNAP_MIN) * SNAP_MIN
 }
@@ -233,6 +268,14 @@ function onPointerCancel(event: PointerEvent) {
 function onPointerUp(event: PointerEvent) {
   const drag = activeDrag.value
   if (!drag || event.pointerId !== drag.pointerId) return
+
+  // 거의 움직이지 않았으면 드래그가 아니라 클릭이다
+  if (Math.abs(previewOffsetPx.value) < CLICK_TOLERANCE_PX) {
+    activeDrag.value = null
+    previewOffsetPx.value = 0
+    emit('select-block', drag.taskId)
+    return
+  }
 
   const newTop = drag.originalTop + previewOffsetPx.value
   const newStartMin = snap(pxToMinutesOfDay(newTop, props.startHour, props.pxPerHour))
@@ -281,6 +324,26 @@ function onPointerUp(event: PointerEvent) {
   font-size: 13px;
   cursor: grab;
   touch-action: none;
+}
+/* 기록할까요? — 원래 계획(고스트)과 같은 점선 표기. 전면 보더(CLAUDE.md 7절) */
+.block.is-needs-check {
+  border: 1.5px dashed var(--text-muted);
+}
+/* 짧은 블록에서도 잘리지 않게 제목 줄 오른쪽 위에 둔다 */
+.state {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+.block.is-carried .state,
+.block.is-dropped .state {
+  background: var(--surface-card);
 }
 .block b {
   display: block;

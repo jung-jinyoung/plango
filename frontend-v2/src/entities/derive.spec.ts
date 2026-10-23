@@ -10,6 +10,7 @@ import {
   lastActiveDate,
   monthlyCurrentHours,
   monthlySpentHours,
+  needsCheck,
   projectedExtraWeeks,
   resolveCategory,
   resolveCategoryForMonthlyGoal,
@@ -634,5 +635,25 @@ describe('projectedExtraWeeks', () => {
 
   it('페이스가 0이면(지난주 실측이 없으면) null을 반환한다(나눗셈 불가)', () => {
     expect(projectedExtraWeeks(monthlyGoal, [weeklyGoalActive], [], '2026-08-18')).toBeNull()
+  })
+})
+
+describe('needsCheck', () => {
+  const planned = { start: '2026-07-29T13:00:00+09:00', end: '2026-07-29T14:00:00+09:00' }
+  const base = makeTask({ plannedBlock: planned })
+
+  it('계획이 끝났는데 기록 없는 todo면 true', () => {
+    expect(needsCheck(base, '2026-07-29T14:00:00+09:00')).toBe(true)
+  })
+
+  it('아직 진행 중이거나 시작 전이면 false', () => {
+    expect(needsCheck(base, '2026-07-29T13:30:00+09:00')).toBe(false)
+  })
+
+  it('이미 기록이 있거나 옮김·안 함으로 정리했으면 false', () => {
+    const now = '2026-07-29T15:00:00+09:00'
+    expect(needsCheck({ ...base, actualBlock: planned, status: 'done' }, now)).toBe(false)
+    expect(needsCheck({ ...base, status: 'carried' }, now)).toBe(false)
+    expect(needsCheck({ ...base, status: 'dropped' }, now)).toBe(false)
   })
 })

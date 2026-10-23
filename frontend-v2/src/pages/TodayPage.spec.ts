@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import TodayPage from './TodayPage.vue'
 import { useNow } from '../shared/lib/time'
@@ -212,5 +212,77 @@ describe('TodayPage — 입력·배치·이월', () => {
     } finally {
       now.value = realNow
     }
+  })
+})
+
+describe('TodayPage — 블록 클릭: 기록할까요?와 편집', () => {
+  const now = useNow()
+  let realNow = ''
+
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await router.push('/today')
+    await router.isReady()
+    realNow = now.value
+    now.value = '2026-07-29T14:30:00+09:00' // 그래프(13~14시)는 지났고, 헬스장(17시)은 앞으로
+  })
+  afterEach(() => {
+    now.value = realNow
+    document.body.innerHTML = ''
+  })
+
+  async function clickBlock(wrapper: ReturnType<typeof mount>, title: string) {
+    const block = wrapper.findAll('.block').find((b) => b.text().includes(title))!
+    await block.trigger('pointerdown', { pointerId: 1, clientY: 100 })
+    await block.trigger('pointerup', { pointerId: 1, clientY: 100 })
+    await flushPromises()
+  }
+  const dialogButton = (text: string) =>
+    [...document.body.querySelectorAll<HTMLButtonElement>('.dialog button')].find(
+      (b) => b.textContent?.trim() === text,
+    )!
+
+  it('계획이 지났는데 기록이 없는 블록은 "기록할까요?"로 표시한다', () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    const block = wrapper.findAll('.block').find((b) => b.text().includes('그래프 3개 다듬기'))!
+    expect(block.text()).toContain('기록할까요?')
+    expect(block.classes()).toContain('is-needs-check')
+  })
+
+  it('"계획대로 했어요"를 누르면 계획 시간 그대로 실제가 기록된다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    await clickBlock(wrapper, '그래프 3개 다듬기')
+
+    dialogButton('계획대로 했어요').click()
+    await flushPromises()
+
+    const task = useTaskStore().tasksById.get('today-18')!
+    expect(task.status).toBe('done')
+    expect(task.actualBlock).toEqual(task.plannedBlock)
+  })
+
+  it('"다음으로 옮길게요"를 누르면 옮김 상태로 낮춰서 보여준다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    await clickBlock(wrapper, '그래프 3개 다듬기')
+
+    dialogButton('다음으로 옮길게요').click()
+    await flushPromises()
+
+    expect(useTaskStore().tasksById.get('today-18')!.status).toBe('carried')
+    const block = wrapper.findAll('.block').find((b) => b.text().includes('그래프 3개 다듬기'))!
+    expect(block.text()).toContain('다음으로 옮김')
+  })
+
+  it('앞으로 할 블록은 내용을 편집한다', async () => {
+    const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+    await clickBlock(wrapper, '헬스장 운동')
+
+    const input = document.body.querySelector<HTMLInputElement>('.dialog input')!
+    input.value = '헬스장 하체 운동'
+    input.dispatchEvent(new Event('input'))
+    dialogButton('저장하기').click()
+    await flushPromises()
+
+    expect(useTaskStore().tasks.some((t) => t.title === '헬스장 하체 운동')).toBe(true)
   })
 })

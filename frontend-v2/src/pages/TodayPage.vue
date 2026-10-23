@@ -42,6 +42,7 @@
           :end-hour="timelineRange.endHour"
           :px-per-hour="64"
           @drag-block="onDragBlock"
+          @select-block="(id) => (selectedTaskId = id)"
         />
       </BaseCard>
     </main>
@@ -56,6 +57,17 @@
       />
     </aside>
   </div>
+
+  <TaskBlockDialog
+    :task="selectedTask"
+    :phase="selectedPhase"
+    :candidate-goals="candidateGoals"
+    @close="selectedTaskId = null"
+    @complete="(block) => applyToSelected({ status: 'done', actualBlock: block })"
+    @carry="applyToSelected({ status: 'carried' })"
+    @drop="applyToSelected({ status: 'dropped' })"
+    @save="(patch) => applyToSelected(patch)"
+  />
 </template>
 
 <script setup lang="ts">
@@ -68,6 +80,7 @@ import ReturnGapBanner from '../features/task/components/ReturnGapBanner.vue'
 import GoalSidebar from '../features/goal/components/GoalSidebar.vue'
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import InboxPanel from '../features/task/components/InboxPanel.vue'
+import TaskBlockDialog from '../features/task/components/TaskBlockDialog.vue'
 import type { TimelineTaskInput } from '../features/schedule/components/ScheduleTimeline.vue'
 import ScheduleTimeline from '../features/schedule/components/ScheduleTimeline.vue'
 import { placeInGaps } from '../features/schedule/lib/placeInGaps'
@@ -86,7 +99,7 @@ import {
   timelineHourRange,
   useNow,
 } from '../shared/lib/time'
-import type { TimeBlock } from '../entities/types'
+import type { Task, TimeBlock } from '../entities/types'
 
 // DEMO_TODAY — 시드 데이터(scripts/generate-seed.mjs)가 이 날짜를 중심으로
 // 고정 생성돼 있어서 화면 표시도 이 날짜에 고정한다. 실제 현재 시각으로
@@ -245,6 +258,27 @@ function onPlaceInGaps() {
 
 function onConfirmToday() {
   todayTasks.value.forEach((t) => taskStore.updateTask(t.id, { confirmed: true }))
+}
+
+// 블록 클릭 패널 — 지난(또는 진행 중) 블록은 어떻게 됐는지 기록하고("기록할까요?"), 앞으로 할 블록은 내용을 편집한다.
+// 시점은 현재 시각 바와 같은 기준(시:분)으로 나눈다. 끝낸 일은 언제든 실제 시간을 고칠 수 있다.
+const selectedTaskId = ref<string | null>(null)
+const selectedTask = computed(() =>
+  selectedTaskId.value ? (taskStore.tasksById.get(selectedTaskId.value) ?? null) : null,
+)
+const selectedPhase = computed<'past' | 'current' | 'future'>(() => {
+  const task = selectedTask.value
+  if (!task?.plannedBlock) return 'future'
+  if (task.status === 'done') return 'past'
+  const nowMin = minutesOfDay(now.value)
+  if (minutesOfDay(task.plannedBlock.end) <= nowMin) return 'past'
+  if (minutesOfDay(task.plannedBlock.start) <= nowMin) return 'current'
+  return 'future'
+})
+
+function applyToSelected(patch: Partial<Task>) {
+  if (selectedTaskId.value) taskStore.updateTask(selectedTaskId.value, patch)
+  selectedTaskId.value = null
 }
 
 // ScheduleTimeline은 store를 모른다(CLAUDE.md 6절) — R2·R3 판정(resolveDragTarget)까지

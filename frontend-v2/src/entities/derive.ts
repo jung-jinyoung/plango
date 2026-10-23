@@ -277,6 +277,15 @@ export function findCurrentTask(tasks: Task[], nowIso: string): Task | null {
 }
 
 /**
+ * 계획 시간이 이미 지났는데 했는지 기록이 없는 할 일 — 오늘 화면이 "기록할까요?"로 권한다.
+ * findCurrentTask와 같은 이유로 날짜가 아니라 시각(시:분)만 비교한다(현재 시각 바와 일치).
+ */
+export function needsCheck(task: Task, nowIso: string): boolean {
+  if (task.status !== 'todo' || !task.plannedBlock || task.actualBlock) return false
+  return minutesOfDay(task.plannedBlock.end) <= minutesOfDay(nowIso)
+}
+
+/**
  * "마지막 활동 날짜"('YYYY-MM-DD') — 진입 라우팅(CLAUDE.md 12절) "마지막 활동
  * 3일 이상 전" 판정의 근거. plannedBlock은 "매일 아침" JIT로만 생성되므로
  * (CLAUDE.md 11절) 그 존재 자체가 실제 사용 신호다 — plannedBlock이 있는
