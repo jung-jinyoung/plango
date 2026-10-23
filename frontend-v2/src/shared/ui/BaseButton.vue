@@ -51,7 +51,7 @@ const emit = defineEmits<{
 /* 로즈는 화면당 1개, 주 CTA에만 — CLAUDE.md 7절 */
 .is-primary {
   background: var(--rose-500);
-  color: var(--surface-card);
+  color: var(--text-on-rose);
   font-weight: 600;
   font-size: 14px;
   padding: 10px 20px;

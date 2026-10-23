@@ -1,7 +1,6 @@
 <template>
   <PersonaBadge />
-  <div class="reflect-week-dark page">
-    <!-- 다크 토큰 컨테이너 안에 둬서 헤더도 다크로 그려진다 -->
+  <div class="page">
     <AppHeader />
     <div class="wrap">
       <div class="hero">

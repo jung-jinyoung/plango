@@ -30,15 +30,45 @@
     <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
     <div class="spacer" />
     <slot name="actions" />
+    <!-- 라이트·다크 전환 — 전체 화면에 적용된다(shared/lib/theme.ts) -->
+    <button
+      type="button"
+      class="theme-toggle"
+      :aria-label="theme === 'dark' ? '라이트 모드로 보기' : '다크 모드로 보기'"
+      :title="theme === 'dark' ? '라이트 모드로 보기' : '다크 모드로 보기'"
+      @click="toggle"
+    >
+      <!-- 지금 라이트면 달(다크로), 다크면 해(라이트로) -->
+      <svg v-if="theme === 'light'" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path
+          d="M15 10.6A6.3 6.3 0 0 1 7.4 3a6.3 6.3 0 1 0 7.6 7.6Z"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <svg v-else width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="3.3" stroke="currentColor" stroke-width="1.6" />
+        <path
+          d="M9 1.5v1.8M9 14.7v1.8M1.5 9h1.8M14.7 9h1.8M3.7 3.7l1.3 1.3M13 13l1.3 1.3M3.7 14.3 5 13M13 5l1.3-1.3"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
   </header>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useTheme } from '../lib/theme'
 
 defineProps<{
   subtitle?: string
 }>()
+
+const { theme, toggle } = useTheme()
 
 // UI 문구는 CLAUDE.md 3절 화면 표. mobile-run은 화면 이름이 없어 "모바일"로만 표시한다
 const TABS = [
@@ -92,6 +122,26 @@ const TABS = [
   font-weight: 600;
 }
 .tab:focus-visible {
+  outline: 2px solid var(--rose-500);
+  outline-offset: 2px;
+}
+.theme-toggle {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-ctrl);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  background: var(--surface-sunken);
+}
+.theme-toggle:focus-visible {
   outline: 2px solid var(--rose-500);
   outline-offset: 2px;
 }
