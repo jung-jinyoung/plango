@@ -1,6 +1,8 @@
 <template>
   <PersonaBadge />
   <div class="reflect-week-dark page">
+    <!-- 다크 토큰 컨테이너 안에 둬서 헤더도 다크로 그려진다 -->
+    <AppHeader />
     <div class="wrap">
       <div class="hero">
         <svg class="flam" width="56" height="56" viewBox="0 0 100 100" fill="none" aria-hidden="true">
@@ -102,6 +104,7 @@ import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import { addDays, formatMinutesAsHours, startOfWeek } from '../shared/lib/time'
 import BaseCard from '../shared/ui/BaseCard.vue'
+import AppHeader from '../shared/ui/AppHeader.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
 
@@ -282,12 +285,12 @@ const monthlyWarnings = computed<MonthlyWarning[]>(() => {
   min-height: 100vh;
   background: var(--surface-page);
   color: var(--text-primary);
-  padding: 24px 0 60px;
+  padding: 0 0 60px;
 }
 .wrap {
   max-width: 660px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 24px 24px 0;
 }
 .hero {
   padding: 24px 0 32px;

@@ -21,20 +21,32 @@
       </svg>
       Plango
     </div>
-    <div>
-      <span class="title">{{ title }}</span>
-      <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
-    </div>
+    <!-- 화면 이동 — 진입 라우팅은 강제 이동이 아니므로 항상 다른 화면으로 갈 길을 둔다(CLAUDE.md 12절) -->
+    <nav class="tabs" aria-label="화면 이동">
+      <RouterLink v-for="tab in TABS" :key="tab.name" :to="{ name: tab.name }" class="tab">
+        {{ tab.label }}
+      </RouterLink>
+    </nav>
+    <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
     <div class="spacer" />
     <slot name="actions" />
   </header>
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
+
 defineProps<{
-  title: string
   subtitle?: string
 }>()
+
+// UI 문구는 CLAUDE.md 3절 화면 표. mobile-run은 화면 이름이 없어 "모바일"로만 표시한다
+const TABS = [
+  { name: 'today', label: '오늘' },
+  { name: 'reflect-day', label: '오늘의 기록' },
+  { name: 'reflect-week', label: '주간 회고' },
+  { name: 'mobile-run', label: '모바일' },
+] as const
 </script>
 
 <style scoped>
@@ -55,15 +67,37 @@ defineProps<{
   font-weight: 700;
   font-size: 17px;
   letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
-.title {
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+.tab {
+  padding: 8px 12px;
+  border-radius: var(--radius-ctrl);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.tab:hover {
+  background: var(--surface-sunken);
+}
+/* 현재 화면 — 로즈는 주 CTA와 포커스에만 쓰므로 중립 톤으로 구분한다(CLAUDE.md 7절) */
+.tab.router-link-exact-active {
+  background: var(--surface-sunken);
+  color: var(--text-primary);
   font-weight: 600;
-  font-size: 15px;
+}
+.tab:focus-visible {
+  outline: 2px solid var(--rose-500);
+  outline-offset: 2px;
 }
 .subtitle {
   color: var(--text-muted);
   font-size: 13px;
-  margin-left: 6px;
 }
 .spacer {
   flex: 1;

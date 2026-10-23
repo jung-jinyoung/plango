@@ -1,6 +1,6 @@
 <template>
   <PersonaBadge />
-  <AppHeader title="오늘" :subtitle="formatDateKo(DEMO_TODAY)">
+  <AppHeader :subtitle="formatDateKo(DEMO_TODAY)">
     <template #actions>
       <BaseButton
         variant="primary"

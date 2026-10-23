@@ -1,5 +1,6 @@
 <template>
   <PersonaBadge />
+  <AppHeader :subtitle="formatDateKo(DEMO_TODAY)" />
   <div class="reflect-day-page">
     <div class="wrap">
       <h1>오늘의 기록</h1>
@@ -59,10 +60,11 @@ import IncompleteTaskRow from '../features/reflect/components/IncompleteTaskRow.
 import { useGoalStore } from '../features/goal/stores/goalStore'
 import { useReflectionStore } from '../features/reflect/stores/reflectionStore'
 import { useTaskStore } from '../features/task/stores/taskStore'
-import { addMinutes, formatMinutesAsHours, minutesBetween } from '../shared/lib/time'
+import { addMinutes, formatDateKo, formatMinutesAsHours, minutesBetween } from '../shared/lib/time'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import ProgressBar from '../shared/ui/ProgressBar.vue'
+import AppHeader from '../shared/ui/AppHeader.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
 import { getDemoToday } from '../shared/lib/seedDateShift'
 
