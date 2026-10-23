@@ -15,6 +15,15 @@ describe('router 진입 라우팅 가드', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.unstubAllEnvs()
+  })
+
+  it('데모 배포(VITE_DEMO_FRESH)에서는 시각과 무관하게 페르소나 선택 화면으로 보낸다', async () => {
+    vi.stubEnv('VITE_DEMO_FRESH', 'true')
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-07-29T10:00:00.000Z')) // KST 19:00 — 평소라면 reflect-day
+    await router.push('/')
+    expect(router.currentRoute.value.name).toBe('persona-picker')
   })
 
   it('시드 기본 상태 + 저녁 전(18시 이전)이면 today로 보낸다', async () => {

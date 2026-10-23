@@ -7,7 +7,10 @@ import { __setRawPersonaForTest, getSelectedPersona } from '../shared/lib/person
 function makeRouter() {
   return createRouter({
     history: createWebHistory(),
-    routes: [{ path: '/demo', name: 'persona-picker', component: PersonaPickerPage }],
+    routes: [
+      { path: '/demo', name: 'persona-picker', component: PersonaPickerPage },
+      { path: '/today', name: 'today', component: { template: '<div />' } },
+    ],
   })
 }
 
@@ -35,7 +38,7 @@ describe('PersonaPickerPage', () => {
     expect(assignSpy).not.toHaveBeenCalled()
   })
 
-  it('카드의 "체험하기"를 누르면 페르소나가 저장되고 "/"로 리로드한다', async () => {
+  it('카드의 "체험하기"를 누르면 페르소나가 저장되고 today로 리로드한다', async () => {
     const router = makeRouter()
     await router.push('/demo')
     await router.isReady()
@@ -47,7 +50,7 @@ describe('PersonaPickerPage', () => {
     await buttons[1]!.trigger('click') // 두 번째 카드 = 김도윤(PERSONA_META 등록 순서)
 
     expect(getSelectedPersona()).toBe('doyoon')
-    expect(assignSpy).toHaveBeenCalledWith('/')
+    expect(assignSpy).toHaveBeenCalledWith('/today')
   })
 
   it('?p=doyoon으로 들어오면 카드를 보여주지 않고 즉시 페르소나를 선택해 리로드한다', async () => {
@@ -59,7 +62,7 @@ describe('PersonaPickerPage', () => {
 
     expect(wrapper.find('button').exists()).toBe(false)
     expect(getSelectedPersona()).toBe('doyoon')
-    expect(assignSpy).toHaveBeenCalledWith('/')
+    expect(assignSpy).toHaveBeenCalledWith('/today')
   })
 
   it('유효하지 않은 ?p= 값은 무시하고 카드를 보여준다', async () => {

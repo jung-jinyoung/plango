@@ -72,12 +72,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { PERSONA_META, setSelectedPersona, type PersonaId } from '../shared/lib/persona'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 
 const route = useRoute()
+const router = useRouter()
 const personas = Object.values(PERSONA_META)
 const demoSectionEl = ref<HTMLElement | null>(null)
 
@@ -105,9 +106,11 @@ function scrollToDemo() {
 // 페르소나를 바꿀 때마다 완전히 새로고침한다(router.push가 아님) — Pinia
 // 스토어가 모듈 스코프 싱글턴이고 리포지토리가 store 초기화 시점에 한 번만
 // 배열을 읽어오므로, 스토어 상태가 깨끗하게 다시 만들어지려면 리로드가 필요하다.
+// 도착지는 진입 라우팅을 거치지 않고 항상 today — 방문 시각에 따라 첫 화면이
+// 달라지지 않게 한다.
 function choose(id: PersonaId) {
   setSelectedPersona(id)
-  window.location.assign('/')
+  window.location.assign(router.resolve({ name: 'today' }).href)
 }
 
 if (autoSelecting.value) {
