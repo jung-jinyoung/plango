@@ -22,6 +22,7 @@
         @pointercancel="onPointerCancel"
       >
         <b>{{ item.task.title }}</b>
+        <small>{{ item.durationLabel }}</small>
       </div>
 
       <!-- 계획·실제가 15분 이상 어긋나면 목업 그대로 나란히(고스트 38% + 실제 나머지) -->
@@ -36,6 +37,7 @@
           :style="{ height: `${item.ghost.height}px`, marginTop: `${item.ghost.top - item.lane.top}px` }"
         >
           <b>계획</b>
+          <small>{{ formatMinutesKo(item.plannedMin) }}</small>
         </div>
         <div
           class="real"
@@ -54,6 +56,7 @@
           @pointercancel="onPointerCancel"
         >
           <b>{{ item.task.title }}</b>
+          <small>{{ formatMinutesKo(actualMin(item.task)) }}</small>
           <span class="delta">+{{ item.deltaMin }}분</span>
         </div>
       </div>
@@ -66,7 +69,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { actualMin, hasScheduleConflict, resolveDragTarget, shouldShowGhost } from '../../../entities/derive'
-import { addMinutes, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
+import { addMinutes, formatMinutesKo, isoAt, minutesBetween, useNow } from '../../../shared/lib/time'
 import type { CategoryColor, Task, TimeBlock } from '../../../entities/types'
 import { layoutTimelineBlock, pxToMinutesOfDay, type TimelineLayout } from '../lib/layoutTimelineBlock'
 import CurrentTimeBar from './CurrentTimeBar.vue'
@@ -98,6 +101,8 @@ interface SingleItem {
   task: Task
   color: CategoryColor
   layout: TimelineLayout
+  // 실측이 있으면 실제 시간, 아직 실행 전이면 계획 길이 + "예상" (목업 01)
+  durationLabel: string
 }
 
 interface PairItem {
@@ -107,6 +112,7 @@ interface PairItem {
   lane: TimelineLayout
   ghost: TimelineLayout
   real: TimelineLayout
+  plannedMin: number
   deltaMin: number
 }
 
@@ -136,13 +142,17 @@ const items = computed<TimelineItem[]>(() =>
           lane: { top: laneTop, height: laneBottom - laneTop },
           ghost: plannedLayout,
           real: actualLayout,
+          plannedMin,
           deltaMin: Math.abs(actualMin(task) - plannedMin),
         }
       }
 
       const layout = actualLayout ?? plannedLayout
       if (!layout) return null
-      return { kind: 'single', task, color, layout }
+      const durationLabel = task.actualBlock
+        ? formatMinutesKo(actualMin(task))
+        : `${formatMinutesKo(minutesBetween(task.plannedBlock!.start, task.plannedBlock!.end))} 예상`
+      return { kind: 'single', task, color, layout, durationLabel }
     })
     .filter((item): item is TimelineItem => item !== null),
 )
@@ -304,6 +314,7 @@ function onPointerUp(event: PointerEvent) {
   overflow: hidden;
 }
 .ghost b {
+  display: block;
   font-weight: 500;
   font-size: 11.5px;
 }
@@ -321,6 +332,14 @@ function onPointerUp(event: PointerEvent) {
   display: block;
   font-weight: 600;
   line-height: 1.35;
+}
+.block small,
+.real small,
+.ghost small {
+  display: block;
+  font-size: 11.5px;
+  opacity: 0.72;
+  font-variant-numeric: tabular-nums;
 }
 .delta {
   font-size: 11px;
