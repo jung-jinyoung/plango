@@ -86,6 +86,7 @@ import { PERSONA_META, setSelectedPersona, type PersonaId } from '../shared/lib/
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PlanActualDiagram from '../shared/ui/PlanActualDiagram.vue'
+import { isNarrowViewport } from '../shared/lib/viewport'
 
 const route = useRoute()
 const router = useRouter()
@@ -128,11 +129,12 @@ function scrollToPersonas() {
 // 페르소나를 바꿀 때마다 완전히 새로고침한다(router.push가 아님) — Pinia
 // 스토어가 모듈 스코프 싱글턴이고 리포지토리가 store 초기화 시점에 한 번만
 // 배열을 읽어오므로, 스토어 상태가 깨끗하게 다시 만들어지려면 리로드가 필요하다.
-// 도착지는 진입 라우팅을 거치지 않고 항상 today — 방문 시각에 따라 첫 화면이
-// 달라지지 않게 한다.
+// 도착지는 진입 라우팅을 거치지 않고 정해진 화면 — 방문 시각에 따라 첫 화면이
+// 달라지지 않게 한다. 넓은 화면은 today, 폰은 모바일 실행(캘린더 전체는 넓은 화면 전용).
 function choose(id: PersonaId) {
   setSelectedPersona(id)
-  window.location.assign(router.resolve({ name: 'today' }).href)
+  const target = isNarrowViewport() ? 'mobile-run' : 'today'
+  window.location.assign(router.resolve({ name: target }).href)
 }
 
 if (autoSelecting.value) {

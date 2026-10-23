@@ -1,73 +1,77 @@
 <template>
   <PersonaBadge />
-  <AppHeader :subtitle="formatDateKo(DEMO_TODAY)">
-    <template #actions>
-      <BaseButton
-        variant="primary"
-        :disabled="todayConfirmed || todayTasks.length === 0"
-        @click="onConfirmToday"
-      >
-        {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
-      </BaseButton>
-    </template>
-  </AppHeader>
-  <div class="today-page">
-    <aside class="col-sidebar">
-      <GoalSidebar
-        :monthly-goal="monthlyGoal"
-        :weekly-goals="weeklyGoals"
-        :week-of="startOfWeek(DEMO_TODAY)"
-        :tasks="allTasks"
-        :monthly-goals-by-id="goalStore.monthlyGoalsById"
-        :categories-by-id="goalStore.categoriesById"
-      />
-    </aside>
-
-    <main class="col-main">
-      <ReturnGapBanner
-        v-if="!bannerDismissed && isReturningAfterGap"
-        @dismiss="bannerDismissed = true"
-        @accept="onAcceptReturnGap"
-      />
-      <CarryOverBanner
-        v-else-if="!bannerDismissed && carriedCount > 0"
-        :count="carriedCount"
-        @dismiss="bannerDismissed = true"
-        @accept="onAcceptCarry"
-      />
-      <BaseCard class="timeline-card">
-        <ScheduleTimeline
-          :tasks="timelineTasks"
-          :start-hour="timelineRange.startHour"
-          :end-hour="timelineRange.endHour"
-          :px-per-hour="64"
-          @drag-block="onDragBlock"
-          @select-block="(id) => (selectedTaskId = id)"
+  <!-- 폰에서는 3열 캘린더 대신 모바일 실행 화면으로 안내한다(CLAUDE.md 13절) -->
+  <WideScreenNotice v-if="narrow" />
+  <template v-else>
+    <AppHeader :subtitle="formatDateKo(DEMO_TODAY)">
+      <template #actions>
+        <BaseButton
+          variant="primary"
+          :disabled="todayConfirmed || todayTasks.length === 0"
+          @click="onConfirmToday"
+        >
+          {{ todayConfirmed ? '오늘 확정했어요' : '오늘 확정' }}
+        </BaseButton>
+      </template>
+    </AppHeader>
+    <div class="today-page">
+      <aside class="col-sidebar">
+        <GoalSidebar
+          :monthly-goal="monthlyGoal"
+          :weekly-goals="weeklyGoals"
+          :week-of="startOfWeek(DEMO_TODAY)"
+          :tasks="allTasks"
+          :monthly-goals-by-id="goalStore.monthlyGoalsById"
+          :categories-by-id="goalStore.categoriesById"
         />
-      </BaseCard>
-    </main>
+      </aside>
 
-    <aside class="col-inbox">
-      <InboxPanel
-        :candidate-goals="candidateGoals"
-        :unplaced-tasks="unplacedTasks"
-        :place-note="placeNote"
-        @add="onAddTask"
-        @place="onPlaceInGaps"
-      />
-    </aside>
-  </div>
+      <main class="col-main">
+        <ReturnGapBanner
+          v-if="!bannerDismissed && isReturningAfterGap"
+          @dismiss="bannerDismissed = true"
+          @accept="onAcceptReturnGap"
+        />
+        <CarryOverBanner
+          v-else-if="!bannerDismissed && carriedCount > 0"
+          :count="carriedCount"
+          @dismiss="bannerDismissed = true"
+          @accept="onAcceptCarry"
+        />
+        <BaseCard class="timeline-card">
+          <ScheduleTimeline
+            :tasks="timelineTasks"
+            :start-hour="timelineRange.startHour"
+            :end-hour="timelineRange.endHour"
+            :px-per-hour="64"
+            @drag-block="onDragBlock"
+            @select-block="(id) => (selectedTaskId = id)"
+          />
+        </BaseCard>
+      </main>
 
-  <TaskBlockDialog
-    :task="selectedTask"
-    :phase="selectedPhase"
-    :candidate-goals="candidateGoals"
-    @close="selectedTaskId = null"
-    @complete="(block) => applyToSelected({ status: 'done', actualBlock: block })"
-    @carry="applyToSelected({ status: 'carried' })"
-    @drop="applyToSelected({ status: 'dropped' })"
-    @save="(patch) => applyToSelected(patch)"
-  />
+      <aside class="col-inbox">
+        <InboxPanel
+          :candidate-goals="candidateGoals"
+          :unplaced-tasks="unplacedTasks"
+          :place-note="placeNote"
+          @add="onAddTask"
+          @place="onPlaceInGaps"
+        />
+      </aside>
+    </div>
+
+    <TaskBlockDialog
+      :task="selectedTask"
+      :phase="selectedPhase"
+      :candidate-goals="candidateGoals"
+      @close="selectedTaskId = null"
+      @complete="(block) => applyToSelected({ status: 'done', actualBlock: block })"
+      @carry="applyToSelected({ status: 'carried' })"
+      @drop="applyToSelected({ status: 'dropped' })"
+      @save="(patch) => applyToSelected(patch)"
+    />
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -91,6 +95,8 @@ import AppHeader from '../shared/ui/AppHeader.vue'
 import BaseButton from '../shared/ui/BaseButton.vue'
 import BaseCard from '../shared/ui/BaseCard.vue'
 import PersonaBadge from '../shared/ui/PersonaBadge.vue'
+import WideScreenNotice from '../shared/ui/WideScreenNotice.vue'
+import { useNarrowViewport } from '../shared/lib/viewport'
 import { getDemoToday } from '../shared/lib/seedDateShift'
 import {
   formatDateKo,
@@ -113,6 +119,7 @@ const DAY_START_HOUR = 8
 const DAY_END_HOUR = 21
 
 const router = useRouter()
+const narrow = useNarrowViewport()
 const goalStore = useGoalStore()
 const taskStore = useTaskStore()
 

@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useTaskStore } from '../features/task/stores/taskStore'
 import TodayPage from './TodayPage.vue'
 import { useNow } from '../shared/lib/time'
@@ -317,5 +317,31 @@ describe('TodayPage — 이른 시간의 타임라인 범위', () => {
 
     const labels = wrapper.findAll('.hour-label').map((l) => l.text())
     expect(labels.at(-1)).toBe('23:00')
+  })
+})
+
+describe('TodayPage — 폰 폭', () => {
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    await router.push('/today')
+    await router.isReady()
+  })
+
+  it('3열 캘린더 대신 모바일 실행으로 가는 안내를 보여준다', () => {
+    const matchMedia = vi.spyOn(window, 'matchMedia').mockReturnValue({
+      matches: true,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    } as unknown as MediaQueryList)
+    try {
+      const wrapper = mount(TodayPage, { global: { plugins: [router] } })
+      expect(wrapper.text()).toContain('오늘 계획은 넓은 화면에서 볼 수 있어요')
+      expect(wrapper.find('.timeline').exists()).toBe(false)
+      expect(wrapper.findComponent({ name: 'RouterLinkStub' }).props('to')).toEqual({
+        name: 'mobile-run',
+      })
+    } finally {
+      matchMedia.mockRestore()
+    }
   })
 })

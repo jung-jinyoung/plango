@@ -10,6 +10,7 @@ function makeRouter() {
     routes: [
       { path: '/demo', name: 'persona-picker', component: PersonaPickerPage },
       { path: '/today', name: 'today', component: { template: '<div />' } },
+      { path: '/mobile-run', name: 'mobile-run', component: { template: '<div />' } },
     ],
   })
 }
@@ -65,6 +66,24 @@ describe('PersonaPickerPage', () => {
 
     expect(scrollSpy).toHaveBeenCalled()
     expect(assignSpy).not.toHaveBeenCalled()
+  })
+
+  it('폰 폭에서 고르면 오늘 화면(3열 캘린더) 대신 모바일 실행으로 간다', async () => {
+    const matchMedia = vi
+      .spyOn(window, 'matchMedia')
+      .mockReturnValue({ matches: true } as MediaQueryList)
+    try {
+      const router = makeRouter()
+      await router.push('/demo')
+      await router.isReady()
+
+      const wrapper = mount(PersonaPickerPage, { global: { plugins: [router] } })
+      await wrapper.findAll('.persona-card button')[0]!.trigger('click')
+
+      expect(assignSpy).toHaveBeenCalledWith('/mobile-run')
+    } finally {
+      matchMedia.mockRestore()
+    }
   })
 
   it('?p=doyoon으로 들어오면 카드를 보여주지 않고 즉시 페르소나를 선택해 리로드한다', async () => {

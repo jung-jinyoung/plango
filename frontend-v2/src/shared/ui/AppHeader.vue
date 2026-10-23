@@ -105,6 +105,7 @@ const TABS = [
   margin-left: 8px;
 }
 .tab {
+  white-space: nowrap;
   padding: 8px 12px;
   border-radius: var(--radius-ctrl);
   font-size: 14px;
@@ -151,5 +152,27 @@ const TABS = [
 }
 .spacer {
   flex: 1;
+}
+
+/* 폰 폭 — 탭 글자가 세로로 쪼개지지 않게 가로 스크롤로 두고, 날짜는 숨긴다 */
+@media (max-width: 767px) {
+  .app-header {
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .brand {
+    flex: none;
+  }
+  .tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .subtitle,
+  .spacer {
+    display: none;
+  }
 }
 </style>
